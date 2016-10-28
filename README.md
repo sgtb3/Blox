@@ -1,16 +1,21 @@
 # Blox
 This repository contains the source code for the Blox programming language. 
 
+#### Directory Structure
 
-## Usage
+* __src__  : source files 
+* __out__  : generated files
+* __amf__  : generated AMF files
+* __tests__: language tests
 
-* Running __make__ will create the scanner (for now).
-* Running __make clean__ will clean up all auxiliary files.
+#### Usage
+
+* Running __make__ will create the scanner and move the generated `scanner.ml` file to the `gen/` directory. 
+* Running __make clean__ will clean up all generated auxiliary files, which are located in the `gen/` directory.
 
 
 #### TODO 
 
-* Create directory for generated files and update Makefile accordingly. This will make it easier to clean up.
 * Update/complete scanner.mll.
 * Update/complete parser.mly.
 * Update/complete ast.ml.

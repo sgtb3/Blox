@@ -1,51 +1,75 @@
-.PHONY: all clean scanner parser ast
+# phony targets
+.PHONY: all clean scanner parser test asttypes parsertypes parsercomp scannercomp bloxcomp
 
-# lexer generator
+# lexer and parser generators
 LEXGEN = ocamllex
-
-# parser generator
 PARSGEN = ocamlyacc
 
-# ocaml compiler
+# ocaml compiler and flags
 OCC = ocamlc
-
-# ocaml compiler flags
 OCFLAGS = -c
 
-# source file directory
+# source files, generated files, testing, and AMF/output directories
 SRCDIR = src
-
-# testing directory
+GENDIR = gen
 TSTDIR = tests
+AMFDIR = amf
 
 # default makefile target
 all: scanner 
 
-# create scanner.ml
 scanner:
 	@echo "\n============================================="	
 	@echo "Creating scanner.ml ..."
 	$(LEXGEN) $(SRCDIR)/scanner.mll
+	@mv $(SRCDIR)/scanner.ml $(GENDIR)/scanner.ml
 	@echo "=============================================\n"	
 
-# create parser.ml and parser.mli
 parser: 
 	@echo "\n============================================="	
 	@echo "Creating parser.ml and parser.mli ..."
 	$(PARSGEN) $(SRCDIR)/parser.mly
+	@mv $(SRCDIR)/parser.ml $(GENDIR)/parser.ml
+	@mv $(SRCDIR)/parser.mli $(GENDIR)/parser.mli
 	@echo "=============================================\n"
 
-# clean up all auxiliary files
+asttypes:
+	@echo "\n============================================="	
+	@echo "Compiling AST types ..."
+	$(OCC) $(OCFLAGS) $(SRCDIR)/ast.ml
+	@mv $(SRCDIR)/ast.mli $(GENDIR)/ast.mli
+	@echo "=============================================\n"
+
 clean:
 	@echo "\n============================================="	
-	@echo "Cleaning up ..."
-	@rm -rf $(SRCDIR)/*scanner.ml
+	@echo "Cleaning up auxiliary files ..."
+	@rm -rf $(GENDIR)/*
 	@echo "=============================================\n"
 
 
 
 
+# ======================================================== #
+# Following commands are not completed.
+# Need to see what kind of file extensions the generated
+# files have, then we can move to appropriate directories.
+# ======================================================== #
 
+parsertypes: 
+	@echo "\n============================================="	
+	@echo "Compiling Parser types ..."
+	$(OCC) $(OCFLAGS) $(GENDIR)/parser.mli
+	@echo "=============================================\n"
 
+scannercomp: 
+	@echo "\n============================================="	
+	@echo "Compiling the Scanner ..."
+	$(OCC) $(OCFLAGS) $(GENDIR)/parser.ml
+	@echo "=============================================\n"
 
+bloxcomp: 
+	@echo "\n============================================="	
+	@echo "Compiling the Blox compiler ..."
+	$(OCC) $(OCFLAGS) $(GENDIR)/blox.ml
+	@echo "=============================================\n"
 
