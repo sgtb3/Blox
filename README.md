@@ -4,8 +4,8 @@ This repository contains the source code for the Blox programming language.
 
 ## Usage
 
-Running __make__ will create the scanner (for now).
-Running __make clean__ will clean up all auxiliary files.
+* Running __make__ will create the scanner (for now).
+* Running __make clean__ will clean up all auxiliary files.
 
 
 #### TODO 

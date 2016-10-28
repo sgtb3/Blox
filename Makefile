@@ -35,13 +35,6 @@ parser:
 	$(PARSGEN) $(SRCDIR)/parser.mly
 	@echo "=============================================\n"
 
-# create parser.ml and parser.mli
-parser: 
-	@echo "\n============================================="	
-	@echo "Creating parser.ml and parser.mli ..."
-	$(OCC) $(SRCDIR)/parser.mly
-	@echo "=============================================\n"
-
 # clean up all auxiliary files
 clean:
 	@echo "\n============================================="	
