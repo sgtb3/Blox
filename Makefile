@@ -25,7 +25,7 @@ TSTDIR = tests
 AMFDIR = amf
 
 # default makefile target
-all: scanner 
+all: scanner asttypes
 
 scanner:
 	@echo "\n============================================="	
@@ -34,7 +34,7 @@ scanner:
 	@mv $(SRCDIR)/scanner.ml $(GENDIR)/scanner.ml
 	@echo "=============================================\n"	
 
-# won't work until parser 
+# not fully working
 parser: 
 	@echo "\n============================================="	
 	@echo "Creating parser.ml and parser.mli ..."
@@ -47,7 +47,8 @@ asttypes:
 	@echo "\n============================================="	
 	@echo "Compiling AST types ..."
 	$(OCC) $(OCCFLAGS1) $(SRCDIR)/ast.ml
-	@mv $(SRCDIR)/ast.mli $(GENDIR)/ast.mli
+	@mv $(SRCDIR)/ast.cmi $(GENDIR)/ast.cmi
+	@mv $(SRCDIR)/ast.cmo $(GENDIR)/ast.cmo
 	@echo "=============================================\n"
 
 clean:

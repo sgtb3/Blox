@@ -11,7 +11,7 @@ type op =
 | Leq 
 | Greater 
 | Geq 
-| BockEq
+| BlockEq
 | And 
 | Or 
 
