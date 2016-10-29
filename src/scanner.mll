@@ -45,7 +45,7 @@ rule token = parse
 | "void"    { VOID    } 
 | "break"   { BREAK   } 
 | "switch"  { SWITCH  } 
-| "case"    { CAES    } 
+| "case"    { CASE    } 
 | "default" { DEFAULT } 
 | "NULL"    { NULL    } 
 | ['0'-'9']+ as lxm { LITERAL(int_of_string lxm) } 
