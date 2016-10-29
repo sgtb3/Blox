@@ -1,3 +1,5 @@
+(* ocamlyacc Abstract Syntax Tree for Blox *)
+
 type op = 
   Add 
 | Sub 
@@ -9,6 +11,7 @@ type op =
 | Leq 
 | Greater 
 | Geq 
+| BockEq
 | And 
 | Or 
 
@@ -50,4 +53,26 @@ type func_decl = {
 }
 
 type program = bind list * func_decl list
+
+
+(* Pretty-printing functions *)
+
+let string_of_op = function
+    Add -> "+"
+  | Sub -> "-"
+  | Mult -> "*"
+  | Div -> "/"
+  | Equal -> "=="
+  | Neq -> "!="
+  | BlockEq -> ".="
+  | Less -> "<"
+  | Leq -> "<="
+  | Greater -> ">"
+  | Geq -> ">="
+  | And -> "&&"
+  | Or -> "||"
+
+let string_of_uop = function
+    Neg -> "-"
+  | Not -> "!"
 

@@ -1,13 +1,22 @@
 # phony targets
 .PHONY: all clean scanner parser test asttypes parsertypes parsercomp scannercomp bloxcomp
 
+# name of output file
+EXEC = blox_exec.amf
+
+# bytecode object file extension
+OBJEXT = .cmo
+
 # lexer and parser generators
 LEXGEN = ocamllex
 PARSGEN = ocamlyacc
 
 # ocaml compiler and flags
+# 	-c : compile without producing executable files
+# 	-o : specify name of output file produced by compiler
 OCC = ocamlc
-OCFLAGS = -c
+OCCFLAGS1 = -c
+OCCFLAGS2 = -o $(EXEC)
 
 # source files, generated files, testing, and AMF/output directories
 SRCDIR = src
@@ -25,6 +34,7 @@ scanner:
 	@mv $(SRCDIR)/scanner.ml $(GENDIR)/scanner.ml
 	@echo "=============================================\n"	
 
+# won't work until parser 
 parser: 
 	@echo "\n============================================="	
 	@echo "Creating parser.ml and parser.mli ..."
@@ -36,7 +46,7 @@ parser:
 asttypes:
 	@echo "\n============================================="	
 	@echo "Compiling AST types ..."
-	$(OCC) $(OCFLAGS) $(SRCDIR)/ast.ml
+	$(OCC) $(OCCFLAGS1) $(SRCDIR)/ast.ml
 	@mv $(SRCDIR)/ast.mli $(GENDIR)/ast.mli
 	@echo "=============================================\n"
 
@@ -58,18 +68,24 @@ clean:
 parsertypes: 
 	@echo "\n============================================="	
 	@echo "Compiling Parser types ..."
-	$(OCC) $(OCFLAGS) $(GENDIR)/parser.mli
+	$(OCC) $(OCCFLAGS1) $(GENDIR)/parser.mli
 	@echo "=============================================\n"
 
 scannercomp: 
 	@echo "\n============================================="	
 	@echo "Compiling the Scanner ..."
-	$(OCC) $(OCFLAGS) $(GENDIR)/parser.ml
+	$(OCC) $(OCCFLAGS1) $(GENDIR)/scanner.ml
 	@echo "=============================================\n"
+
+parsercomp:
+	@echo "\n============================================="	
+	@echo "Compiling the Parser ..."
+	$(OCC) $(OCCFLAGS1) $(GENDIR)/parser.ml
+	@echo "=============================================\n"	
 
 bloxcomp: 
 	@echo "\n============================================="	
 	@echo "Compiling the Blox compiler ..."
-	$(OCC) $(OCFLAGS) $(GENDIR)/blox.ml
+	$(OCC) $(OCCFLAGS2) $(AMF)/$(EXEC).
 	@echo "=============================================\n"
 

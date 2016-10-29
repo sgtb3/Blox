@@ -1,3 +1,5 @@
+/* ocamlyacc Parser for Blox */
+
 %{ open Ast %}
 
 %token SEMI LPAREN RPAREN LBRACE RBRACE COMMA 
@@ -13,10 +15,10 @@
 
 %nonassoc NOELSE 
 %nonassoc ELSE 
-%right ASSIGN 
+%right ASSIGN CREATE 
 %left OR 
 %left AND 
-%left EQ NEQ
+%left EQ NEQ BLOCKEQ
 %left LT GT LEQ GEQ 
 %left PLUS MINUS 
 %left TIMES DIVIDE 
