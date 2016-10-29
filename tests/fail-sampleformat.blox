@@ -1,0 +1,3 @@
+/* This is how fail-filenames must be formatted */
+/* These type of failing tests are expected to fail during compile and throw */
+/* an error matching a given error message */
