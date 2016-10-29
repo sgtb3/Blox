@@ -1,0 +1,22 @@
+﻿AMF Info: https://en.wikipedia.org/wiki/Additive_Manufacturing_File_Format
+
+
+AMF Editor: http://amf.wikispaces.com/Amf+Editor
+
+
+AMF Testfiles: http://amf.wikispaces.com/AMF+test+files
+
+
+3D Plotter to help make shapes: http://technology.cpm.org/general/3dgraph/
+
+
+With amf you're working with triangles, so in the most basic sense, every face = two triangles. If you understand that you just have to connect the relevant vertices, which is pretty simple. I used a 3D plot site to help me visualize the points
+
+
+You can comment in amf
+
+
+You can have two unattached objects in a single amf file
+
+
+Seems like you can use AMF editor to potentially do anything/everything, but transparency appears to be lacking.
