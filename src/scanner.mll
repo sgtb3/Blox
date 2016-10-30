@@ -35,7 +35,6 @@ rule token = parse
 | "if"      { IF      } 
 | "else"    { ELSE    } 
 | "for"     { FOR     } 
-| "do"      { DO      }
 | "while"   { WHILE   } 
 | "return"  { RETURN  } 
 | "int"     { INT     }
@@ -44,9 +43,6 @@ rule token = parse
 | "false"   { FALSE   } 
 | "void"    { VOID    } 
 | "break"   { BREAK   } 
-| "switch"  { SWITCH  } 
-| "case"    { CASE    } 
-| "default" { DEFAULT } 
 | "NULL"    { NULL    } 
 | ['0'-'9']+ as lxm { LITERAL(int_of_string lxm) } 
 | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_'] * as lxm { ID(lxm) } 
