@@ -21,3 +21,13 @@ This repository contains the source code for the Blox programming language.
 * Update/complete ast.ml.
 * Create tests for Scanner and Parser.
 
+
+#### Data Type Definitions
+* The programmer cannot access individual Block objects, but they are defined
+within the compiler to be an array of 6 tuples. Each tuple represents one face
+of the Block. Each tuple contains first a single bit that is: 1 if the face is
+joined, or 0 if it is available. Each tuple contains second a floating-point
+number that represents the color of that face. The tuples are arranged in the
+array in the order North (+y), East (+x), South (-y), West (-x), Top (+z),
+and Bottom (-z). An example Block looks like:
+[(0, 0.00), (0, 0.00), (0, 0.00), (0, 0.00), (0, 0.00), (0, 0.00)]
