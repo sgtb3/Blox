@@ -32,6 +32,7 @@ rule token = parse
 | "Join"    { JOIN    }
 | "Detach"  { DETACH  }
 | "Frame"   { FRAME   }
+| "Structure"   { STRUCTURE   }
 | "if"      { IF      } 
 | "else"    { ELSE    } 
 | "for"     { FOR     } 
