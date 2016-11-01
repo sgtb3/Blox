@@ -10,7 +10,7 @@
 # MICROC="./microc.native"
 # BLOX="./"
 
-
+#test
 # Set time limit for all operations
 ulimit -t 30
 
