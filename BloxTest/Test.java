@@ -1,4 +1,7 @@
-import java.util.Arrays;
+/*
+ * This class should really be named "Compiler" since all the functions except main are all compiler functions.
+ */
+
 import java.util.Objects;
 
 public class Test {
@@ -12,16 +15,13 @@ public class Test {
         System.out.println("\nNewly created frames: \n");
         System.out.println(A + "\n" + B + "\n" + C + "\n\n");
 
-
         /*
             A.Block(1,1,2) : The pointer to the 2nd block (from bottom) of Frame A
             coord(1,1,2)   : The coordinates of the 2nd block of Frame A
             "W"            : The side of the 2nd block of Frame A where the join will happen
-
             B.Block(1,1,1) : The pointer to the 1st (leftmost) block of Frame B
             coord(1,1,1)   : The coordinates of the 1st block of Frame B
             "E"            : The side of the 1st block of Frame B where the join will happen
-
          */
         Join(A.Block(1,1,2), coord(1, 1, 2), "E", B.Block(1,1,1), coord(1, 1, 1), "W");
         System.out.println("Frames A and B after Joining B<1,1,1>W to A<1,1,2>E ...\n");

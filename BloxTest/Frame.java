@@ -1,6 +1,4 @@
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Map;
 
 public class Frame {
 
@@ -21,12 +19,18 @@ public class Frame {
         this.name = name;
         blocks = new Block[x][y][z];
 
-        // running total on how many entries are in the joins matrix/list
-        num_joins = 0;
-        // the max # of possible joins is always x*y*z*6 (i.e the max # of available faces)
-        joins = new Object[x*y*z*6][6];
+        num_joins = 0;                        // running total on how many entries are in the joins matrix/list
+        joins = new Object[x * y * z * 6][6]; // max # of possible joins is always x*y*z*6 (i.e the max # of available faces)
         joined_frames = new HashMap<String, Frame>();
 
+        /*
+            There needs to be some logic in these loops to check where the "default" joined sides are
+
+            For example, for a frame with 3 blocks stacked on top of each other:
+                1) the top side of the bottom-most block and the bottom side of the middle block
+                2) the top side of the middle-most block and the bottom side of the top-most block
+            should be changed to false (unavailable for join).
+         */
         for (int i = 0; i < x; i++) {
             for (int j = 0; j < y; j++) {
                 for (int k = 0; k < z; k++)

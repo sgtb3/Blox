@@ -1,9 +1,6 @@
-import java.util.Arrays;
-
 public class Block {
 
-    // ONE block, with COORDINATES <x,y,z>
-    int[] coord;
+    int[] coord;                                                          // ONE block, with COORDINATES <x,y,z>
     boolean[] open_faces;
     float[] face_colors;
     Frame parent;
@@ -14,7 +11,6 @@ public class Block {
         face_colors = new float[]  { 0, 0, 0, 0, 0, 0 };
         this.parent = parent;
     }
-
 
     @Override
     public String toString() {
