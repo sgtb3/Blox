@@ -5,6 +5,12 @@
 # Compile, run, and check the output of each expected-to-work test
 # Compile and check the error of each expected-to-fail test
 
+# NEEDS THIS SECTION
+# Path to the blox compiler
+# MICROC="./microc.native"
+# BLOX="./"
+
+
 # Set time limit for all operations
 ulimit -t 30
 
@@ -77,18 +83,9 @@ Check() {
     generatedfiles=""
 
 # Not sure about how to do this part
-#    generatedfiles="$generatedfiles ${basename}.i.out" &&
-#    Run "$MICROC"  "<" $1 ">" ${basename}.i.out &&
-#    Compare ${basename}.i.out ${reffile}.out ${basename}.i.diff
-
-#    generatedfiles="$generatedfiles ${basename}.ll ${basename}.out" &&
-#    Run "$MICROC" "<" $1 ">" "${basename}.ll" &&
-#    Compare ${basename}.out ${reffile}.out ${basename}.diff
-
-#    generatedfiles="$generatedfiles ${basename}.c.out" &&
-#    Run "$MICROC"  "<" $1 ">" ${basename}.c.out  &&
-#    Compare ${basename}.c.out ${reffile}.out ${basename}.c.diff
-
+    generatedfiles="$generatedfiles ${basename}.ll ${basename}.out" &&
+    Run "$BLOX" "<" $1 ">" "${basename}.ll" &&
+    Compare ${basename}.out ${reffile}.out ${basename}.diff
 
 
     # Report the status and clean up the generated files
@@ -120,9 +117,9 @@ CheckFail() {
     generatedfiles=""
 
 # Again not sure what to do here
-#    generatedfiles="$generatedfiles ${basename}.err ${basename}.diff" &&
-#    RunFail "$MICROC" "<" $1 "2>" "${basename}.err" ">>" $globallog &&
-#    Compare ${basename}.err ${reffile}.err ${basename}.diff
+    generatedfiles="$generatedfiles ${basename}.err ${basename}.diff" &&
+    RunFail "$BLOX" "<" $1 "2>" "${basename}.err" ">>" $globallog &&
+    Compare ${basename}.err ${reffile}.err ${basename}.diff
 
     # Report the status and clean up the generated files
 
