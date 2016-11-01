@@ -14,13 +14,13 @@ public class Test {
 
 
         /*
-            A.Blocks[1][1][2] : The pointer to the 2nd block of Frame A
-            new int[] {0,0,1} : The coordinates of the 1st block of Frame A
-            "W"               : The side of the 1st block of Frame A where the join will happen
+            A.Block(1,1,2) : The pointer to the 2nd block (from bottom) of Frame A
+            coord(1,1,2)   : The coordinates of the 2nd block of Frame A
+            "W"            : The side of the 2nd block of Frame A where the join will happen
 
-            B.blocks[0][0][0] : The pointer to the 1st block of Frame B
-            new int[] {0,0,0} : The coordinates of the 1st block of Frame B
-            "E"               : The side of the 1st block of Frame B where the join will happen
+            B.Block(1,1,1) : The pointer to the 1st (leftmost) block of Frame B
+            coord(1,1,1)   : The coordinates of the 1st block of Frame B
+            "E"            : The side of the 1st block of Frame B where the join will happen
 
          */
         Join(A.Block(1,1,2), coord(1, 1, 2), "W", B.Block(1,1,1), coord(1, 1, 1), "E");
