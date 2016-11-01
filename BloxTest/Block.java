@@ -15,6 +15,7 @@ public class Block {
         this.parent = parent;
     }
 
+
     @Override
     public String toString() {
 
@@ -22,14 +23,17 @@ public class Block {
         sb.append("Block<");
         sb.append(coord[0] + 1).append(", ");
         sb.append(coord[1] + 1).append(", ");
-        sb.append(coord[2] + 1).append(">[");
+        sb.append(coord[2] + 1).append("> | <");
 
         for (int i = 0; i < open_faces.length; i++) {
-            sb.append(open_faces[i]);
+            if (open_faces[i])
+                sb.append(1);
+            else
+                sb.append(0);
             if (i != open_faces.length - 1)
                 sb.append(", ");
         }
-        sb.append("]");
+        sb.append(">");
         return sb.toString();
     }
 }

@@ -1,38 +1,55 @@
+import java.util.Arrays;
 import java.util.Objects;
 
 public class Test {
 
-    // Tester
     public static void main(String[] args) {
 
-        Frame A = new Frame("A", 1,1,3);
-        Frame B = new Frame("B", 1,3,1);
-        Frame C = new Frame("C", 2,2,2);
+        Frame A = new Frame("A", 1,1,3); // 3 blocks on top of each other
+        Frame B = new Frame("B", 1,3,1); // 3 blocks next to each other
+        Frame C = new Frame("C", 2,2,2); // a 2x2x2 square box
 
-        System.out.println("Newly created frames: \n");
-        System.out.println(A + "\n");
-        System.out.println(B + "\n");
-        System.out.println(C + "\n\n");
+        System.out.println("\nNewly created frames: \n");
+        System.out.println(A + "\n" + B + "\n" + C + "\n\n");
 
 
-        // do a join
-        Join(A.blocks[0][0][0], new int[] {0,0,1}, "W", B.blocks[0][0][0], new int[] {0,0,0}, "E");
+        /*
+            A.Blocks[1][1][2] : The pointer to the 2nd block of Frame A
+            new int[] {0,0,1} : The coordinates of the 1st block of Frame A
+            "W"               : The side of the 1st block of Frame A where the join will happen
 
-        System.out.println("Frames A and B after performing Joining B<1,1,1>W to A<1,1,1>E ...\n");
+            B.blocks[0][0][0] : The pointer to the 1st block of Frame B
+            new int[] {0,0,0} : The coordinates of the 1st block of Frame B
+            "E"               : The side of the 1st block of Frame B where the join will happen
+
+         */
+        Join(A.Block(1,1,2), coord(1, 1, 2), "W", B.Block(1,1,1), coord(1, 1, 1), "E");
+        System.out.println("Frames A and B after Joining B<1,1,1>W to A<1,1,1>E ...\n");
         System.out.println(A +"\n");
         System.out.println(B +"\n");
 
     }
 
-    // This would be a compiler function and it wouldn't have to take all these args.
-    public static void Join(Block A, int[] A_coord, String A_face,
-                            Block B, int[] B_coord, String B_face) {
+    // just a helper to fix the 1-based array index issue
+    private static int[] coord(int x, int y, int z) {
+        return new int[] {x-1, y-1, z-1};
+    }
+
+    /*
+        This would be a compiler function and it wouldn't have to take all these args.
+        TODO: If A.parent.num_joins or B.parent.num_joins != 0, then one or both of the frames have other attached frames
+              that must also be checked to make sure nothing illegal happens. This should be easy since for any given
+              frame, we can access all other attached frames by simply looking in the given frame's hashmap of frame pointers.
+     */
+
+    private static void Join(Block A, int[] A_coord, String A_face,
+                             Block B, int[] B_coord, String B_face) {
 
         // check if blocks are part of same frame
         if (A.parent == B.parent)
             System.err.println("Error: Attempting to join blocks from the same Frame.");
 
-
+        // needed for next check
         boolean Aface = false;
         if (Objects.equals(A_face, "E"))
             Aface = A.open_faces[0];
@@ -47,6 +64,7 @@ public class Test {
         else if (Objects.equals(A_face, "B"))
             Aface = A.open_faces[5];
 
+        // needed for next check
         boolean Bface = false;
         if (Objects.equals(B_face, "E"))
             Bface = B.open_faces[0];
@@ -61,9 +79,13 @@ public class Test {
         else if (Objects.equals(B_face, "B"))
             Bface = B.open_faces[5];
 
-        // check if block face is available
-        if (!Aface || !Bface )
-            System.err.println("Error: One or both Block faces is not available for Join.");
+        // check if A's block face is available
+        if (!Aface )
+            System.err.println("Error: Block face is not available for Join: " + A);
+
+        // check if B's block face is available
+        if (!Bface )
+            System.err.println("Error: Block face is not available for Join: " + B);
 
         // check for opposite faces
         if (Objects.equals(A_face, "E") && !Objects.equals(B_face, "W") ||
@@ -78,11 +100,10 @@ public class Test {
             Objects.equals(A_face, "B") && !Objects.equals(B_face, "F"))
             System.err.println("Error: Illegal face option.");
 
-
+        // save the x,y,z coordinates of A and B, needed for next check
         int Ax = A.coord[0];
         int Ay = A.coord[1];
         int Az = A.coord[2];
-
         int Bx = B.coord[0];
         int By = B.coord[1];
         int Bz = B.coord[2];
@@ -91,14 +112,28 @@ public class Test {
         if (Bx > Ax && By > Ay && Bz > Az)
             System.err.println("Error: Illegal Join placement");
 
-        // else it's valid, do the join
+
+        /* ========== ALL CHECKS PASSED. BEING JOIN PROCESS ========== */
+
+
+        // create an entry to be placed in the "joins Object[][] matrix" (this is the join information)
         Object[] join_entry = {A, A_coord, A_face, B, B_coord, B_face};
+
+        // increment # of frames joined to A
         A.parent.num_joins++;
-        A.parent.joined_frames[A.parent.num_joins] = join_entry;
+        // add the join entry into A's joins
+        A.parent.joins[A.parent.num_joins] = join_entry;
+        // add a pointer to B into A's hashmap of joined frames (so A can access B)
+        A.parent.joined_frames.put(B.parent.name, B.parent);
+
+        // increment # of frames joined to B
         B.parent.num_joins++;
-        B.parent.joined_frames[B.parent.num_joins] = join_entry;
+        // add the join entry into B's joins
+        B.parent.joins[B.parent.num_joins] = join_entry;
+        // add a pointer to A into B's hashmap of joined frames (so B can access A)
+        B.parent.joined_frames.put(A.parent.name, A.parent);
 
-
+        // mark the appropriate face as unavailable for both A and B.
         if (Objects.equals(A_face, "E")) {
             A.parent.blocks[Ax][Ay][Az].open_faces[0] = false;
             B.parent.blocks[Bx][By][Bz].open_faces[1] = false;
@@ -111,9 +146,7 @@ public class Test {
             A.parent.blocks[Ax][Ay][Az].open_faces[4] = false;
             B.parent.blocks[Bx][By][Bz].open_faces[5] = false;
 
-        }
-
-        else if (Objects.equals(A_face, "W")) {
+        } else if (Objects.equals(A_face, "W")) {
             A.parent.blocks[Ax][Ay][Az].open_faces[1] = false;
             B.parent.blocks[Bx][By][Bz].open_faces[0] = false;
 
@@ -126,15 +159,5 @@ public class Test {
             B.parent.blocks[Bx][By][Bz].open_faces[4] = false;
 
         }
-
-        /*
-        for (int x = 0; x < Ax; x++) {
-            for (int y = 0; y < Ay; y++) {
-                for (int z = 0; z < Az; z++) {
-
-                }
-            }
-        }
-        */
     }
 }
