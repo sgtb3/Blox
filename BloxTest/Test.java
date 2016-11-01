@@ -23,7 +23,7 @@ public class Test {
             coord(1,1,1)   : The coordinates of the 1st block of Frame B
             "E"            : The side of the 1st block of Frame B where the join will happen
          */
-        Join(A.Block(1,1,2), coord(1, 1, 2), "E", B.Block(1,1,1), coord(1, 1, 1), "W");
+        Join(A, coord(1, 1, 2), "E", B, coord(1, 1, 1), "W");
         System.out.println("Frames A and B after Joining B<1,1,1>W to A<1,1,2>E ...\n");
         System.out.println(A +"\n");
         System.out.println(B +"\n");
@@ -35,49 +35,63 @@ public class Test {
         return new int[] {x-1, y-1, z-1};
     }
 
+    private static Frame Detach(Object[] join_entry) {
+        Frame f;
+
+        return null;
+    }
+
     /*
         This would be a compiler function and it wouldn't have to take all these args.
         TODO: If A.parent.num_joins or B.parent.num_joins != 0, then one or both of the frames have other attached frames
               that must also be checked to make sure nothing illegal happens. This should be easy since for any given
               frame, we can access all other attached frames by simply looking in the given frame's hashmap of frame pointers.
      */
+    private static void Join(Frame A, int[] A_coord, String A_face,
+                             Frame B, int[] B_coord, String B_face) {
 
-    private static void Join(Block A, int[] A_coord, String A_face,
-                             Block B, int[] B_coord, String B_face) {
+        int Ax = A_coord[0];
+        int Ay = A_coord[1];
+        int Az = A_coord[2];
+
+        int Bx = B_coord[0];
+        int By = B_coord[1];
+        int Bz = B_coord[2];
+
 
         // check if blocks are part of same frame
-        if (A.parent == B.parent)
+        if (A == B)
             System.err.println("Error: Attempting to join blocks from the same Frame.");
 
         // needed for next check
         boolean Aface = false;
         if (Objects.equals(A_face, "E"))
-            Aface = A.open_faces[0];
+            Aface = A.blocks.get(Ax).get(Ay).get(Az).open_faces[0];
         else if (Objects.equals(A_face, "W"))
-            Aface = A.open_faces[1];
+            Aface = A.blocks.get(Ax).get(Ay).get(Az).open_faces[1];
         else if (Objects.equals(A_face, "N"))
-            Aface = A.open_faces[2];
+            Aface = A.blocks.get(Ax).get(Ay).get(Az).open_faces[2];
         else if (Objects.equals(A_face, "S"))
-            Aface = A.open_faces[3];
+            Aface = A.blocks.get(Ax).get(Ay).get(Az).open_faces[3];
         else if (Objects.equals(A_face, "F"))
-            Aface = A.open_faces[4];
+            Aface = A.blocks.get(Ax).get(Ay).get(Az).open_faces[4];
         else if (Objects.equals(A_face, "B"))
-            Aface = A.open_faces[5];
+            Aface = A.blocks.get(Ax).get(Ay).get(Az).open_faces[5];
 
         // needed for next check
         boolean Bface = false;
         if (Objects.equals(B_face, "E"))
-            Bface = B.open_faces[0];
+            Bface = B.blocks.get(Bx).get(By).get(Bz).open_faces[0];
         else if (Objects.equals(B_face, "W"))
-            Bface = B.open_faces[1];
+            Bface = B.blocks.get(Bx).get(By).get(Bz).open_faces[1];
         else if (Objects.equals(B_face, "N"))
-            Bface = B.open_faces[2];
+            Bface = B.blocks.get(Bx).get(By).get(Bz).open_faces[2];
         else if (Objects.equals(B_face, "S"))
-            Bface = B.open_faces[3];
+            Bface = B.blocks.get(Bx).get(By).get(Bz).open_faces[3];
         else if (Objects.equals(B_face, "F"))
-            Bface = B.open_faces[4];
+            Bface = B.blocks.get(Bx).get(By).get(Bz).open_faces[4];
         else if (Objects.equals(B_face, "B"))
-            Bface = B.open_faces[5];
+            Bface = B.blocks.get(Bx).get(By).get(Bz).open_faces[5];
 
         // check if A's block face is available
         if (!Aface )
@@ -101,16 +115,16 @@ public class Test {
             System.err.println("Error: Illegal face option.");
 
         // save the x,y,z coordinates of A and B, needed for next check
-        int Ax = A.coord[0];
-        int Ay = A.coord[1];
-        int Az = A.coord[2];
-        int Bx = B.coord[0];
-        int By = B.coord[1];
-        int Bz = B.coord[2];
+//        int Ax = A.coord[0];
+//        int Ay = A.coord[1];
+//        int Az = A.coord[2];
+//        int Bx = B.coord[0];
+//        int By = B.coord[1];
+//        int Bz = B.coord[2];
 
         // check for illegal join placement (B gets joined to A)
-        if (Bx > Ax && By > Ay && Bz > Az)
-            System.err.println("Error: Illegal Join placement");
+        //if (Bx <= Ax || By <= Ay || Bz <= Az)
+        //    System.err.println("Error: Illegal Join placement");
 
 
         /* ========== ALL CHECKS PASSED. BEING JOIN PROCESS ========== */
@@ -120,43 +134,43 @@ public class Test {
         Object[] join_entry = {A, A_coord, A_face, B, B_coord, B_face};
 
         // increment # of frames joined to A
-        A.parent.num_joins++;
+        A.num_joins++;
         // add the join entry into A's joins
-        A.parent.joins[A.parent.num_joins] = join_entry;
+        A.joins[A.num_joins] = join_entry;
         // add a pointer to B into A's hashmap of joined frames (so A can access B)
-        A.parent.joined_frames.put(B.parent.name, B.parent);
+        A.joined_frames.put(B.name, B);
 
         // increment # of frames joined to B
-        B.parent.num_joins++;
+        B.num_joins++;
         // add the join entry into B's joins
-        B.parent.joins[B.parent.num_joins] = join_entry;
+        B.joins[B.num_joins] = join_entry;
         // add a pointer to A into B's hashmap of joined frames (so B can access A)
-        B.parent.joined_frames.put(A.parent.name, A.parent);
+        B.joined_frames.put(A.name, A);
 
         // mark the appropriate face as unavailable for both A and B.
         if (Objects.equals(A_face, "E")) {
-            A.parent.blocks[Ax][Ay][Az].open_faces[0] = false;
-            B.parent.blocks[Bx][By][Bz].open_faces[1] = false;
+            A.blocks.get(Ax).get(Ay).get(Az).open_faces[0] = false;
+            B.blocks.get(Bx).get(By).get(Bz).open_faces[1] = false;
 
         } else if (Objects.equals(A_face, "N")) {
-            A.parent.blocks[Ax][Ay][Az].open_faces[2] = false;
-            B.parent.blocks[Bx][By][Bz].open_faces[3] = false;
+            A.blocks.get(Ax).get(Ay).get(Az).open_faces[2] = false;
+            B.blocks.get(Bx).get(By).get(Bz).open_faces[3] = false;
 
         } else if (Objects.equals(A_face, "F")) {
-            A.parent.blocks[Ax][Ay][Az].open_faces[4] = false;
-            B.parent.blocks[Bx][By][Bz].open_faces[5] = false;
+            A.blocks.get(Ax).get(Ay).get(Az).open_faces[4] = false;
+            B.blocks.get(Bx).get(By).get(Bz).open_faces[5] = false;
 
         } else if (Objects.equals(A_face, "W")) {
-            A.parent.blocks[Ax][Ay][Az].open_faces[1] = false;
-            B.parent.blocks[Bx][By][Bz].open_faces[0] = false;
+            A.blocks.get(Ax).get(Ay).get(Az).open_faces[1] = false;
+            B.blocks.get(Bx).get(By).get(Bz).open_faces[0] = false;
 
         } else if (Objects.equals(A_face, "S")) {
-            A.parent.blocks[Ax][Ay][Az].open_faces[3] = false;
-            B.parent.blocks[Bx][By][Bz].open_faces[2] = false;
+            A.blocks.get(Ax).get(Ay).get(Az).open_faces[3] = false;
+            B.blocks.get(Bx).get(By).get(Bz).open_faces[2] = false;
 
         } else if (Objects.equals(A_face, "B")) {
-            A.parent.blocks[Ax][Ay][Az].open_faces[5] = false;
-            B.parent.blocks[Bx][By][Bz].open_faces[4] = false;
+            A.blocks.get(Ax).get(Ay).get(Az).open_faces[5] = false;
+            B.blocks.get(Bx).get(By).get(Bz).open_faces[4] = false;
 
         }
     }
