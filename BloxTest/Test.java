@@ -23,8 +23,8 @@ public class Test {
             "E"            : The side of the 1st block of Frame B where the join will happen
 
          */
-        Join(A.Block(1,1,2), coord(1, 1, 2), "W", B.Block(1,1,1), coord(1, 1, 1), "E");
-        System.out.println("Frames A and B after Joining B<1,1,1>W to A<1,1,1>E ...\n");
+        Join(A.Block(1,1,2), coord(1, 1, 2), "E", B.Block(1,1,1), coord(1, 1, 1), "W");
+        System.out.println("Frames A and B after Joining B<1,1,1>W to A<1,1,2>E ...\n");
         System.out.println(A +"\n");
         System.out.println(B +"\n");
 
