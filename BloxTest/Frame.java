@@ -18,21 +18,10 @@ public class Frame {
         this.y = y;
         this.z = z;
         this.name = name;
-        //blocks = new ArrayList<ArrayList<ArrayList<Block>>>();
-        //blocks = new Block[x][y][z];
 
         num_joins = 0;                        // running total on how many entries are in the joins matrix/list
         joins = new Object[x * y * z * 6][6]; // max # of possible joins is always x*y*z*6 (i.e the max # of available faces)
-        joined_frames = new HashMap<String, Frame>();
-
-        /*
-            There needs to be some logic in these loops to check where the "default" joined sides are
-
-            For example, for a frame with 3 blocks stacked on top of each other:
-                1) the top side of the bottom-most block and the bottom side of the middle block
-                2) the top side of the middle-most block and the bottom side of the top-most block
-            should be changed to false (unavailable for join).
-         */
+        joined_frames = new HashMap<>();
 
         blocks = new ArrayList<>();
         for (int i = 0; i < x; i++) {
@@ -46,6 +35,7 @@ public class Frame {
             }
             blocks.add(y_list);
         }
+        Test.faceCheck(blocks);
     }
 
     // Return frame's Block at coordinates x, y, z, adjusted for 1-based index
@@ -62,12 +52,17 @@ public class Frame {
 
         StringBuilder sb = new StringBuilder();
         sb.append("Frame ").append(name).append(" \n{\n");
-        sb.append("\tBlock<x, y, z> | [E, W, N, S, F, B]");
-        sb.append("\n\t---------------|-------------------\n");
+        sb.append("\t<Block> : [E, W, N, S, F, B]");
+        sb.append("\n\t----------------------------\n");
+
         for (int i = 0; i < x; i++) {
             for (int j = 0; j < y; j++) {
                 for (int k = 0; k < z; k++) {
-                    sb.append("\t").append(blocks.get(i).get(j).get(k));
+                    sb.append("\t").append("<");
+                    sb.append(i+1).append(",");
+                    sb.append(j+1).append(",");
+                    sb.append(k+1).append("> : ");
+                    sb.append(blocks.get(i).get(j).get(k));
                     if (i + 1 != x || j + 1 != y || k + 1 != z)
                         sb.append("\n");
                 }
@@ -94,12 +89,12 @@ public class Frame {
                             append(((int[]) joins[i][4])[1] + 1).append(",").
                             append(((int[]) joins[i][4])[2] + 1).append(">");
                     sb.append(joins[i][5]);
+                    sb.append("\n");
                 }
             }
-            sb.append("\n\t}");
+            sb.append("\t}");
         }
         sb.append("\n}");
         return sb.toString();
     }
-
 }

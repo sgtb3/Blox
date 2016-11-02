@@ -1,8 +1,8 @@
 public class Block {
 
     boolean[] open_faces;
-    float[] face_colors;
-    Frame parent;
+    private float[] face_colors;
+    private Frame parent;
 
     public Block(Frame parent) {
         open_faces = new boolean[] { true, true, true, true, true, true }; // E, W, N, S, F, B
@@ -13,7 +13,7 @@ public class Block {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("Block<");
+        sb.append("[");
         for (int i = 0; i < open_faces.length; i++) {
             if (open_faces[i])
                 sb.append(1);
@@ -22,7 +22,7 @@ public class Block {
             if (i != open_faces.length - 1)
                 sb.append(", ");
         }
-        sb.append(">");
+        sb.append("]");
         return sb.toString();
     }
 }

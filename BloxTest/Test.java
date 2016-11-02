@@ -1,10 +1,8 @@
 /*
  * This class should really be named "Compiler" since all the functions except main are all compiler functions.
  */
-
 import java.util.Objects;
 import java.util.ArrayList;
-
 
 public class Test {
 
@@ -25,12 +23,15 @@ public class Test {
             coord(1,1,1)   : The coordinates of the 1st block of Frame B
             "E"            : The side of the 1st block of Frame B where the join will happen
          */
+        System.out.println("===> Calling Join(A, coord(1, 1, 2), \"E\", B, coord(1, 1, 1), \"W\")...");
         Join(A, coord(1, 1, 2), "E", B, coord(1, 1, 1), "W");
-        System.out.println("Frames A and B after Joining B<1,1,1>W to A<1,1,2>E ...\n");
+        System.out.println("===> Join complete. Frames A and B after Joining B<1,1,1>W to A<1,1,2>E ...\n");
         System.out.println(A +"\n");
         System.out.println(B +"\n");
+
+        System.out.println("===> Calling Join(Join(A, coord(1, 1, 2), \"W\", C, coord(2, 2, 2), \"E\");");
         Join(A, coord(1, 1, 2), "W", C, coord(2, 2, 2), "E");
-        System.out.println("Frames A and C after Joining C<2,2,2>E to A<1,1,2>W ...\n");
+        System.out.println("===> Join complete. Frames A and C after Joining C<2,2,2>E to A<1,1,2>W ...\n");
         System.out.println(A +"\n");
         System.out.println(C +"\n");
 
@@ -41,19 +42,12 @@ public class Test {
         return new int[] {x-1, y-1, z-1};
     }
 
-    // TODO: Implement this??
-    private static Frame Detach(Object[] join_entry) {
-        Frame f;
-
-        return null;
-    }
-
-
-    private static ArrayList<ArrayList<ArrayList<Block>>> faceCheck(ArrayList<ArrayList<ArrayList<Block>>> A) {
+    // checks the
+    public static void faceCheck(ArrayList<ArrayList<ArrayList<Block>>> A) {
 
         int x = 0;
-        int y = 0;
-        int z = 0;
+        int y;
+        int z;
         for (ArrayList<ArrayList<Block>> ylist : A) {
             y = 0;
             for (ArrayList<Block> zlist : ylist) {
@@ -91,7 +85,7 @@ public class Test {
             }
             x++;
         }
-        return A;
+        //return A;
     }
 
 
@@ -114,9 +108,9 @@ public class Test {
         int By_shift = 0;
         int Bz_shift = 0;
 
-        int Cx_max = 0;
-        int Cy_max = 0;
-        int Cz_max = 0;
+        int Cx_max;
+        int Cy_max;
+        int Cz_max;
 
 
         // check if blocks are part of same frame
@@ -183,15 +177,15 @@ public class Test {
 
         // check for opposite faces
         if (Objects.equals(A_face, "E") && !Objects.equals(B_face, "W") ||
-            Objects.equals(A_face, "W") && !Objects.equals(B_face, "E"))
+                Objects.equals(A_face, "W") && !Objects.equals(B_face, "E"))
             System.err.println("Error: Illegal face option.");
 
         if (Objects.equals(A_face, "N") && !Objects.equals(B_face, "S") ||
-            Objects.equals(A_face, "S") && !Objects.equals(B_face, "N"))
+                Objects.equals(A_face, "S") && !Objects.equals(B_face, "N"))
             System.err.println("Error: Illegal face option.");
 
         if (Objects.equals(A_face, "F") && !Objects.equals(B_face, "B") ||
-            Objects.equals(A_face, "B") && !Objects.equals(B_face, "F"))
+                Objects.equals(A_face, "B") && !Objects.equals(B_face, "F"))
             System.err.println("Error: Illegal face option.");
 
 
@@ -215,7 +209,7 @@ public class Test {
         B.joins[B.num_joins] = join_entry;
         // add a pointer to A into B's hashmap of joined frames (so B can access A)
         B.joined_frames.put(A.name, A);
-        
+
         // Determine shift values for A and B
         if (Bx_shift < 0) {
             Ax_shift = -Bx_shift;
@@ -296,7 +290,7 @@ public class Test {
         }
 
         // Check Cblocks faces
-        Cblocks = faceCheck(Cblocks);
+        faceCheck(Cblocks);
 
         // Print Cblocks
         x = 0;
@@ -305,10 +299,10 @@ public class Test {
             for (ArrayList<Block> zlist : ylist) {
                 z = 0;
                 for (Block block : zlist) {
-                    if(block != null) {
-                        System.out.println("("+x+", "+y+", "+z+") = " + block + "\n");
+                    if (block != null) {
+                        System.out.println("("+x+", "+y+", "+z+") = " + block);
                     } else {
-                        System.out.println("("+x+", "+y+", "+z+") = empty \n");
+                        System.out.println("("+x+", "+y+", "+z+") = empty");
                     }
                     z++;
                 }
@@ -322,6 +316,5 @@ public class Test {
         A.x = Cx_max;
         A.y = Cy_max;
         A.z = Cz_max;
-        
     }
 }
