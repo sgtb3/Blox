@@ -3,6 +3,8 @@
  */
 
 import java.util.Objects;
+import java.util.ArrayList;
+
 
 public class Test {
 
@@ -23,7 +25,7 @@ public class Test {
             coord(1,1,1)   : The coordinates of the 1st block of Frame B
             "E"            : The side of the 1st block of Frame B where the join will happen
          */
-        Join(A, coord(1, 1, 2), "E", B, coord(1, 1, 1), "W");
+        A.blocks = Join(A, coord(1, 1, 2), "E", B, coord(1, 1, 1), "W");
         System.out.println("Frames A and B after Joining B<1,1,1>W to A<1,1,2>E ...\n");
         System.out.println(A +"\n");
         System.out.println(B +"\n");
@@ -47,7 +49,8 @@ public class Test {
               that must also be checked to make sure nothing illegal happens. This should be easy since for any given
               frame, we can access all other attached frames by simply looking in the given frame's hashmap of frame pointers.
      */
-    private static void Join(Frame A, int[] A_coord, String A_face,
+
+    private static ArrayList<ArrayList<ArrayList<Block>>> Join(Frame A, int[] A_coord, String A_face,
                              Frame B, int[] B_coord, String B_face) {
 
         int Ax = A_coord[0];
@@ -57,6 +60,26 @@ public class Test {
         int Bx = B_coord[0];
         int By = B_coord[1];
         int Bz = B_coord[2];
+
+        int Ax_shift = 0;
+        int Ay_shift = 0;
+        int Az_shift = 0;
+
+        int Bx_shift = 0;
+        int By_shift = 0;
+        int Bz_shift = 0;
+
+        int Ax_max = 0;
+        int Ay_max = 0;
+        int Az_max = 0;
+
+        int Bx_max = 0;
+        int By_max = 0;
+        int Bz_max = 0;
+
+        int Cx_max = 0;
+        int Cy_max = 0;
+        int Cz_max = 0;
 
 
         // check if blocks are part of same frame
@@ -78,20 +101,40 @@ public class Test {
         else if (Objects.equals(A_face, "B"))
             Aface = A.blocks.get(Ax).get(Ay).get(Az).open_faces[5];
 
-        // needed for next check
+        // Check which face is being joined to, set shift factor accordingly
         boolean Bface = false;
-        if (Objects.equals(B_face, "E"))
+        if (Objects.equals(B_face, "E")) {
             Bface = B.blocks.get(Bx).get(By).get(Bz).open_faces[0];
-        else if (Objects.equals(B_face, "W"))
+            Bx_shift = (Ax - 1) - Bx;
+            By_shift = Ay - By;
+            Bz_shift = Az - Bz;
+        } else if (Objects.equals(B_face, "W")) {
             Bface = B.blocks.get(Bx).get(By).get(Bz).open_faces[1];
-        else if (Objects.equals(B_face, "N"))
+            Bx_shift = (Ax + 1) - Bx;
+            By_shift = Ay - By;
+            Bz_shift = Az - Bz;
+        } else if (Objects.equals(B_face, "N")) {
             Bface = B.blocks.get(Bx).get(By).get(Bz).open_faces[2];
-        else if (Objects.equals(B_face, "S"))
+            Bx_shift = Ax - Bx;
+            By_shift = (Ay - 1) - By;
+            Bz_shift = Az - Bz;
+        } else if (Objects.equals(B_face, "S")) {
             Bface = B.blocks.get(Bx).get(By).get(Bz).open_faces[3];
-        else if (Objects.equals(B_face, "F"))
+            Bx_shift = Ax - Bx;
+            By_shift = (Ay + 1) - By;
+            Bz_shift = Az - Bz;
+        } else if (Objects.equals(B_face, "F")) {
             Bface = B.blocks.get(Bx).get(By).get(Bz).open_faces[4];
-        else if (Objects.equals(B_face, "B"))
+            Bx_shift = Ax - Bx;
+            By_shift = Ay - By;
+            Bz_shift = (Az - 1) - Bz;
+        } else if (Objects.equals(B_face, "B")) {
             Bface = B.blocks.get(Bx).get(By).get(Bz).open_faces[5];
+            Bx_shift = Ax - Bx;
+            By_shift = Ay - By;
+            Bz_shift = (Az + 1) - Bz;
+        }
+
 
         // check if A's block face is available
         if (!Aface )
@@ -127,7 +170,7 @@ public class Test {
         //    System.err.println("Error: Illegal Join placement");
 
 
-        /* ========== ALL CHECKS PASSED. BEING JOIN PROCESS ========== */
+        /* ========== ALL CHECKS PASSED. BEGIN JOIN PROCESS ========== */
 
 
         // create an entry to be placed in the "joins Object[][] matrix" (this is the join information)
@@ -139,6 +182,10 @@ public class Test {
         A.joins[A.num_joins] = join_entry;
         // add a pointer to B into A's hashmap of joined frames (so A can access B)
         A.joined_frames.put(B.name, B);
+
+
+
+
 
         // increment # of frames joined to B
         B.num_joins++;
@@ -173,5 +220,121 @@ public class Test {
             B.blocks.get(Bx).get(By).get(Bz).open_faces[4] = false;
 
         }
+
+
+
+
+        
+        // Determine shift values for A and B
+        System.out.println(Bx_shift + "Bx_shift \n");
+        System.out.println(By_shift + "By_shift \n");
+        System.out.println(Bz_shift + "Bz_shift \n");
+        if (Bx_shift < 0) {
+            Ax_shift = -Bx_shift;
+            Bx_shift = 0;
+        }
+        if (By_shift < 0) {
+            Ay_shift = -By_shift;
+            By_shift = 0;
+        }
+        if (Bz_shift < 0) {
+            Az_shift = -Bz_shift;
+            Bz_shift = 0;
+        }
+
+        // Determine size of new array
+        Cx_max = (A.x + Ax_shift);
+        if (Cx_max < (B.x + Bx_shift)) {
+            Cx_max = (B.x + Bx_shift);
+        }
+        Cy_max = (A.y + Ay_shift);
+        if (Cy_max < (B.y + By_shift)) {
+            Cy_max = (B.y + By_shift);
+        }
+        Cz_max = (A.z + Az_shift);
+        if (Cz_max < (B.z + Bz_shift)) {
+            Cz_max = (B.z + Bz_shift);
+        }
+
+        System.out.println(Bx_shift + " Bx_shift \n");
+        System.out.println(By_shift + " By_shift \n");
+        System.out.println(Bz_shift + " Bz_shift \n");
+        System.out.println(Ax_shift + " Ax_shift \n");
+        System.out.println(Ay_shift + " Ay_shift \n");
+        System.out.println(Az_shift + " Az_shift \n");
+
+        // Create new empty array Cblocks
+        ArrayList<ArrayList<ArrayList<Block>>> Cblocks;
+        Cblocks = new ArrayList<>();
+        for (int i = 0; i < Cx_max; i++) {
+            ArrayList<ArrayList<Block>> y_list = new ArrayList<>();
+            for (int j = 0; j < Cy_max; j++) {
+                ArrayList<Block> z_list = new ArrayList<>();
+                for (int k = 0; k < Cz_max; k++) {
+                    z_list.add(null);
+                }
+                y_list.add(z_list);
+            }
+            Cblocks.add(y_list);
+        }
+
+        // Fill Cblocks with blocks from frame A
+        int x = 0;
+        int y = 0;
+        int z = 0;
+        for (ArrayList<ArrayList<Block>> ylist : A.blocks) {
+            y = 0;
+            for (ArrayList<Block> zlist : ylist) {
+                z = 0;
+                for (Block block : zlist) {
+                    if(block != null) {
+                        Cblocks.get(x + Ax_shift).get(y + Ay_shift).set((z + Az_shift), block);
+                    }
+                    z++;
+                }
+                y++;
+            }
+            x++;
+        }
+
+        // Fill Cblocks with values from frame B
+        x = 0;
+        for (ArrayList<ArrayList<Block>> ylist : B.blocks) {
+            y = 0;
+            for (ArrayList<Block> zlist : ylist) {
+                z = 0;
+                for (Block block : zlist) {
+                    if(block != null) {
+                        Cblocks.get(x + Bx_shift).get(y + By_shift).set((z + Bz_shift), block);
+                    }
+                    z++;
+                }
+                y++;
+            }
+            x++;
+        }
+
+        // Print Cblocks
+        x = 0;
+        for (ArrayList<ArrayList<Block>> ylist : Cblocks) {
+            y = 0;
+            for (ArrayList<Block> zlist : ylist) {
+                z = 0;
+                for (Block block : zlist) {
+                    if(block != null) {
+                        System.out.println("("+x+", "+y+", "+z+") = " + block + "\n");
+                    } else {
+                        System.out.println("("+x+", "+y+", "+z+") = empty \n");
+                    }
+                    z++;
+                }
+                y++;
+            }
+            x++;
+        }
+
+        // Update Frame A with Cblocks Array to finish merge of B into A
+        return Cblocks;
+        
     }
 }
