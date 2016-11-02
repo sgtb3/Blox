@@ -24,7 +24,6 @@ type typ =
 | Bool 
 | Void 
 | Frame
-| Structure
 
 type bind = typ * string
 
@@ -83,5 +82,4 @@ let string_of_typ = function
   | Bool -> "bool"
   | Void -> "void"
   | Frame -> "Frame"
-  | Structure -> "Structure"
-
+  

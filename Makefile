@@ -25,7 +25,7 @@ TSTDIR = tests
 AMFDIR = amf
 
 # default makefile target
-all: scanner asttypes
+all: scanner asttypes parser
 
 scanner:
 	@echo "\n============================================="	
