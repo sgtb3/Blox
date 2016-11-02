@@ -24,7 +24,7 @@ rule token = parse
 | '*'       { TIMES   } 
 | "||"      { OR      } 
 | '/'       { DIVIDE  } 
-| ".="      { BLOCKEQ }
+| ".="      { FRAMEEQ }
 | "!"       { NOT     } 
 | "Create"  { CREATE  }
 | "Build"   { BUILD   }

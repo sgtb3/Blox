@@ -11,7 +11,7 @@ type op =
 | Leq 
 | Greater 
 | Geq 
-| BlockEq
+| FrameEq
 | And 
 | Or 
 
@@ -24,6 +24,9 @@ type typ =
 | Bool 
 | Void 
 | Frame
+| String
+| Array of typ 
+| Set of typ 
 
 type bind = typ * string
 
@@ -65,7 +68,7 @@ let string_of_op = function
   | Div -> "/"
   | Equal -> "=="
   | Neq -> "!="
-  | BlockEq -> ".="
+  | FrameEq -> ".="
   | Less -> "<"
   | Leq -> "<="
   | Greater -> ">"
@@ -82,4 +85,5 @@ let string_of_typ = function
   | Bool -> "bool"
   | Void -> "void"
   | Frame -> "Frame"
+  | String -> "String"
   
