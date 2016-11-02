@@ -37,6 +37,7 @@ rule token = parse
 | "return"  { RETURN  } 
 | "int"     { INT     }
 | "bool"    { BOOL    } 
+| "String"  { STRING  }
 | "true"    { TRUE    } 
 | "false"   { FALSE   } 
 | "void"    { VOID    } 
