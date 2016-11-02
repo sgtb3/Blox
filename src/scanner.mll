@@ -28,11 +28,8 @@ rule token = parse
 | "!"       { NOT     } 
 | "Create"  { CREATE  }
 | "Build"   { BUILD   }
-| "Rule"    { RULE    }
 | "Join"    { JOIN    }
-| "Detach"  { DETACH  }
 | "Frame"   { FRAME   }
-| "Structure"   { STRUCTURE   }
 | "if"      { IF      } 
 | "else"    { ELSE    } 
 | "for"     { FOR     } 
@@ -43,8 +40,7 @@ rule token = parse
 | "true"    { TRUE    } 
 | "false"   { FALSE   } 
 | "void"    { VOID    } 
-| "break"   { BREAK   } 
-| "NULL"    { NULL    } 
+| "break"   { BREAK   }  
 | ['0'-'9']+ as lxm { LITERAL(int_of_string lxm) } 
 | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_'] * as lxm { ID(lxm) } 
 | eof { EOF } 
