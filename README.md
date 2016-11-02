@@ -7,6 +7,7 @@ This repository contains the source code for the Blox programming language.
 * __out__  : generated files
 * __amf__  : generated AMF files
 * __tests__: language tests
+* __res__  : resource files
 
 #### Usage
 
@@ -23,3 +24,5 @@ placed in `gen/`.
 * Update/complete ast.ml.
 * Create tests for Scanner and Parser.
 
+#### Block Orientation
+![Orient](res/orient.png?raw=true)

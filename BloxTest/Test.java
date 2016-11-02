@@ -8,8 +8,8 @@ public class Test {
 
     public static void main(String[] args) {
 
-        Frame A = new Frame("A", 1,1,3); // 3 blocks on top of each other
-        Frame B = new Frame("B", 1,3,1); // 3 blocks next to each other
+        Frame A = new Frame("A", 1,1,3); // 3 blocks next to each other horizontally
+        Frame B = new Frame("B", 1,3,1); // 3 blocks stacked on top of each other
         Frame C = new Frame("C", 2,2,2); // a 2x2x2 square box
 
         System.out.println("\nNewly created frames: \n");
@@ -42,7 +42,7 @@ public class Test {
         return new int[] {x-1, y-1, z-1};
     }
 
-    // checks the
+    // checks the contiguous faces
     public static void faceCheck(ArrayList<ArrayList<ArrayList<Block>>> A) {
 
         int x = 0;
@@ -85,7 +85,6 @@ public class Test {
             }
             x++;
         }
-        //return A;
     }
 
 
@@ -191,24 +190,16 @@ public class Test {
 
         /* ========== ALL CHECKS PASSED. BEGIN JOIN PROCESS ========== */
 
-
-
         // create an entry to be placed in the "joins Object[][] matrix" (this is the join information)
         Object[] join_entry = {A, A_coord, A_face, B, B_coord, B_face};
 
-        // increment # of frames joined to A
-        A.num_joins++;
-        // add the join entry into A's joins
-        A.joins[A.num_joins] = join_entry;
-        // add a pointer to B into A's hashmap of joined frames (so A can access B)
-        A.joined_frames.put(B.name, B);
+        A.num_joins++;                      // increment # of frames joined to A
+        A.joins[A.num_joins] = join_entry;  // add the join entry into A's joins
+        A.joined_frames.put(B.name, B);     // add a pointer to B into A's hashmap of joined frames (so A can access B)
 
-        // increment # of frames joined to B
-        B.num_joins++;
-        // add the join entry into B's joins
-        B.joins[B.num_joins] = join_entry;
-        // add a pointer to A into B's hashmap of joined frames (so B can access A)
-        B.joined_frames.put(A.name, A);
+        B.num_joins++;                      // increment # of frames joined to B
+        B.joins[B.num_joins] = join_entry;  // add the join entry into B's joins
+        B.joined_frames.put(A.name, A);     // add a pointer to A into B's hashmap of joined frames (so B can access A)
 
         // Determine shift values for A and B
         if (Bx_shift < 0) {

@@ -19,8 +19,8 @@ public class Frame {
         this.z = z;
         this.name = name;
 
-        num_joins = 0;                        // running total on how many entries are in the joins matrix/list
-        joins = new Object[x * y * z * 6][6]; // max # of possible joins is always x*y*z*6 (i.e the max # of available faces)
+        num_joins = 0;                            // running total on how many entries are in the joins matrix/list
+        joins = new Object[x * y * z * 6][6];     // max # of possible joins is always x*y*z*6 (i.e the max # of available faces)
         joined_frames = new HashMap<>();
 
         blocks = new ArrayList<>();
@@ -36,15 +36,6 @@ public class Frame {
             blocks.add(y_list);
         }
         Test.faceCheck(blocks);
-    }
-
-    // Return frame's Block at coordinates x, y, z, adjusted for 1-based index
-    Block Block(int x, int y, int z) {
-        try {
-            return blocks.get(x-1).get(y-1).get(z-1);
-        } catch (ArrayIndexOutOfBoundsException e) {
-            throw new IllegalArgumentException("Block<" + x + ", " + y + ", " + z +"> does not exist");
-        }
     }
 
     @Override
