@@ -3,9 +3,9 @@ import java.util.HashMap;
 
 public class Frame {
 
-    int x;
-    int y;
-    int z;
+    private int x;
+    private int y;
+    private int z;
     String name;                                  // Frame name
     ArrayList<ArrayList<ArrayList<Block>>> blocks;// the actual blocks of the frame. total # of blocks is always x*y*z
     Object[][] joins;                             // an array of size x*y*z*6 where each element = {A, A_coord, A_face, B, B_coord, B_face} (i.e. the args to Join())
@@ -38,7 +38,7 @@ public class Frame {
         for (int i = 0; i < x; i++) {
             ArrayList<ArrayList<Block>> y_list = new ArrayList<>();
             for (int j = 0; j < y; j++) {
-                ArrayList<Block> z_list = new ArrayList<>();
+                ArrayList<Block> z_list = new ArrayList<Block>();
                 for (int k = 0; k < z; k++) {
                     z_list.add(new Block(this));
                 }

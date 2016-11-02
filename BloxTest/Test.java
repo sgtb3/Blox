@@ -25,32 +25,77 @@ public class Test {
             coord(1,1,1)   : The coordinates of the 1st block of Frame B
             "E"            : The side of the 1st block of Frame B where the join will happen
          */
-        A.blocks = Join(A, coord(1, 1, 2), "E", B, coord(1, 1, 1), "W");
+        Join(A, coord(1, 1, 2), "E", B, coord(1, 1, 1), "W");
         System.out.println("Frames A and B after Joining B<1,1,1>W to A<1,1,2>E ...\n");
         System.out.println(A +"\n");
         System.out.println(B +"\n");
+        Join(A, coord(1, 1, 2), "W", C, coord(2, 2, 2), "E");
+        System.out.println("Frames A and C after Joining C<2,2,2>E to A<1,1,2>W ...\n");
+        System.out.println(A +"\n");
+        System.out.println(C +"\n");
 
     }
 
-    // just a helper to fix the 1-based array index issue
+    // Helper to fix the 1-based array index issue
     private static int[] coord(int x, int y, int z) {
         return new int[] {x-1, y-1, z-1};
     }
 
+    // TODO: Implement this??
     private static Frame Detach(Object[] join_entry) {
         Frame f;
 
         return null;
     }
 
-    /*
-        This would be a compiler function and it wouldn't have to take all these args.
-        TODO: If A.parent.num_joins or B.parent.num_joins != 0, then one or both of the frames have other attached frames
-              that must also be checked to make sure nothing illegal happens. This should be easy since for any given
-              frame, we can access all other attached frames by simply looking in the given frame's hashmap of frame pointers.
-     */
 
-    private static ArrayList<ArrayList<ArrayList<Block>>> Join(Frame A, int[] A_coord, String A_face,
+    private static ArrayList<ArrayList<ArrayList<Block>>> faceCheck(ArrayList<ArrayList<ArrayList<Block>>> A) {
+
+        int x = 0;
+        int y = 0;
+        int z = 0;
+        for (ArrayList<ArrayList<Block>> ylist : A) {
+            y = 0;
+            for (ArrayList<Block> zlist : ylist) {
+                z = 0;
+                for (Block block : zlist) {
+                    if(block != null) {
+                        Block xBlock = null;
+                        Block yBlock = null;
+                        Block zBlock = null;
+                        if (x < (A.size() - 1)) {
+                            xBlock = A.get(x + 1).get(y).get(z);
+                        }
+                        if (y < (ylist.size() -1)) {
+                            yBlock = A.get(x).get(y + 1).get(z);
+                        }
+                        if (z < (zlist.size() - 1)) {
+                            zBlock = A.get(x).get(y).get(z + 1);
+                        }
+                        if (xBlock != null) {
+                            block.open_faces[0] = false;
+                            xBlock.open_faces[1] = false;
+                        }
+                        if (yBlock != null) {
+                            block.open_faces[2] = false;
+                            yBlock.open_faces[3] = false;
+                        }
+                        if (zBlock != null) {
+                            block.open_faces[4] = false;
+                            zBlock.open_faces[5] = false;
+                        }
+                    }
+                    z++;
+                }
+                y++;
+            }
+            x++;
+        }
+        return A;
+    }
+
+
+    private static void Join(Frame A, int[] A_coord, String A_face,
                              Frame B, int[] B_coord, String B_face) {
 
         int Ax = A_coord[0];
@@ -68,14 +113,6 @@ public class Test {
         int Bx_shift = 0;
         int By_shift = 0;
         int Bz_shift = 0;
-
-        int Ax_max = 0;
-        int Ay_max = 0;
-        int Az_max = 0;
-
-        int Bx_max = 0;
-        int By_max = 0;
-        int Bz_max = 0;
 
         int Cx_max = 0;
         int Cy_max = 0;
@@ -157,20 +194,9 @@ public class Test {
             Objects.equals(A_face, "B") && !Objects.equals(B_face, "F"))
             System.err.println("Error: Illegal face option.");
 
-        // save the x,y,z coordinates of A and B, needed for next check
-//        int Ax = A.coord[0];
-//        int Ay = A.coord[1];
-//        int Az = A.coord[2];
-//        int Bx = B.coord[0];
-//        int By = B.coord[1];
-//        int Bz = B.coord[2];
-
-        // check for illegal join placement (B gets joined to A)
-        //if (Bx <= Ax || By <= Ay || Bz <= Az)
-        //    System.err.println("Error: Illegal Join placement");
-
 
         /* ========== ALL CHECKS PASSED. BEGIN JOIN PROCESS ========== */
+
 
 
         // create an entry to be placed in the "joins Object[][] matrix" (this is the join information)
@@ -183,52 +209,14 @@ public class Test {
         // add a pointer to B into A's hashmap of joined frames (so A can access B)
         A.joined_frames.put(B.name, B);
 
-
-
-
-
         // increment # of frames joined to B
         B.num_joins++;
         // add the join entry into B's joins
         B.joins[B.num_joins] = join_entry;
         // add a pointer to A into B's hashmap of joined frames (so B can access A)
         B.joined_frames.put(A.name, A);
-
-        // mark the appropriate face as unavailable for both A and B.
-        if (Objects.equals(A_face, "E")) {
-            A.blocks.get(Ax).get(Ay).get(Az).open_faces[0] = false;
-            B.blocks.get(Bx).get(By).get(Bz).open_faces[1] = false;
-
-        } else if (Objects.equals(A_face, "N")) {
-            A.blocks.get(Ax).get(Ay).get(Az).open_faces[2] = false;
-            B.blocks.get(Bx).get(By).get(Bz).open_faces[3] = false;
-
-        } else if (Objects.equals(A_face, "F")) {
-            A.blocks.get(Ax).get(Ay).get(Az).open_faces[4] = false;
-            B.blocks.get(Bx).get(By).get(Bz).open_faces[5] = false;
-
-        } else if (Objects.equals(A_face, "W")) {
-            A.blocks.get(Ax).get(Ay).get(Az).open_faces[1] = false;
-            B.blocks.get(Bx).get(By).get(Bz).open_faces[0] = false;
-
-        } else if (Objects.equals(A_face, "S")) {
-            A.blocks.get(Ax).get(Ay).get(Az).open_faces[3] = false;
-            B.blocks.get(Bx).get(By).get(Bz).open_faces[2] = false;
-
-        } else if (Objects.equals(A_face, "B")) {
-            A.blocks.get(Ax).get(Ay).get(Az).open_faces[5] = false;
-            B.blocks.get(Bx).get(By).get(Bz).open_faces[4] = false;
-
-        }
-
-
-
-
         
         // Determine shift values for A and B
-        System.out.println(Bx_shift + "Bx_shift \n");
-        System.out.println(By_shift + "By_shift \n");
-        System.out.println(Bz_shift + "Bz_shift \n");
         if (Bx_shift < 0) {
             Ax_shift = -Bx_shift;
             Bx_shift = 0;
@@ -255,13 +243,6 @@ public class Test {
         if (Cz_max < (B.z + Bz_shift)) {
             Cz_max = (B.z + Bz_shift);
         }
-
-        System.out.println(Bx_shift + " Bx_shift \n");
-        System.out.println(By_shift + " By_shift \n");
-        System.out.println(Bz_shift + " Bz_shift \n");
-        System.out.println(Ax_shift + " Ax_shift \n");
-        System.out.println(Ay_shift + " Ay_shift \n");
-        System.out.println(Az_shift + " Az_shift \n");
 
         // Create new empty array Cblocks
         ArrayList<ArrayList<ArrayList<Block>>> Cblocks;
@@ -314,6 +295,9 @@ public class Test {
             x++;
         }
 
+        // Check Cblocks faces
+        Cblocks = faceCheck(Cblocks);
+
         // Print Cblocks
         x = 0;
         for (ArrayList<ArrayList<Block>> ylist : Cblocks) {
@@ -333,8 +317,11 @@ public class Test {
             x++;
         }
 
-        // Update Frame A with Cblocks Array to finish merge of B into A
-        return Cblocks;
+        // Update Frame A with Cblocks array to finish merge of B into A
+        A.blocks = Cblocks;
+        A.x = Cx_max;
+        A.y = Cy_max;
+        A.z = Cz_max;
         
     }
 }
