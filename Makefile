@@ -1,5 +1,6 @@
 # phony targets
-.PHONY: all clean scanner parser test asttypes parsertypes parsercomp scannercomp bloxcomp
+.PHONY: all clean scanner parser test asttypes parsertypes 
+	parsercomp scannercomp bloxcomp scannertest parsertest
 
 # name of output file
 EXEC = blox_exec.amf
@@ -16,7 +17,7 @@ PARSGEN = ocamlyacc
 # 	-o : specify name of output file produced by compiler
 OCC = ocamlc
 OCCFLAGS1 = -c
-OCCFLAGS2 = -o $(EXEC)
+OCCFLAGS2 = -o 
 
 # source files, generated files, testing, and AMF/output directories
 SRCDIR = src
@@ -24,8 +25,19 @@ GENDIR = gen
 TSTDIR = tests
 AMFDIR = amf
 
+VPATH = src:gen
+testfiles := $(wildcard $(TSTDIR)/*)
+
 # default makefile target
 all: scanner asttypes parser
+
+scannertest: scanner
+	@echo "\n============================================="	
+	@echo "Testing scanner ..."
+	@for file in $(testfiles) ; do \
+		$(OCC) $(OCCFLAGS2) scanner $(GENDIR)/scanner.ml ; \
+		./scanner < "$$file" ; \
+	done
 
 scanner:
 	@echo "\n============================================="	
@@ -34,7 +46,6 @@ scanner:
 	@mv $(SRCDIR)/scanner.ml $(GENDIR)/scanner.ml
 	@echo "=============================================\n"	
 
-# not fully working
 parser: 
 	@echo "\n============================================="	
 	@echo "Creating parser.ml and parser.mli ..."
@@ -56,8 +67,6 @@ clean:
 	@echo "Cleaning up auxiliary files ..."
 	@rm -rf $(GENDIR)/*
 	@echo "=============================================\n"
-
-
 
 
 # ======================================================== #
@@ -87,6 +96,6 @@ parsercomp:
 bloxcomp: 
 	@echo "\n============================================="	
 	@echo "Compiling the Blox compiler ..."
-	$(OCC) $(OCCFLAGS2) $(AMF)/$(EXEC).
+	$(OCC) $(OCCFLAGS2) $(EXEC) $(AMF)/$(EXEC).
 	@echo "=============================================\n"
 
