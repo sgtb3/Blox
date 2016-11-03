@@ -22,17 +22,34 @@ type uop =
 type typ = 
   Int 
 | Bool 
-| Void 
+| Void
+| Float
+| Block
 | Frame
 | String
 | Array of typ 
-| Set of typ 
+| Set of typ
+
+type block = {
+        open_faces : bool array;
+        face_colors : float array;
+}
+
+type frame = {
+        x : int;
+        y : int;
+        z : int;
+        name : string;
+        blocks : block array array array;
+        (*joins : DynArray*)
+}
 
 type bind = typ * string
 
 type expr = 
-  Literal of int            
-| BoolLit of bool 
+  Literal of int          
+| BoolLit of bool
+| Float of float
 | Id of string              
 | Noexpr 
 | Binop of expr * op * expr 
@@ -84,6 +101,7 @@ let string_of_typ = function
     Int -> "int"
   | Bool -> "bool"
   | Void -> "void"
+  | Float -> "float"
+  | Block -> "Block"
   | Frame -> "Frame"
   | String -> "String"
-  
