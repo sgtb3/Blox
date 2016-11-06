@@ -23,7 +23,8 @@ rule token = parse
 | "&&"       { AND      } 
 | '*'        { TIMES    } 
 | "||"       { OR       } 
-| '/'        { DIVIDE   } 
+| '/'        { DIVIDE   }
+| '%'        { MOD      }
 | ".="       { FRAMEEQ  }
 | "!"        { NOT      }
 | "Set"      { SET      }
