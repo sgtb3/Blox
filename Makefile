@@ -8,7 +8,7 @@ EXEC = blox_exec.amf
 # bytecode object file extension
 OBJEXT = .cmo
 
-# lexer and parser generators
+# lexer(scanner) and parser generators
 LEXGEN = ocamllex
 PARSGEN = ocamlyacc
 
@@ -31,13 +31,19 @@ testfiles := $(wildcard $(TSTDIR)/*)
 # default makefile target
 all: scanner asttypes parser
 
-scannertest: scanner
+
+#$(LEXGEN) $(SRCDIR)/scanner.mll
+#$(OCC) $(OCCFLAGS2) scanner $(SRCDIR)/scanner.ml ; \
+#	@for file in $(testfiles) ; do \
+#		./scanner < "$$file" ; \
+#	done
+scannertest: scanner asttypes parser 
 	@echo "\n============================================="	
 	@echo "Testing scanner ..."
-	@for file in $(testfiles) ; do \
-		$(OCC) $(OCCFLAGS2) scanner $(GENDIR)/scanner.ml ; \
-		./scanner < "$$file" ; \
-	done
+	ocamllex src/scanner.mll
+	ocamlc -o scanner src/scanner.ml
+	./scanner < src/scanner.mll
+	@echo "=============================================\n"	
 
 scanner:
 	@echo "\n============================================="	

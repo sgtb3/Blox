@@ -97,7 +97,7 @@ let string_of_uop = function
     Neg -> "-"
   | Not -> "!"
 
-let string_of_typ = function
+let rec string_of_typ = function
     Int -> "int"
   | Bool -> "bool"
   | Void -> "void"
@@ -105,3 +105,8 @@ let string_of_typ = function
   | Block -> "Block"
   | Frame -> "Frame"
   | String -> "String"
+  | Array x -> "array_" ^ (string_of_typ x)
+  | Set x -> "set_" ^ (string_of_typ x)
+  | _ -> raise (Failure ("ast.ml: string_of_typ not yet support this type"))
+
+
