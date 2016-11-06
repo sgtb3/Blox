@@ -107,6 +107,6 @@ let rec string_of_typ = function
   | String -> "String"
   | Array x -> "array_" ^ (string_of_typ x)
   | Set x -> "set_" ^ (string_of_typ x)
-  | _ -> raise (Failure ("ast.ml: string_of_typ not yet support this type"))
+  | _ -> raise (Failure ("ast.ml: string_of_typ: unsupported type"))
 
 
