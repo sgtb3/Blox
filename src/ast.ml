@@ -55,14 +55,15 @@ type expr =
 | BoolLit of bool
 | Float of float
 | Id of string
+| Objid of string * string
 | Set of expr list
 | Map of (expr * expr) list
 | Array of expr list             
-| Noexpr 
 | Binop of expr * op * expr 
 | Unop of uop * expr 
 | Assign of string * expr   
 | Call of string * expr list
+| Noexpr
 
 type stmt = 
   Block of stmt list        
@@ -71,13 +72,15 @@ type stmt =
 | For of expr * expr * expr * stmt 
 | While of expr * stmt      
 | Return of expr
+| Break
+| Continue
 
 type func_decl = { 
-        typ     : typ; 
-        fname   : string; 
-        formals : bind list; 
-        locals  : bind list; 
-        body    : stmt list; 
+        typ     : typ;
+        fname   : string;
+        formals : bind list;
+        locals  : bind list;
+        body    : stmt list;
 }
 
 type program = bind list * func_decl list
