@@ -119,7 +119,7 @@ let rec string_of_typ = function
   | String -> "String"
   | Array x -> "Array_" ^ (string_of_typ x)
   | Set x -> "Set_" ^ (string_of_typ x)
-  | Map (x, y) -> "Map_" ^ (type_to_string x) ^ "_" ^ (type_to_string y)
+  | Map (x, y) -> "Map_" ^ (string_of_typ x) ^ "_" ^ (string_of_typ y)
   | _ -> raise (Failure ("ast.ml: string_of_typ: unsupported type"))
 
 
