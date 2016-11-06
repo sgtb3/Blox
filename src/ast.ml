@@ -13,7 +13,8 @@ type op =
 | Geq 
 | FrameEq
 | And 
-| Or 
+| Or
+| Mod
 
 type uop = 
   Neg 
@@ -25,11 +26,13 @@ type typ =
 | Void
 | Float
 | Block
-| Frame
 | String
+| Frame
 | Array of typ 
 | Set of typ
+| Map of typ * typ
 
+(*
 type block = {
         open_faces : bool array;
         face_colors : float array;
@@ -43,6 +46,7 @@ type frame = {
         blocks : block array array array;
         (*joins : DynArray*)
 }
+*)
 
 type bind = typ * string
 
@@ -50,7 +54,10 @@ type expr =
   Literal of int          
 | BoolLit of bool
 | Float of float
-| Id of string              
+| Id of string
+| Set of expr list
+| Map of (expr * expr) list
+| Array of expr list             
 | Noexpr 
 | Binop of expr * op * expr 
 | Unop of uop * expr 
@@ -92,6 +99,7 @@ let string_of_op = function
   | Geq -> ">="
   | And -> "&&"
   | Or -> "||"
+  | Mod -> "%"
 
 let string_of_uop = function
     Neg -> "-"
@@ -103,10 +111,12 @@ let rec string_of_typ = function
   | Void -> "void"
   | Float -> "float"
   | Block -> "Block"
+  | String -> "String"
   | Frame -> "Frame"
   | String -> "String"
-  | Array x -> "array_" ^ (string_of_typ x)
-  | Set x -> "set_" ^ (string_of_typ x)
+  | Array x -> "Array_" ^ (string_of_typ x)
+  | Set x -> "Set_" ^ (string_of_typ x)
+  | Map (x, y) -> "Map_" ^ (type_to_string x) ^ "_" ^ (type_to_string y)
   | _ -> raise (Failure ("ast.ml: string_of_typ: unsupported type"))
 
 
