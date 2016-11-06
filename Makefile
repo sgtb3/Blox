@@ -37,12 +37,12 @@ all: scanner asttypes parser
 #	@for file in $(testfiles) ; do \
 #		./scanner < "$$file" ; \
 #	done
-scannertest: scanner asttypes parser 
+scannertest: scanner
 	@echo "\n============================================="	
 	@echo "Testing scanner ..."
-	ocamllex src/scanner.mll
-	ocamlc -o scanner src/scanner.ml
-	./scanner < src/scanner.mll
+	#ocamllex src/scanner.mll
+	ocamlc -o scannertest src/scanner.ml
+	./scannertest < src/scanner.mll
 	@echo "=============================================\n"	
 
 scanner:
