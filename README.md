@@ -19,7 +19,6 @@ placed in `gen/`.
 
 #### TODO 
 
-* Update/complete scanner.mll.
 * Update/complete parser.mly.
 * Update/complete ast.ml.
 * Create tests for Scanner and Parser.
