@@ -4,7 +4,7 @@
 
 rule token = parse
   [' ' '\t' '\r' '\n'] { token lexbuf }  (* Whitespace *) 
-| "/ * "     { comment lexbuf }           (* Comments   *) 
+| "/ * "     { comment lexbuf }          (* Comments   *) 
 | '('        { LPAREN   } 
 | '='        { ASSIGN   } 
 | ')'        { RPAREN   } 
@@ -40,17 +40,17 @@ rule token = parse
 | "while"    { WHILE    } 
 | "return"   { RETURN   } 
 | "int"      { INT      }
-| "bool"     {  BOOL    } 
+| "bool"     { BOOL     } 
 | "String"   { STRING   }
 | "true"     { TRUE     } 
-| "false"    {  FALSE   } 
+| "false"    { FALSE    } 
 | "void"     { VOID     }
 | "continue" { CONTINUE } 
 | "break"    { BREAK    }
-| "null"	 { NULL     }
+| "null"     { NULL     }
 | ['0'-'9']+ as lxm { LITERAL(int_of_string lxm) } 
+| ['0'-'9']+ '.' ['0'-'9']+ as lxm { FLOAT(float_of_string lxm) }
 | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_'] * as lxm { ID(lxm) }
-| ['0'-'9']+ '.' ['0'-'9']+ as lxm {FLOAT(float_of_string lxm)}
 | eof { EOF } 
 | _ as char { raise (Failure("illegal character " ^ Char.escaped char)) }
 

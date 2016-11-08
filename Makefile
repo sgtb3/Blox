@@ -31,7 +31,44 @@ testfiles := $(wildcard $(TSTDIR)/*)
 # default makefile target
 all: scanner asttypes parser
 
+# creates scanner.ml and moves it to gen/
+scanner:
+	@echo "\n============================================="	
+	@echo "Creating scanner.ml ..."
+	$(LEXGEN) $(SRCDIR)/scanner.mll
+	#@mv $(SRCDIR)/scanner.ml $(GENDIR)/scanner.ml
+	@echo "=============================================\n"	
 
+# creates parser.ml and parser.mli and moves them to gen/
+parser: 
+	@echo "\n============================================="	
+	@echo "Creating parser.ml and parser.mli ..."
+	$(PARSGEN) $(SRCDIR)/parser.mly
+	#@mv $(SRCDIR)/parser.ml $(GENDIR)/parser.ml
+	#@mv $(SRCDIR)/parser.mli $(GENDIR)/parser.mli
+	@echo "=============================================\n"
+
+# creates ast.cmi and ast.cmp and moves them to gen/
+asttypes:
+	@echo "\n============================================="	
+	@echo "Compiling AST types (ast.cmi and ast.cmo) ..."
+	$(OCC) $(OCCFLAGS1) $(SRCDIR)/ast.ml
+	#@mv $(SRCDIR)/ast.cmi $(GENDIR)/ast.cmi
+	#@mv $(SRCDIR)/ast.cmo $(GENDIR)/ast.cmo
+	@echo "=============================================\n"
+
+# removes all files in gen/
+clean:
+	@echo "\n============================================="	
+	@echo "Cleaning up auxiliary files ..."
+	rm -rf $(GENDIR)/*
+	rm -r $(SRCDIR)/scanner.ml
+	rm -f $(SRCDIR)/*.cmi $(SRCDIR)/*.cmo 
+	rm -r $(SRCDIR)/parser.mli $(SRCDIR)/parser.ml
+	@echo "=============================================\n"
+
+# ======================================================== #
+# Following targets are for tests
 #$(LEXGEN) $(SRCDIR)/scanner.mll
 #$(OCC) $(OCCFLAGS2) scanner $(SRCDIR)/scanner.ml ; \
 #	@for file in $(testfiles) ; do \
@@ -44,36 +81,6 @@ scannertest: scanner
 	ocamlc -o scannertest src/scanner.ml
 	./scannertest < src/scanner.mll
 	@echo "=============================================\n"	
-
-scanner:
-	@echo "\n============================================="	
-	@echo "Creating scanner.ml ..."
-	$(LEXGEN) $(SRCDIR)/scanner.mll
-	@mv $(SRCDIR)/scanner.ml $(GENDIR)/scanner.ml
-	@echo "=============================================\n"	
-
-parser: 
-	@echo "\n============================================="	
-	@echo "Creating parser.ml and parser.mli ..."
-	$(PARSGEN) $(SRCDIR)/parser.mly
-	@mv $(SRCDIR)/parser.ml $(GENDIR)/parser.ml
-	@mv $(SRCDIR)/parser.mli $(GENDIR)/parser.mli
-	@echo "=============================================\n"
-
-asttypes:
-	@echo "\n============================================="	
-	@echo "Compiling AST types ..."
-	$(OCC) $(OCCFLAGS1) $(SRCDIR)/ast.ml
-	@mv $(SRCDIR)/ast.cmi $(GENDIR)/ast.cmi
-	@mv $(SRCDIR)/ast.cmo $(GENDIR)/ast.cmo
-	@echo "=============================================\n"
-
-clean:
-	@echo "\n============================================="	
-	@echo "Cleaning up auxiliary files ..."
-	@rm -rf $(GENDIR)/*
-	@echo "=============================================\n"
-
 
 # ======================================================== #
 # Following commands are not completed.
