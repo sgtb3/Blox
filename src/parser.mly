@@ -6,11 +6,11 @@
 %token PLUS MINUS TIMES DIVIDE ASSIGN NOT
 %token FRAMEEQ EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
 %token DOT COLON
-%token RETURN IF ELSE FOR WHILE INT VOID
+%token RETURN IF ELSE FOR WHILE INT VOID BOOL
 %token TRUE FALSE
 %token BREAK CONTINUE
 %token BUILD JOIN 
-%token FRAME SET MAP 
+%token STRING FRAME SET MAP ARRAY
 %token EOF
 
 %token <string> ID
@@ -62,6 +62,18 @@ formals_opt:
 formal_list:
     typ ID                   { [($1, $2)]     }
   | formal_list COMMA typ ID { ($3, $4) :: $1 }
+
+typ: 
+  INT     { Int    }
+| BOOL    { Bool   }
+| VOID    { Void   }
+| FLOAT   { Float  }
+/*| BLCK    { Blck   }*/
+| STRING  { String }
+| FRAME   { Frame  }
+/*| ARRAY   { Array  }*/
+| SET     { Set of typ    }
+| MAP     { Map    }
 
 typedef_list:
     typedef {[$1]}

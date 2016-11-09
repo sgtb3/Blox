@@ -31,6 +31,7 @@ rule token = parse
 | '.'        { DOT      }
 | "Set"      { SET      }
 | "Map"      { MAP      }
+| "Array"    { ARRAY    }
 | "Build"    { BUILD    }
 | "Join"     { JOIN     }
 | "Frame"    { FRAME    }
