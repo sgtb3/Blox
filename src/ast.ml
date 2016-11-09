@@ -21,12 +21,12 @@ type uop =
 | Not 
 
 type typ = 
-  IntLit
-| BoolLit
+  Int
+| Bool
 | Void
-| FloatLit
+| Float
 | Blck
-| StringLit
+| String
 | Frame
 | Array of typ
 | Set   of typ
@@ -109,12 +109,12 @@ let string_of_uop = function
   | Not -> "!"
 
 let rec string_of_typ = function
-    IntLit     -> "int"
-  | BoolLit    -> "bool"
+    Int        -> "int"
+  | Bool       -> "bool"
   | Void       -> "void"
-  | FloatLit   -> "float"
+  | Float      -> "float"
   | Blck       -> "Block"
-  | StringLit  -> "String"
+  | String     -> "String"
   | Frame      -> "Frame"
   | Array x    -> "Array_" ^ (string_of_typ x)
   | Set x      -> "Set_"   ^ (string_of_typ x)
