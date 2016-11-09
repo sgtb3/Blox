@@ -9,12 +9,14 @@
 %token TRUE FALSE
 %token BREAK CONTINUE
 %token CREATE BUILD JOIN 
-%token SET MAP FRAME
-
-%token <int> LITERAL
-%token <string> ID
-%token <float> FLOAT
+%token FRAME SET MAP 
 %token EOF
+
+%token <string> ID
+%token <string> STRINGLIT
+%token <float> FLOATLIT
+%token <char> CHARLIT
+%token <int> INTLIT
 
 %nonassoc NOELSE
 %nonassoc ELSE
@@ -96,7 +98,8 @@ expr_opt:
   | expr          { $1     }
 
 expr:
-    LITERAL                      { Literal($1)            }
+    INTLIT                       { IntLit($1)            }
+  | FLOATLIT                     { FloatLit($)}
   | TRUE                         { BoolLit(true)          }
   | FALSE                        { BoolLit(false)         }
   | ID                           { Id($1)                 }
