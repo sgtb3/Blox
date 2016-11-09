@@ -37,16 +37,15 @@ type block = {
   open_faces  : bool  array;
   face_colors : float array;
 }
-
+*)
 type frame = {
   x       : int;
   y       : int;
   z       : int;
   name    : string;
-  blocks  : block array array array;
+  (*blocks  : block array array array;*)
   (*joins : DynArray*)
 }
-*)
 
 type bind = typ * string
 

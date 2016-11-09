@@ -4,7 +4,8 @@
 
 %token SEMI LPAREN RPAREN LBRACE RBRACE COMMA
 %token PLUS MINUS TIMES DIVIDE ASSIGN NOT
-%token FRAMEEQ EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR DOT
+%token FRAMEEQ EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
+%token DOT COLON
 %token RETURN IF ELSE FOR WHILE INT BOOL VOID
 %token TRUE FALSE
 %token BREAK CONTINUE
@@ -15,7 +16,6 @@
 %token <string> ID
 %token <string> STRINGLIT
 %token <float> FLOATLIT
-%token <char> CHARLIT
 %token <int> INTLIT
 
 %nonassoc NOELSE
@@ -71,6 +71,89 @@ typ:
   | MAP   { Map   }
   | FRAME { Frame }
 
+typedef_list:
+    typedef {[$1]}
+    | typedef_list COMMA typedef {$3::$1}
+
+typedef_list_opt:
+    /* nothing*/ {[]}
+    | typedef_list {List.rev $1}
+
+/*typedef description*/
+typedef:
+    ID {
+        match $1 with
+        | "Int" -> Int
+        | "Bool" -> Bool
+        | "Void" -> Void
+        | "String" -> String
+        | "Float" -> Float
+        | "Map" | "Set" -> failwith ("set map init must with parameters")
+        | x -> Class x
+    }
+    | ID LT typedef_list_opt GT {
+        match $1 with
+        | "Set" -> begin
+                match $3 with
+                |[x] -> Set x
+                | _ -> failwith ("set just with one parameter")
+                end
+        | "Map" -> begin
+                match $3 with
+                | [x;y] -> Map (x,y)
+                | _ -> failwith ("map just two parameter")
+                end
+        | "Array" -> begin
+               match $3 with
+               |[x] -> Array x
+               | _ -> failwith ("array just with one parameter")
+               end
+        | _ -> failwith ("not suppport template except set map")
+    }
+
+
+
+
+/* for map */
+expr_pair_list:
+    /*nothing*/ {[]}
+    | expr_pair_true_list {$1}
+expr_pair_true_list:
+    | expr COLON expr {[($1, $3)]}
+    | expr_pair_true_list COMMA expr COLON expr {($3,$5)::$1}
+
+
+/* for set */
+expr_list_set:
+    /* nothing */       { [] }
+  | expr_true_list_set  { $1 }
+
+expr_true_list_set:
+    expr                    { [$1]     }
+  | expr_true_list_set COMMA expr { $3 :: $1 }
+
+
+/* for function call */
+actuals_opt:
+    /* nothing */ { []          }
+  | actuals_list  { List.rev $1 }
+
+actuals_list:
+    expr                    { [$1]     }
+  | actuals_list COMMA expr { $3 :: $1 }
+
+
+map:
+    MAP LPAREN expr_pair_list RPAREN {Map(List.rev $3)}
+set:
+    SET LT expr_list_set RPAREN {Set(List.rev $3)}
+arr:
+    LBRACE expr_list_set RBRACE {Array (List.rev $2)}
+
+
+
+
+
 vdecl_list:
     /* nothing */    { []       }
   | vdecl_list vdecl { $2 :: $1 }
@@ -103,9 +186,9 @@ expr:
   | TRUE                         { BoolLit(true)          }
   | FALSE                        { BoolLit(false)         }
   | ID                           { Id($1)                 }
-  | Set                          { $1                     }
-  | Map                          { $1                     }
-  | Array                        { $1                     }
+  | set                          { $1                     }
+  | map                          { $1                     }
+  | arr                          { $1                     }
   | expr PLUS    expr            { Binop($1, Add,     $3) }
   | expr MINUS   expr            { Binop($1, Sub,     $3) }
   | expr TIMES   expr            { Binop($1, Mult,    $3) }
@@ -127,10 +210,3 @@ expr:
   | ID LPAREN actuals_opt RPAREN { Call($1, $3)           }
   | LPAREN expr RPAREN           { $2                     }
 
-actuals_opt:
-    /* nothing */ { []          }
-  | actuals_list  { List.rev $1 }
-
-actuals_list:
-    expr                    { [$1]     }
-  | actuals_list COMMA expr { $3 :: $1 }
