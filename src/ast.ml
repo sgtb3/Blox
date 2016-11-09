@@ -21,12 +21,12 @@ type uop =
 | Not 
 
 type typ = 
-  Int 
-| Bool 
+  IntLit
+| BoolLit
 | Void
-| Float
+| FloatLit
 | Blck
-| String
+| StringLit
 | Frame
 | Array of typ
 | Set   of typ
@@ -38,7 +38,7 @@ type block = {
   face_colors : float array;
 }
 *)
-type frame = {
+(*type frame = {
   x       : int;
   y       : int;
   z       : int;
@@ -46,6 +46,7 @@ type frame = {
   (*blocks  : block array array array;*)
   (*joins : DynArray*)
 }
+*)
 
 type bind = typ * string
 
@@ -108,12 +109,12 @@ let string_of_uop = function
   | Not -> "!"
 
 let rec string_of_typ = function
-    Int        -> "int"
-  | Bool       -> "bool"
+    IntLit     -> "int"
+  | BoolLit    -> "bool"
   | Void       -> "void"
-  | Float      -> "float"
+  | FloatLit   -> "float"
   | Blck       -> "Block"
-  | String     -> "String"
+  | StringLit  -> "String"
   | Frame      -> "Frame"
   | Array x    -> "Array_" ^ (string_of_typ x)
   | Set x      -> "Set_"   ^ (string_of_typ x)
