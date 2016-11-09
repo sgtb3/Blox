@@ -6,7 +6,7 @@
 %token PLUS MINUS TIMES DIVIDE ASSIGN NOT
 %token FRAMEEQ EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
 %token DOT COLON
-%token RETURN IF ELSE FOR WHILE INT BOOL VOID
+%token RETURN IF ELSE FOR WHILE INT VOID
 %token TRUE FALSE
 %token BREAK CONTINUE
 %token BUILD JOIN 
@@ -14,9 +14,9 @@
 %token EOF
 
 %token <string> ID
-%token <string> STRINGLIT
-%token <float> FLOATLIT
-%token <int> INTLIT
+%token <string> STRING
+%token <float> FLOAT
+%token <int> LITERAL
 
 %nonassoc NOELSE
 %nonassoc ELSE
@@ -62,14 +62,6 @@ formals_opt:
 formal_list:
     typ ID                   { [($1, $2)]     }
   | formal_list COMMA typ ID { ($3, $4) :: $1 }
-
-typ:
-    INT   { Int   }
-  | BOOL  { Bool  }
-  | VOID  { Void  }
-  | SET   { Set   }
-  | MAP   { Map   }
-  | FRAME { Frame }
 
 typedef_list:
     typedef {[$1]}
@@ -181,9 +173,9 @@ expr_opt:
   | expr          { $1     }
 
 expr:
-    INTLIT                       { IntLit($1)             }
-  | FLOATLIT                     { FloatLit($1)           }
-  | STRINGLIT                    { StringLit($1)          }
+    LITERAL                      { Literal($1)            }
+  | FLOAT                        { Float($1)              }/* check this later*/
+  | STRING                       { String($1)             }
   | ID                           { Id($1)                 }
   | TRUE                         { BoolLit(true)          }
   | FALSE                        { BoolLit(false)         }

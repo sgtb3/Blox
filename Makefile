@@ -33,39 +33,39 @@ all: scanner asttypes parser
 
 # creates scanner.ml and moves it to gen/
 scanner:
-	@echo "\n============================================="	
+	@echo "\n====================================================="	
 	@echo "Creating scanner.ml ..."
 	$(LEXGEN) $(SRCDIR)/scanner.mll
-	#@mv $(SRCDIR)/scanner.ml $(GENDIR)/scanner.ml
-	@echo "=============================================\n"	
+	@mv $(SRCDIR)/scanner.ml $(GENDIR)/scanner.ml
+	@echo "=====================================================\n"	
 
 # creates parser.ml and parser.mli and moves them to gen/
 parser: 
-	@echo "\n============================================="	
+	@echo "\n====================================================="	
 	@echo "Creating parser.ml and parser.mli ..."
 	$(PARSGEN) $(SRCDIR)/parser.mly
-	#@mv $(SRCDIR)/parser.ml $(GENDIR)/parser.ml
-	#@mv $(SRCDIR)/parser.mli $(GENDIR)/parser.mli
-	@echo "=============================================\n"
+	@mv $(SRCDIR)/parser.ml $(GENDIR)/parser.ml
+	@mv $(SRCDIR)/parser.mli $(GENDIR)/parser.mli
+	@echo "=====================================================\n"
 
 # creates ast.cmi and ast.cmp and moves them to gen/
 asttypes:
-	@echo "\n============================================="	
+	@echo "\n====================================================="	
 	@echo "Compiling AST types (ast.cmi and ast.cmo) ..."
 	$(OCC) $(OCCFLAGS1) $(SRCDIR)/ast.ml
-	#@mv $(SRCDIR)/ast.cmi $(GENDIR)/ast.cmi
-	#@mv $(SRCDIR)/ast.cmo $(GENDIR)/ast.cmo
-	@echo "=============================================\n"
+	@mv $(SRCDIR)/ast.cmi $(GENDIR)/ast.cmi
+	@mv $(SRCDIR)/ast.cmo $(GENDIR)/ast.cmo
+	@echo "=====================================================\n"
 
 # removes all files in gen/
 clean:
-	@echo "\n============================================="	
+	@echo "\n====================================================="	
 	@echo "Cleaning up auxiliary files ..."
 	rm -rf $(GENDIR)/*
-	rm -r $(SRCDIR)/scanner.ml
-	rm -f $(SRCDIR)/*.cmi $(SRCDIR)/*.cmo 
-	rm -r $(SRCDIR)/parser.mli $(SRCDIR)/parser.ml
-	@echo "=============================================\n"
+	#rm -r $(SRCDIR)/scanner.ml
+	#rm -f $(SRCDIR)/*.cmi $(SRCDIR)/*.cmo 
+	#rm -r $(SRCDIR)/parser.mli $(SRCDIR)/parser.ml
+	@echo "=====================================================\n"
 
 # ======================================================== #
 # Following targets are for tests
@@ -75,12 +75,12 @@ clean:
 #		./scanner < "$$file" ; \
 #	done
 scannertest: scanner
-	@echo "\n============================================="	
+	@echo "\n====================================================="	
 	@echo "Testing scanner ..."
 	#ocamllex src/scanner.mll
 	ocamlc -o scannertest src/scanner.ml
 	./scannertest < src/scanner.mll
-	@echo "=============================================\n"	
+	@echo "=====================================================\n"	
 
 # ======================================================== #
 # Following commands are not completed.
@@ -89,26 +89,26 @@ scannertest: scanner
 # ======================================================== #
 
 parsertypes: 
-	@echo "\n============================================="	
+	@echo "\n====================================================="	
 	@echo "Compiling Parser types ..."
 	$(OCC) $(OCCFLAGS1) $(GENDIR)/parser.mli
-	@echo "=============================================\n"
+	@echo "=====================================================\n"
 
 scannercomp: 
-	@echo "\n============================================="	
+	@echo "\n====================================================="	
 	@echo "Compiling the Scanner ..."
 	$(OCC) $(OCCFLAGS1) $(GENDIR)/scanner.ml
-	@echo "=============================================\n"
+	@echo "=====================================================\n"
 
 parsercomp:
-	@echo "\n============================================="	
+	@echo "\n====================================================="	
 	@echo "Compiling the Parser ..."
 	$(OCC) $(OCCFLAGS1) $(GENDIR)/parser.ml
-	@echo "=============================================\n"	
+	@echo "=====================================================\n"	
 
 bloxcomp: 
-	@echo "\n============================================="	
+	@echo "\n====================================================="	
 	@echo "Compiling the Blox compiler ..."
 	$(OCC) $(OCCFLAGS2) $(EXEC) $(AMF)/$(EXEC).
-	@echo "=============================================\n"
+	@echo "=====================================================\n"
 
