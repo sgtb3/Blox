@@ -19,6 +19,7 @@
 %nonassoc NOELSE
 %nonassoc ELSE
 %right ASSIGN
+%left DOT
 %left OR
 %left AND
 %left EQ NEQ FRAMEEQ
