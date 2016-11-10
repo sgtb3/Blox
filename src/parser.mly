@@ -11,7 +11,7 @@
 %token BUILD JOIN 
 %token FRAME SET MAP AT
 %token EOF
-
+%token LTN GTN
 %token <string> ID
 %token <string> STRING
 %token <float> FLOAT
@@ -77,7 +77,7 @@ typedef_list:
     | typedef_list COMMA typedef {$3::$1}
 
 typedef_list_opt:
-    /* nothing*/ {[]}
+    /*nothing*/ {[]}
     | typedef_list {List.rev $1}
 
 /*typedef description*/
@@ -92,7 +92,7 @@ typedef:
         | "Map" | "Set" -> failwith ("set map init must with parameters")
         | x -> Class x
     }
-    | ID LT typedef_list_opt GT {
+    | ID LTN typedef_list_opt GTN {
         match $1 with
         | "Set" -> begin
                 match $3 with
@@ -141,7 +141,7 @@ actuals_list:
 map:
     MAP LPAREN expr_pair_list RPAREN {Map(List.rev $3)}
 set:
-    SET LT expr_list_set RPAREN {Set(List.rev $3)}
+    SET LPAREN expr_list_set RPAREN {Set(List.rev $3)}
 arr:
     LBRACE expr_list_set RBRACE {Array (List.rev $2)}
 
@@ -206,6 +206,5 @@ expr:
   | NOT expr                     { Unop(Not, $2)          }
   | ID ASSIGN expr               { Assign($1, $3)         }
   | ID LPAREN actuals_opt RPAREN { Call($1, $3)           }
-	   
   | AT typedef 									 { ObjGen($2)							} /*class generation syntax*/
   | LPAREN expr RPAREN           { $2                     }
