@@ -153,19 +153,26 @@ vdecl:
    typ ID SEMI { ($1, $2) }
 
 stmt_list:
-    /* nothing */  { []       }
-  | stmt_list stmt { $2 :: $1 }
+    /* nothing */  { [] }
+  | stmt_true_list { $1 }
+
+stmt_true_list:
+    stmt SEMI {[$1]}
+    | stmt_true_list stmt { $2 :: $1 }
 
 stmt:
   expr SEMI                                 { Expr $1               }
   | RETURN SEMI                             { Return Noexpr         }
   | RETURN expr SEMI                        { Return $2             }
+  | BREAK SEMI                              { Break                 }
+  | CONTINUE SEMI                           { Continue              }
   | LBRACE stmt_list RBRACE                 { Block(List.rev $2)    }
   | IF LPAREN expr RPAREN stmt %prec NOELSE { If($3, $5, Block([])) }
   | IF LPAREN expr RPAREN stmt ELSE stmt    { If($3, $5, $7)        }
   | WHILE LPAREN expr RPAREN stmt           { While($3, $5)         }
   | FOR LPAREN expr_opt SEMI expr SEMI expr_opt RPAREN stmt
                                             { For($3, $5, $7, $9)   }
+
 
 expr_opt:
     /* nothing */ { Noexpr }
