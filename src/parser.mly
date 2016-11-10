@@ -9,7 +9,7 @@
 %token RETURN IF ELSE FOR WHILE INT BOOL VOID
 %token BREAK CONTINUE
 %token BUILD JOIN 
-%token FRAME SET MAP
+%token FRAME SET MAP AT
 %token EOF
 
 %token <string> ID
@@ -200,4 +200,5 @@ expr:
   | NOT expr                     { Unop(Not, $2)          }
   | ID ASSIGN expr               { Assign($1, $3)         }
   | ID LPAREN actuals_opt RPAREN { Call($1, $3)           }
+	| AT typedef 									 { ObjGen($2)             }/*class generation syntax*/
   | LPAREN expr RPAREN           { $2                     }
