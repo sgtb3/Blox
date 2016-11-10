@@ -8,9 +8,11 @@ EXEC = blox_exec.amf
 # bytecode object file extension
 OBJEXT = .cmo
 
-# lexer(scanner) and parser generators
+# lexer (scanner) and parser generators
+# 	-v : verbose output option for ocamlyacc
 LEXGEN = ocamllex
 PARSGEN = ocamlyacc
+PARSGENFLAG = -v
 
 # ocaml compiler and flags
 # 	-c : compile without producing executable files
@@ -39,15 +41,6 @@ scanner:
 	@mv $(SRCDIR)/scanner.ml $(GENDIR)/scanner.ml
 	@echo "=====================================================\n"	
 
-# creates parser.ml and parser.mli and moves them to gen/
-parser: 
-	@echo "\n====================================================="	
-	@echo "Creating parser.ml and parser.mli ..."
-	$(PARSGEN) $(SRCDIR)/parser.mly
-	@mv $(SRCDIR)/parser.ml $(GENDIR)/parser.ml
-	@mv $(SRCDIR)/parser.mli $(GENDIR)/parser.mli
-	@echo "=====================================================\n"
-
 # creates ast.cmi and ast.cmp and moves them to gen/
 asttypes:
 	@echo "\n====================================================="	
@@ -57,15 +50,31 @@ asttypes:
 	@mv $(SRCDIR)/ast.cmo $(GENDIR)/ast.cmo
 	@echo "=====================================================\n"
 
+# creates parser.ml and parser.mli and moves them to gen/
+parser: 
+	@echo "\n====================================================="	
+	@echo "Creating parser.ml and parser.mli ..."
+	$(PARSGEN) $(PARSGENFLAG) $(SRCDIR)/parser.mly
+	@mv $(SRCDIR)/parser.ml $(GENDIR)/parser.ml
+	@mv $(SRCDIR)/parser.mli $(GENDIR)/parser.mli
+	@mv $(SRCDIR)/parser.output $(GENDIR)/parser.output
+	@cat $(GENDIR)/parser.output
+	@echo "=====================================================\n"
+
 # removes all files in gen/
 clean:
 	@echo "\n====================================================="	
 	@echo "Cleaning up auxiliary files ..."
 	rm -rf $(GENDIR)/*
-	#rm -r $(SRCDIR)/scanner.ml
-	#rm -f $(SRCDIR)/*.cmi $(SRCDIR)/*.cmo 
-	#rm -r $(SRCDIR)/parser.mli $(SRCDIR)/parser.ml
 	@echo "=====================================================\n"
+
+
+
+
+
+
+
+
 
 # ======================================================== #
 # Following targets are for tests
@@ -77,7 +86,6 @@ clean:
 scannertest: scanner
 	@echo "\n====================================================="	
 	@echo "Testing scanner ..."
-	#ocamllex src/scanner.mll
 	ocamlc -o scannertest src/scanner.ml
 	./scannertest < src/scanner.mll
 	@echo "=====================================================\n"	
