@@ -1,9 +1,13 @@
 # phony targets
 .PHONY: all clean scanner parser test asttypes parsertypes 
-	parsercomp scannercomp bloxcomp scannertest parsertest
+	parsercomp scannercomp bloxcomp scannertest parsertest 
+	test showtestlog
 
 # name of output file
 EXEC = blox_exec.amf
+
+# name of test shell script
+TESTSH = testAll
 
 # bytecode object file extension
 OBJEXT = .cmo
@@ -59,6 +63,16 @@ parser:
 	@mv $(SRCDIR)/parser.mli $(GENDIR)/parser.mli
 	@mv $(SRCDIR)/parser.output $(GENDIR)/parser.output
 	@cat $(GENDIR)/parser.output
+	@echo "=====================================================\n"
+
+test:
+	@echo "\n====================================================="	
+	@echo "Running test script ..."
+	@./$(TESTSH).sh
+	@mv $(TESTSH).log $(GENDIR)/$(TESTSH).log
+	@echo "\n====================================================="
+	@echo "Opening $(TESTSH).sh log ..."
+	@cat $(GENDIR)/$(TESTSH).log
 	@echo "=====================================================\n"
 
 # removes all files in gen/
