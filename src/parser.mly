@@ -10,7 +10,6 @@
 %token RETURN IF ELSE FOR WHILE INT BOOL VOID
 =======
 %token RETURN IF ELSE FOR WHILE INT VOID BOOL
-%token TRUE FALSE
 >>>>>>> refs/remotes/origin/master
 %token BREAK CONTINUE
 %token BUILD JOIN 
