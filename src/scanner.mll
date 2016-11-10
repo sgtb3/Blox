@@ -1,4 +1,4 @@
-(* ocamllex parser for Blox *)
+(* ocamllex scanner for Blox *)
 
 { open Parser }
 
