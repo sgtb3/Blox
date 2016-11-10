@@ -1,7 +1,7 @@
 # phony targets
 .PHONY: all clean scanner parser test asttypes parsertypes 
 	parsercomp scannercomp bloxcomp scannertest parsertest 
-	test showtestlog
+	test menhirtest 
 
 # name of output file
 EXEC = blox_exec.amf
@@ -65,6 +65,7 @@ parser:
 	@cat $(GENDIR)/parser.output
 	@echo "=====================================================\n"
 
+# runs the test script and displays the test log
 test:
 	@echo "\n====================================================="	
 	@echo "Running test script ..."
@@ -75,6 +76,10 @@ test:
 	@cat $(GENDIR)/$(TESTSH).log
 	@echo "=====================================================\n"
 
+# runs the menhir's interpreter as an alternative debugging tool
+menhirtest:
+	menhir --interpret --interpret-show-cst $(SRCDIR)/parser.mly
+
 # removes all files in gen/
 clean:
 	@echo "\n====================================================="	
@@ -84,25 +89,6 @@ clean:
 
 
 
-
-
-
-
-
-
-# ======================================================== #
-# Following targets are for tests
-#$(LEXGEN) $(SRCDIR)/scanner.mll
-#$(OCC) $(OCCFLAGS2) scanner $(SRCDIR)/scanner.ml ; \
-#	@for file in $(testfiles) ; do \
-#		./scanner < "$$file" ; \
-#	done
-scannertest: scanner
-	@echo "\n====================================================="	
-	@echo "Testing scanner ..."
-	ocamlc -o scannertest src/scanner.ml
-	./scannertest < src/scanner.mll
-	@echo "=====================================================\n"	
 
 # ======================================================== #
 # Following commands are not completed.
@@ -133,4 +119,3 @@ bloxcomp:
 	@echo "Compiling the Blox compiler ..."
 	$(OCC) $(OCCFLAGS2) $(EXEC) $(AMF)/$(EXEC).
 	@echo "=====================================================\n"
-
