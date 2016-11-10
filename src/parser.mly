@@ -7,7 +7,6 @@
 %token FRAMEEQ EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
 %token DOT COLON
 %token RETURN IF ELSE FOR WHILE INT BOOL VOID
-%token TRUE FALSE
 %token BREAK CONTINUE
 %token BUILD JOIN 
 %token FRAME SET MAP 
@@ -111,9 +110,6 @@ typedef:
         | _ -> failwith ("not suppport template except set map")
     }
 
-
-
-
 /* for map */
 expr_pair_list:
     /*nothing*/ {[]}
@@ -121,7 +117,6 @@ expr_pair_list:
 expr_pair_true_list:
     | expr COLON expr {[($1, $3)]}
     | expr_pair_true_list COMMA expr COLON expr {($3,$5)::$1}
-
 
 /* for set */
 expr_list_set:
@@ -132,7 +127,6 @@ expr_true_list_set:
     expr                    { [$1]     }
   | expr_true_list_set COMMA expr { $3 :: $1 }
 
-
 /* for function call */
 actuals_opt:
     /* nothing */ { []          }
@@ -142,17 +136,12 @@ actuals_list:
     expr                    { [$1]     }
   | actuals_list COMMA expr { $3 :: $1 }
 
-
 map:
     MAP LPAREN expr_pair_list RPAREN {Map(List.rev $3)}
 set:
     SET LT expr_list_set RPAREN {Set(List.rev $3)}
 arr:
     LBRACE expr_list_set RBRACE {Array (List.rev $2)}
-
-
-
-
 
 vdecl_list:
     /* nothing */    { []       }
@@ -210,4 +199,3 @@ expr:
   | ID ASSIGN expr               { Assign($1, $3)         }
   | ID LPAREN actuals_opt RPAREN { Call($1, $3)           }
   | LPAREN expr RPAREN           { $2                     }
-
