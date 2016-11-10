@@ -6,14 +6,10 @@
 %token PLUS MINUS TIMES DIVIDE ASSIGN NOT
 %token FRAMEEQ EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
 %token DOT COLON
-<<<<<<< HEAD
 %token RETURN IF ELSE FOR WHILE INT BOOL VOID
-=======
-%token RETURN IF ELSE FOR WHILE INT VOID BOOL
->>>>>>> refs/remotes/origin/master
 %token BREAK CONTINUE
 %token BUILD JOIN 
-%token STRING FRAME SET MAP ARRAY
+%token FRAME SET MAP ARRAY
 %token EOF
 
 %token <string> ID
