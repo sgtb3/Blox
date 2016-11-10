@@ -21,8 +21,8 @@ type uop =
 | Not 
 
 type typ = 
-  Int 
-| Bool 
+  Int
+| Bool
 | Void
 | Float
 | Blck
@@ -38,7 +38,7 @@ type block = {
   face_colors : float array;
 }
 *)
-type frame = {
+(*type frame = {
   x       : int;
   y       : int;
   z       : int;
@@ -46,6 +46,7 @@ type frame = {
   (*blocks  : block array array array;*)
   (*joins : DynArray*)
 }
+*)
 
 type bind = typ * string
 
