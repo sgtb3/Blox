@@ -9,7 +9,7 @@
 %token RETURN IF ELSE FOR WHILE INT BOOL VOID
 %token BREAK CONTINUE
 %token BUILD JOIN 
-%token FRAME SET MAP ARRAY
+%token FRAME SET MAP
 %token EOF
 
 %token <string> ID
@@ -67,11 +67,9 @@ typ:
 | BOOL    { Bool   }
 | VOID    { Void   }
 | FLOAT   { Float  }
-/*| BLCK    { Blck   }*/
 | STRING  { String }
 | FRAME   { Frame  }
-/*| ARRAY   { Array  }*/
-| SET     { Set of typ    }
+| SET     { Set    }
 | MAP     { Map    }
 
 typedef_list:
