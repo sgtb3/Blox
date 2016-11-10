@@ -11,6 +11,7 @@
 %token BUILD JOIN 
 %token FRAME SET MAP AT
 %token EOF
+%token LMBRACE RMBRACE
 %token LTN GTN
 %token <string> ID
 %token <string> STRING
@@ -143,7 +144,7 @@ map:
 set:
     SET LPAREN expr_list_set RPAREN {Set(List.rev $3)}
 arr:
-    LBRACE expr_list_set RBRACE {Array (List.rev $2)}
+    LMBRACE expr_list_set RMBRACE {Array (List.rev $2)}
 
 vdecl_list:
     /* nothing */    { []       }
@@ -189,7 +190,7 @@ expr:
   | arr                          { $1                     }
   | expr PLUS    expr            { Binop($1, Add,     $3) }
   | expr MINUS   expr            { Binop($1, Sub,     $3) }
-  | expr TIMES   expr            { Binop($1, Mult,    $3) }
+  | expr TIMES   expr            { Binop($1, Mault,    $3) }
   | expr DIVIDE  expr            { Binop($1, Div,     $3) }
   | expr MOD     expr            { Binop($1, Mod,     $3) }
   | expr EQ      expr            { Binop($1, Equal,   $3) }
