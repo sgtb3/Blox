@@ -38,12 +38,12 @@ Thumbs.db
 
 # OCAML related
 *.annot
-*.cmo
-*.cma
-*.cmi
+#*.cmo
+#*.cma
+#*.cmi
 *.a
 *.o
-*.cmx
+#*.cmx
 *.cmxs
 *.cmxa
 
