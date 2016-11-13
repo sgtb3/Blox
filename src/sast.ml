@@ -30,71 +30,67 @@ let get_expr_type_info epr = match epr with
 	| Assign (_, x)         -> x
 	| Call (_, x)           -> x
 
-type tstmt =
-  TBlock     of tstmt list
-  | TExpr    of texpr
-  | TReturn  of texpr
-  | TIf      of texpr * tstmt list * tstmt list
-  | TFor     of texpr * texpr * texpr * tstmt list
-  | TForeach of string * texpr * tstmt list (*for each*)
-  | TWhile   of texpr * tstmt list
-  | TBreak
-  | TContinue
-
-
+type stmt =
+  Block     of  stmt list
+  | Expr    of  expr
+	| If      of  expr * stmt list * stmt list
+  | Return  of  expr
+  | For     of  expr * expr * expr * stmt list
+  | While   of  expr * stmt list
+  | Break
+  | Continue
 
 (* this is for lambda decl, with type information*)
-type t_lambda_decl = {
-        ltkey     : string; (*for matching*)
-        ltfname   : string; (* random hash *)
-        ltbinds   : (string * typ) list;
-        ltformals : (string * typ) list;
-        ltbody    : tstmt list;
-        ltret     : typ (* the return value*)
+type lambda_decl = {
+        lkey     : string; (*for matching*)
+				ltyp			: typ;
+        lfname   : string; (* random hash *)
+        lformals : (typ * string) list;
+        lbody    : stmt list;
+        lret     : typ (* the return value*)
     }
 
-type t_func_decl = {
-        ttkey    : string; (* for matching*)
-        tfname   : string;
-        tformals : (string * typ) list;
-        tbody    : tstmt list;
-        tret     : typ (*the return value type*)
+type func_decl = {
+        key     : string; (* for matching*)
+				typ			: typ;
+        fname   : string;
+        formals : (typ * string) list;
+        body    : stmt list;
+        ret     : typ (*the return value type*)
     }
 
-
-(* just raw t_fdecl *)
-let new_null_tfdecl() =
+(* just raw fdecl *)
+let new_null_fdecl() =
     {
-        ttkey    = "";
-        tfname   = "";
-        tformals = [];
-        tbody    = [];
-        tret     = Undef;
+        key    = "";
+        fname   = "";
+        formals = [];
+        body    = [];
+        ret     = Undef;
     }
 
 (*raw tfdecl with type*)
-let new_raw_type_tfdecl thistype =
+let new_raw_type_fdecl thistype =
     {
-        ttkey    = "";
-        tfname   = "";
-        tformals = [];
-        tbody    = [];
-        tret     = thistype;
+        key    = "";
+        fname   = "";
+        formals = [];
+        body    = [];
+        ret     = thistype;
     }
 
-let compare_and_update tfdecl thistype =
-    match tfdecl with
-    | {ttkey=a;tfname=b;tformals=c;tbody=d;tret=rtype;}->
+let compare_and_update fdecl thistype =
+    match fdecl with
+    | {key=a;fname=b;formals=c;body=d;ret=rtype;}->
         begin match rtype with
         | Undef ->
-            {ttkey=a;tfname=b;tformals=c;tbody=d;tret=thistype}
-        | x -> if x = thistype then tfdecl
+            {key=a;fname=b;formals=c;body=d;ret=thistype}
+        | x -> if x = thistype then fdecl
                 else failwith ("return with different type")
         end
 
-
-let get_func_result tfdecl = match tfdecl with
-    | {tret=rtype;_} -> rtype
+let get_func_result fdecl = match fdecl with
+    | {ret=rtype;_} -> rtype
 
 let check_bool this_type =
     if this_type = Bool then ()
@@ -103,15 +99,7 @@ let check_bool this_type =
 (*from a stmts list get a return stmt and get the return type*)
 let rec get_rtype stmt_list = match stmt_list with
     | [] -> Void (*no return stmts just return void*)
-    | (TReturn x::y) -> get_expr_type_info x
+    | (Return x::y) -> get_expr_type_info x
     | (x :: y) -> get_rtype y
-
-
-type t_class_decl = {
-        tcname       : string;
-        member_binds : (string * typ) list;
-        t_func_decls : t_func_decl list;
-        (* member functions with overloading records*)
-    }
 
 (* debug code for sast*)
