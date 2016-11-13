@@ -6,7 +6,7 @@ type expr =
   Literal          of int
   | BoolLit        of bool
   | Float          of float
-	| Null 					 of typ
+	| Null           of typ
   | Id             of string * typ(* id token *)
 	| Objid   			 of string * string * typ
   | Set            of expr list * typ
@@ -21,7 +21,7 @@ let get_expr_type_info epr = match epr with
 	| Literal _             -> Int
 	| BoolLit _             -> Bool
 	| Float _               -> Float
-	| Null x								-> x
+  | Null x                -> x
 	| Id (_, x)             -> x
 	| Objid (_, x)          -> x
 	| Set (_, x)            -> x
