@@ -2,35 +2,19 @@
 
 open Ast
 
-type texpr =
-  TLiteral         of int
-  | TBoolLit       of bool
-  | TFloat         of float
-  | TNull          of typ
-  | TId            of string * typ(* id token *)
-  | TSet           of texpr list * typ
-  | TMap           of (texpr * texpr) list * typ
-  | TArray         of texpr list * typ
-  | TString        of string(*represent const string*)
-  | TBinop         of (texpr * op * texpr) * typ
-  | TUnop          of (uop * texpr) * typ
-  | TCall          of (string * texpr list) * typ
-  | TObjCall       of (string * string * texpr list) * typ (*invoke a method   of an object*)
-  | TFunc          of (string list * texpr) * typ (*lambda expr*)
-  | TAssign        of (string * texpr) * typ
-  | TMAssign       of (string * string * texpr) * typ
-  | TListComprehen of (texpr  * string * texpr) * typ (*can iterate a tuple?*)
-  (* below are network specified exprs *)
-  | TExec          of string * typ
-  | TDispatch      of (string * texpr list * texpr * texpr) * typ
-  | TRegister      of (string * string * texpr list) * typ
-  | TChangen       of typ * typ
-  | TChanunop      of string * typ
-  | TChanbinop     of (string * string) * typ
-  | TFly           of (string * texpr list) * typ
-  | TFlyo          of (string * string * texpr list) * typ
-  | TObjGen        of typ * typ
-  | TObjid         of (string * string) * typ
+type expr =
+  Literal          of int
+  | BoolLit        of bool
+  | Float          of float
+  | Id             of string * typ(* id token *)
+	| Objid   			 of string * string * typ
+  | Set            of expr list * typ
+  | Map	           of (expr * expr) list * typ
+  | Array  	       of expr list * typ
+  | Binop          of (expr * op * expr) * typ
+  | Unop        	 of (uop * expr) * typ
+	| Assign         of (string * expr) * typ
+  | Call           of (string * expr list) * typ
 
 let get_expr_type_info tepr = match tepr with
     | TLiteral _            -> Int
