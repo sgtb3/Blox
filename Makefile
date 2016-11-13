@@ -1,6 +1,6 @@
 # phony targets
-.PHONY: all clean scanner parser test asttypes parsertypes 
-	parsercomp scannercomp bloxcomp scannertest parsertest 
+.PHONY: all clean scanner parser ast sast test parsertypes 
+	sast parsercomp scannercomp bloxcomp scannertest parsertest 
 	test menhirtest 
 
 # name of output file
@@ -28,14 +28,15 @@ OCCFLAGS2 = -o
 # source files, generated files, testing, and AMF/output directories
 SRCDIR = src
 GENDIR = gen
+OBJDIR = obj
 TSTDIR = tests
 AMFDIR = amf
 
-VPATH = src:gen
+VPATH = src:gen:obj
 testfiles := $(wildcard $(TSTDIR)/*)
 
 # default makefile target
-all: scanner asttypes parser
+all: scanner ast parser sast
 
 # creates scanner.ml and moves it to gen/
 scanner:
@@ -45,16 +46,19 @@ scanner:
 	@mv $(SRCDIR)/scanner.ml $(GENDIR)/scanner.ml
 	@echo "=====================================================\n"	
 
-# creates ast.cmi and ast.cmp and moves them to gen/
-asttypes:
+# creates ast compiled interface (ast.cmi) and ast compiled object code 
+# (ast.cmo) files and moves them to the appropriate directories
+ast:
 	@echo "\n====================================================="	
-	@echo "Compiling AST types (ast.cmi and ast.cmo) ..."
+	@echo "Compiling AST (ast.cmi and ast.cmo) ..."
 	$(OCC) $(OCCFLAGS1) $(SRCDIR)/ast.ml
 	@mv $(SRCDIR)/ast.cmi $(GENDIR)/ast.cmi
-	@mv $(SRCDIR)/ast.cmo $(GENDIR)/ast.cmo
+	@mv $(SRCDIR)/ast.cmo $(OBJDIR)/ast.cmo
 	@echo "=====================================================\n"
 
-# creates parser.ml and parser.mli and moves them to gen/
+# creates parser source code (parser.ml), parser module interface 
+# (parser.mli), and parser generator verbose output files and moves them 
+# to appropriate directory
 parser: 
 	@echo "\n====================================================="	
 	@echo "Creating parser.ml and parser.mli ..."
@@ -65,13 +69,32 @@ parser:
 	@cat $(GENDIR)/parser.output
 	@echo "=====================================================\n"
 
+# creates the sematically checked AST (sast). scanner, ast, and parser 
+# should already be created making sast
+sast:
+	@echo "\n====================================================="	
+	@echo "Creating SAST ..."
+	$(OCC) -I $(GENDIR) $(OCCFLAGS1) \
+	$(SRCDIR)/sast.ml \
+	$(SRCDIR)/parser.mli \
+	$(SRCDIR)/scanner.ml
+	@echo "\n-----------------------------------------------------"
+	@echo "Compiling the Scanner ..."
+	$(OCC) $(OCCFLAGS1) $(GENDIR)/scanner.ml
+	@mv $(GENDIR)/scanner.cmo $(OBJDIR)/scanner.cmo 
+	@echo "\n-----------------------------------------------------"
+	@echo "Compiling the Parser ..."
+	$(OCC) $(OCCFLAGS1) $(GENDIR)/parser.ml
+	@mv $(GENDIR)/parser.cmo $(OBJDIR)/parser.cmo 
+	@echo "=====================================================\n"
+
 # runs the test script and displays the test log
 test:
 	@echo "\n====================================================="	
 	@echo "Running test script ..."
 	@./$(TESTSH).sh
 	@mv $(TESTSH).log $(GENDIR)/$(TESTSH).log
-	@echo "\n====================================================="
+	@echo "\n-----------------------------------------------------"
 	@echo "Opening $(TESTSH).sh log ..."
 	@cat $(GENDIR)/$(TESTSH).log
 	@echo "=====================================================\n"
@@ -80,40 +103,15 @@ test:
 menhirtest:
 	menhir --interpret --interpret-show-cst $(SRCDIR)/parser.mly
 
-# removes all files in gen/
+# removes all files in gen/ and obj/
 clean:
 	@echo "\n====================================================="	
 	@echo "Cleaning up auxiliary files ..."
 	rm -rf $(GENDIR)/*
+	rm -rf $(OBJDIR)/*
 	@echo "=====================================================\n"
 
-
-
-
-# ======================================================== #
-# Following commands are not completed.
-# Need to see what kind of file extensions the generated
-# files have, then we can move to appropriate directories.
-# ======================================================== #
-
-parsertypes: 
-	@echo "\n====================================================="	
-	@echo "Compiling Parser types ..."
-	$(OCC) $(OCCFLAGS1) $(GENDIR)/parser.mli
-	@echo "=====================================================\n"
-
-scannercomp: 
-	@echo "\n====================================================="	
-	@echo "Compiling the Scanner ..."
-	$(OCC) $(OCCFLAGS1) $(GENDIR)/scanner.ml
-	@echo "=====================================================\n"
-
-parsercomp:
-	@echo "\n====================================================="	
-	@echo "Compiling the Parser ..."
-	$(OCC) $(OCCFLAGS1) $(GENDIR)/parser.ml
-	@echo "=====================================================\n"	
-
+# not yet complete
 bloxcomp: 
 	@echo "\n====================================================="	
 	@echo "Compiling the Blox compiler ..."

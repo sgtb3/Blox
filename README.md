@@ -5,6 +5,7 @@ This repository contains the source code for the Blox programming language.
 
 * __src__  : source files 
 * __out__  : generated files
+* __obj__  : compiled object files
 * __amf__  : generated AMF files
 * __tests__: language tests
 * __res__  : resource files
@@ -15,7 +16,7 @@ This repository contains the source code for the Blox programming language.
 * Running __make__ creates the `scanner.ml` source file, compiles the `ast.ml` 
 file  into the `ast.cmo` bytecode and `ast.cmi` compiled interface, and creates 
 the `parser.ml` source file and `parser.mli` interface. All generated files are 
-placed in `gen/`.
+placed in `gen/` and all compiled object files are places in `obj/`.
 * Running __make test__ runs the `testAll` shell script and displays the 
 contents of the generated `testall.log` file.
 * Running __make menhirtest__ runs the `menhir` interpreter for debugging.
