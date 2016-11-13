@@ -25,7 +25,6 @@ type typ =
 | Bool
 | Void
 | Float
-| Blck
 | String
 | Frame
 | Array of typ
@@ -85,7 +84,6 @@ type func_decl = {
 
 type program = bind list * func_decl list
 
-
 (* Pretty-printing functions *)
 
 let string_of_op = function
@@ -113,7 +111,6 @@ let rec string_of_typ = function
   | Bool       -> "bool"
   | Void       -> "void"
   | Float      -> "float"
-  | Blck       -> "Block"
   | String     -> "String"
   | Frame      -> "Frame"
   | Array x    -> "Array_" ^ (string_of_typ x)
