@@ -16,34 +16,19 @@ type expr =
 	| Assign         of (string * expr) * typ
   | Call           of (string * expr list) * typ
 
-let get_expr_type_info tepr = match tepr with
-    | TLiteral _            -> Int
-    | TBoolLit _            -> Bool
-    | TFloat _              -> Float
-    | TNull x               -> x (*nullpointer now*)
-    | TString _             -> String
-    | TId (_, x)            -> x
-    | TSet (_, x)           -> x
-    | TMap (_, x)           -> x
-    | TArray (_, x)         -> x
-    | TBinop (_, x)         -> x
-    | TUnop (_, x)          -> x
-    | TCall (_, x)          -> x
-    | TObjCall (_, x)       -> x
-    | TFunc (_, x)          -> x
-    | TAssign (_, x)        -> x
-    | TListComprehen (_, x) -> x
-    | TExec (_, x)          -> x
-    | TDispatch (_, x)      -> x
-    | TRegister (_, x)      -> x
-    | TChangen (_, x)       -> x
-    | TChanunop (_, x)      -> x
-    | TChanbinop (_, x)     -> x
-    | TFly (_, x)           -> x
-    | TFlyo (_, x)          -> x
-    | TObjGen (_, x)        -> x
-    | TObjid (_, x)         -> x
-    | TMAssign (_, x)       -> x
+let get_expr_type_info epr = match epr with
+	| Literal _             -> Int
+	| BoolLit _             -> Bool
+	| Float _               -> Float
+	| Id (_, x)             -> x
+	| Objid (_, x)          -> x
+	| Set (_, x)            -> x
+	| Map (_, x)            -> x
+	| Array (_, x)          -> x
+	| Binop (_, x)          -> x
+	| Unop (_, x)           -> x
+	| Assign (_, x)         -> x
+	| Call (_, x)           -> x
 
 type tstmt =
   TBlock     of tstmt list
