@@ -25,6 +25,7 @@ type typ =
 | Bool
 | Void
 | Float
+| Null
 | String
 | Frame
 | Array of typ

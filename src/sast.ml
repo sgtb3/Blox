@@ -43,50 +43,55 @@ type stmt =
   | Continue
 
 (* this is for lambda decl, with type information*)
-type lambda_decl = {
-        lkey     : string; (*for matching*)
-				ltyp			: typ;
-        lfname   : string; (* random hash *)
-        lformals : (typ * string) list;
-        lbody    : stmt list;
-        lret     : typ (* the return value*)
+(*
+	type lambda_decl = 
+	  {
+			lkey     : string; (*for matching*)
+			ltyp		 : typ;
+			lfname   : string; (* random hash *)
+			lformals : (typ * string) list;
+			lbody    : stmt list;
+			lret     : typ (* the return value*)
     }
-
-type func_decl = {
-        key     : string; (* for matching*)
-				typ			: typ;
-        fname   : string;
-        formals : (typ * string) list;
-        body    : stmt list;
-        ret     : typ (*the return value type*)
-    }
+*)
+type func_decl = 
+  {
+		key     : string; (* for matching*)
+		typ			: typ;
+		fname   : string;
+		formals : (typ * string) list;
+		body    : stmt list;
+		ret     : typ (*the return value type*)
+  }
 
 (* just raw fdecl *)
 let new_null_fdecl() =
-    {
-        key    = "";
-        fname   = "";
-        formals = [];
-        body    = [];
-        ret     = Undef;
-    }
+  {
+		key     = "";
+		typ     = Null;
+		fname   = "";
+		formals = [];
+		body    = [];
+		ret     = Null;
+  }
 
-(*raw tfdecl with type*)
+(*raw fdecl with type*)
 let new_raw_type_fdecl thistype =
-    {
-        key    = "";
-        fname   = "";
-        formals = [];
-        body    = [];
-        ret     = thistype;
-    }
+	{
+		key    = "";
+		typ     = thistype;
+		fname   = "";
+		formals = [];
+		body    = [];
+		ret     = thistype;
+	}
 
 let compare_and_update fdecl thistype =
     match fdecl with
-    | {key=a;fname=b;formals=c;body=d;ret=rtype;}->
+    | {key=a;typ=rtype;fname=c;formals=d;body=e;ret=rtype;}->
         begin match rtype with
-        | Undef ->
-            {key=a;fname=b;formals=c;body=d;ret=thistype}
+        | Undef -> (* We don't have Undef in our lang *)
+            {key=a;typ=thistype;fname=c;formals=d;body=e;ret=thistype}
         | x -> if x = thistype then fdecl
                 else failwith ("return with different type")
         end
