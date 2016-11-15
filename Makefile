@@ -1,7 +1,5 @@
 # phony targets
-.PHONY: all clean scanner parser ast sast test parsertypes 
-	sast parsercomp scannercomp bloxcomp scannertest parsertest 
-	test menhirtest 
+.PHONY: all clean scanner parser ast sast test menhirtest bloxcomp
 
 # name of output file
 EXEC = blox_exec.amf
@@ -16,7 +14,7 @@ OBJEXT = .cmo
 # 	-v : verbose output option for ocamlyacc
 LEXGEN = ocamllex
 PARSGEN = ocamlyacc
-PARSGENFLAG = -v
+PARSGENFLAG =
 
 # ocaml compiler and flags
 # 	-c : compile without producing executable files
@@ -24,6 +22,7 @@ PARSGENFLAG = -v
 OCC = ocamlc
 OCCFLAGS1 = -c
 OCCFLAGS2 = -o 
+OCCFLAGS3 = -absname
 
 # source files, generated files, testing, and AMF/output directories
 SRCDIR = src
@@ -36,7 +35,7 @@ VPATH = src:gen:obj
 testfiles := $(wildcard $(TSTDIR)/*)
 
 # default makefile target
-all: scanner ast parser sast
+all: clean scanner ast parser sast
 
 # creates scanner.ml and moves it to gen/
 scanner:
@@ -65,8 +64,8 @@ parser:
 	$(PARSGEN) $(PARSGENFLAG) $(SRCDIR)/parser.mly
 	@mv $(SRCDIR)/parser.ml $(GENDIR)/parser.ml
 	@mv $(SRCDIR)/parser.mli $(GENDIR)/parser.mli
-	@mv $(SRCDIR)/parser.output $(GENDIR)/parser.output
-	@cat $(GENDIR)/parser.output
+	#@mv $(SRCDIR)/parser.output $(GENDIR)/parser.output
+	#@cat $(GENDIR)/parser.output
 	@echo "=====================================================\n"
 
 # creates the sematically checked AST (sast). scanner, ast, and parser 
@@ -74,17 +73,18 @@ parser:
 sast:
 	@echo "\n====================================================="	
 	@echo "Creating SAST ..."
-	$(OCC) -I $(GENDIR) $(OCCFLAGS1) \
-	$(SRCDIR)/sast.ml \
-	$(SRCDIR)/parser.mli \
-	$(SRCDIR)/scanner.ml
+	$(OCC) -I $(GENDIR) $(OCCFLAGS1) $(SRCDIR)/sast.ml
+	$(OCC) -I $(GENDIR) $(OCCFLAGS1) $(GENDIR)/parser.mli
+	$(OCC) -I $(GENDIR) $(OCCFLAGS1) $(GENDIR)/scanner.ml
+	@mv $(SRCDIR)/sast.cmi $(GENDIR)/sast.cmi
+	@mv $(SRCDIR)/sast.cmo $(OBJDIR)/sast.cmo
 	@echo "\n-----------------------------------------------------"
 	@echo "Compiling the Scanner ..."
-	$(OCC) $(OCCFLAGS1) $(GENDIR)/scanner.ml
+	$(OCC) -I $(GENDIR) $(OCCFLAGS1) $(GENDIR)/scanner.ml
 	@mv $(GENDIR)/scanner.cmo $(OBJDIR)/scanner.cmo 
 	@echo "\n-----------------------------------------------------"
 	@echo "Compiling the Parser ..."
-	$(OCC) $(OCCFLAGS1) $(GENDIR)/parser.ml
+	$(OCC) -I $(GENDIR) $(OCCFLAGS1) $(GENDIR)/parser.ml
 	@mv $(GENDIR)/parser.cmo $(OBJDIR)/parser.cmo 
 	@echo "=====================================================\n"
 
@@ -107,8 +107,8 @@ menhirtest:
 clean:
 	@echo "\n====================================================="	
 	@echo "Cleaning up auxiliary files ..."
-	rm -rf $(GENDIR)/*
-	rm -rf $(OBJDIR)/*
+	@rm -rf $(GENDIR)/*
+	@rm -rf $(OBJDIR)/*
 	@echo "=====================================================\n"
 
 # not yet complete
