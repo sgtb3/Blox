@@ -8,7 +8,7 @@ type expr =
   | Float          of float
 	| Null           of typ
   | Id             of string * typ(* id token *)
-	| Objid   			 of string * string * typ
+	| Objid   			 of (string * string) * typ
   | Set            of expr list * typ
   | Map	           of (expr * expr) list * typ
   | Array  	       of expr list * typ
@@ -16,6 +16,7 @@ type expr =
   | Unop        	 of (uop * expr) * typ
 	| Assign         of (string * expr) * typ
   | Call           of (string * expr list) * typ
+	| ObjGen         of typ * typ
 
 let get_expr_type_info epr = match epr with
 	| Literal _             -> Int
@@ -31,6 +32,7 @@ let get_expr_type_info epr = match epr with
 	| Unop (_, x)           -> x
 	| Assign (_, x)         -> x
 	| Call (_, x)           -> x
+	| ObjGen (_, x)         -> x
 
 type stmt =
   Block     of  stmt list
@@ -88,9 +90,9 @@ let new_raw_type_fdecl thistype =
 
 let compare_and_update fdecl thistype =
     match fdecl with
-    | {key=a;typ=rtype;fname=c;formals=d;body=e;ret=rtype;}->
+    | {key=a;typ=b;fname=c;formals=d;body=e;ret=rtype;}->
         begin match rtype with
-        | Undef -> (* We don't have Undef in our lang *)
+        | Null -> (* We don't have Undef in our lang *)
             {key=a;typ=thistype;fname=c;formals=d;body=e;ret=thistype}
         | x -> if x = thistype then fdecl
                 else failwith ("return with different type")

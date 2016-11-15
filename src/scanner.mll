@@ -9,11 +9,14 @@ rule token = parse
 | '='        { ASSIGN   } 
 | ')'        { RPAREN   } 
 | "=="       { EQ       } 
-| '{'        { LBRACE   } 
 | "!="       { NEQ      } 
+| '{'        { LBRACE   } 
 | '}'        { RBRACE   } 
+| '['        { LMBRACE  } (*add [] for array init*)
+| ']'        { RMBRACE  } 
 | '<'        { LT       } 
 | ';'        { SEMI     } 
+| "@"        { AT       }
 | "<="       { LEQ      } 
 | ','        { COMMA    } 
 | ">"        { GT       } 
@@ -41,7 +44,7 @@ rule token = parse
 | "return"   { RETURN   } 
 | "int"      { INT      }
 | "bool"     { BOOL     } 
-| "String"   { STRING   }
+(* | "String"   { STRING   } *)
 | "true"     { TRUE     } 
 | "false"    { FALSE    } 
 | "void"     { VOID     }

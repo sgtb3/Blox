@@ -1,6 +1,7 @@
 (* Semantic Analyzer for the Blox compiler *)
 
 open Ast
+open Sast
 
 module StringMap = Map.Make(String)
 
@@ -90,9 +91,11 @@ let check (globals, functions) =
 
     (* Return the type of an expression or throw an exception *)
     let rec expr = function
-	Literal _ -> Int
+				Literal _ -> Int
       | BoolLit _ -> Bool
-      | Id s -> type_of_identifier s
+			| Float   _ -> Float
+      | Id s 			-> type_of_identifier s
+			| Objid s*s	-> type_of_identifier s
       | Binop(e1, op, e2) as e -> let t1 = expr e1 and t2 = expr e2 in
 	(match op with
           Add | Sub | Mult | Div when t1 = Int && t2 = Int -> Int
@@ -156,3 +159,97 @@ let check (globals, functions) =
    
   in
   List.iter check_function functions
+
+(*get the return type of array, fail if not ok*)
+let get_arr_call_ret (thistype:typ) fname expr_types = match thistype with
+    | Array x ->
+        let expr_len = List.length expr_types
+        in
+        begin match fname with
+        | "push_back" ->
+            if expr_len = 1 then
+                if [x] = expr_types then Void
+                else failwith ("type not consistent: get_arr_call_ret")
+            else
+                failwith ("push_back not 1 element: get_arr_call_ret")
+        | "push_vec" ->
+            if expr_len = 1 then
+                let y = List.hd expr_types
+                in
+                match y with
+                | Array z -> if x = z then Void
+                    else failwith ("type not consistent: get_arr_call_ret")
+                | _ -> failwith ("type not consistent: get_arr_call_ret")
+            else
+                failwith ("push_vec not 1 element: get_arr_call_ret")
+        | "get_at" ->
+            if expr_len = 1 then
+                if [Int] = expr_types then x
+                else failwith ("type not consistent: get_arr_call_ret")
+            else
+                failwith ("get_at not 1 element: get_arr_call_ret")
+        | "set_at" ->
+            if expr_len = 2 then
+                if [Int;x] = expr_types then Void
+                else failwith ("type not consistent: get_arr_call_ret")
+            else
+                failwith ("get_at not 1 element: get_arr_call_ret")
+        | "size" ->
+            if expr_len = 0 then
+                Int
+            else
+                failwith("size should 0 element: get_arr_call_ret")
+        | "sync" ->
+            if expr_len = 0 then
+                Void
+            else
+                failwith("sync should 0 element: get_arr_call_ret")
+        | _ ->
+            failwith ("not support build in array function")
+        end
+    | _ -> failwith ("not array error")
+
+(*get the return type of map, fail if not ok*)
+let get_map_call_ret (thistype:typ) fname expr_types = match thistype with
+    | Map (x,y) ->
+        let expr_len = List.length expr_types
+        in
+        begin match fname with
+        | "insert" ->
+            if expr_len = 2 then
+                if [x;y] = expr_types then Void
+                else failwith ("type not consistent: get_map_call_ret")
+            else
+                failwith ("insert not 2 element: get_map_call_ret")
+        | "get" ->
+            if expr_len = 1 then
+                if [x] = expr_types then y
+                else failwith ("type not consistent: get_map_call_ret")
+            else
+                failwith ("get_at not 1 element: get_map_call_ret")
+        | "size" ->
+            if expr_len = 0 then
+                Int
+            else
+                failwith("size should 0 element: get_map_call_ret")
+        | "delete" ->
+            if expr_len = 1 then
+                if [x] = expr_types then Void
+                else failwith ("type not consistent: get_map_call_ret")
+            else
+                failwith("delete should 1 element: get_map_call_ret")
+        | "exist" ->
+            if expr_len = 1 then
+                if [x] = expr_types then Bool
+                else failwith  ("type not consistent: get_map_call_ret")
+            else
+                failwith("exist should be 1 element: get_map_call_ret")
+        | "sync" ->
+            if expr_len = 0 then
+                Void
+            else
+                failwith("sync should 0 element: get_map_call_ret")
+        | _ ->
+            failwith ("not support build in map function")
+        end
+    | _ -> failwith ("not array error")

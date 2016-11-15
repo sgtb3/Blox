@@ -28,9 +28,11 @@ type typ =
 | Null
 | String
 | Frame
+| ObjGen of typ
 | Array of typ
 | Set   of typ
 | Map   of typ * typ
+| Default of string
 
 (*
 type block = {
@@ -54,12 +56,14 @@ type expr =
   Literal of int
 | BoolLit of bool
 | Float   of float
-| Null    of typ 
+| Null of string (*nullpointer belong to Default s*)
 | Id      of string
 | Objid   of string * string
+| ObjGen of typ
 | Set     of expr list
 | Map     of (expr * expr) list
 | Array   of expr list
+| String of string (*represent const string*)
 | Binop   of expr * op * expr
 | Unop    of uop * expr
 | Assign  of string * expr
@@ -113,9 +117,11 @@ let rec string_of_typ = function
   | Bool       -> "bool"
   | Void       -> "void"
   | Float      -> "float"
+	| Null       -> "Null"
   | String     -> "String"
   | Frame      -> "Frame"
+	| Default x  -> x
   | Array x    -> "Array_" ^ (string_of_typ x)
   | Set x      -> "Set_"   ^ (string_of_typ x)
   | Map (x, y) -> "Map_"   ^ (string_of_typ x) ^ "_" ^ (string_of_typ y)
-  (*| _          -> raise (Failure ("ast.ml: string_of_typ: unsupported type"))*)
+  | _          -> raise (Failure ("ast.ml: string_of_typ: unsupported type"))

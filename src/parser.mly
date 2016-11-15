@@ -12,6 +12,7 @@
 %token FRAME SET MAP AT
 %token EOF
 %token LMBRACE RMBRACE
+%token NULL DEFAULT
 %token LTN GTN
 %token <string> ID
 %token <string> STRING
@@ -70,8 +71,8 @@ typ:
 | FLOAT   { Float  }
 | STRING  { String }
 | FRAME   { Frame  }
-| SET     { Set    }
-| MAP     { Map    }
+/* | SET     { Set    } */
+/* | MAP     { Map    } */
 
 typedef_list:
     typedef {[$1]}
@@ -90,8 +91,8 @@ typedef:
         | "Void" -> Void
         | "String" -> String
         | "Float" -> Float
-        | "Map" | "Set" -> failwith ("set map init must with parameters")
-        | x -> Class x
+        | "Map" | "Set" -> failwith ("set map init must with parameters") 
+				| x -> Default x 
     }
     | ID LTN typedef_list_opt GTN {
         match $1 with
@@ -190,7 +191,7 @@ expr:
   | arr                          { $1                     }
   | expr PLUS    expr            { Binop($1, Add,     $3) }
   | expr MINUS   expr            { Binop($1, Sub,     $3) }
-  | expr TIMES   expr            { Binop($1, Mault,    $3) }
+  | expr TIMES   expr            { Binop($1, Mult,    $3) }
   | expr DIVIDE  expr            { Binop($1, Div,     $3) }
   | expr MOD     expr            { Binop($1, Mod,     $3) }
   | expr EQ      expr            { Binop($1, Equal,   $3) }
@@ -199,7 +200,7 @@ expr:
   | expr LEQ     expr            { Binop($1, Leq,     $3) }
   | expr GT      expr            { Binop($1, Greater, $3) }
   | expr GEQ     expr            { Binop($1, Geq,     $3) } 
-  | ID FRAMEEQ ID                { Binop($1, FrameEq, $3) } 
+  | expr FRAMEEQ expr                { Binop($1, FrameEq, $3) } 
   | expr AND     expr            { Binop($1, And,     $3) }
   | expr OR      expr            { Binop($1, Or,      $3) }
   | MINUS expr %prec NEG         { Unop(Neg, $2)          }
@@ -207,5 +208,5 @@ expr:
   | NOT expr                     { Unop(Not, $2)          }
   | ID ASSIGN expr               { Assign($1, $3)         }
   | ID LPAREN actuals_opt RPAREN { Call($1, $3)           }
-  | AT typedef 									 { ObjGen($2)							} /*class generation syntax*/
+  | AT typedef 									 { ObjGen($2)							} 
   | LPAREN expr RPAREN           { $2                     }
