@@ -27,7 +27,6 @@ rule token = parse
 | '*'        { TIMES    }
 | "||"       { OR       } 
 | '/'        { DIVIDE   }
-| ':'        { COLON    }
 | ".="       { FRAMEEQ  }
 | '!'        { NOT      }
 | '.'        { DOT      }
