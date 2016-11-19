@@ -123,8 +123,6 @@ actuals_list:
     expr                    { [$1]     }
   | actuals_list COMMA expr { $3 :: $1 }
 
-map:
-    MAP LPAREN expr_pair_list RPAREN {Map(List.rev $3)}
 set:
     SET LPAREN expr_list_set RPAREN {Set(List.rev $3)}
 arr:
