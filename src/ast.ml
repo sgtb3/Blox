@@ -105,7 +105,6 @@ let string_of_op = function
   | Geq     -> ">="
   | And     -> "&&"
   | Or      -> "||"
-  | Mod     -> "%"
 
 let string_of_uop = function
     Neg -> "-"

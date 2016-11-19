@@ -41,17 +41,6 @@ decls:
  | decls vdecl   { ($2 :: fst $1), snd $1 }
  | decls fdecl   { fst $1, ($2 :: snd $1) }
 
-fdecl:
-  typ ID LPAREN formals_opt RPAREN LBRACE vdecl_list stmt_list RBRACE
-    {
-      { typ     = $1;
-        fname   = $2;
-        formals = $4;
-        locals  = List.rev $7;
-        body    = List.rev $8
-      }
-    }
-
 formals_opt:
     /* nothing */ { []          }
   | formal_list   { List.rev $1 }
@@ -60,10 +49,10 @@ formal_list:
     typ ID                   { [($1, $2)]     }
   | formal_list COMMA typ ID { ($3, $4) :: $1 }
 
-typ: 
-  INT     { Int    }
-| BOOL    { Bool   }
-| FRAME   { Frame  }
+typ:
+   INT  { Int   }
+  |BOOL { Bool  }
+  |FRAME{ Frame }
 
 typedef_list:
     typedef {[$1]}
@@ -81,8 +70,7 @@ typedef:
         | "Bool" -> Bool
         | "Void" -> Void
         | "String" -> String
-        | "Float" -> Float
-        | "Map" | "Set" -> failwith ("set map init must with parameters") 
+        | Set" -> failwith ("set map init must with parameters") 
 				| x -> Default x 
     }
     | ID LTN typedef_list_opt GTN {
@@ -91,11 +79,6 @@ typedef:
                 match $3 with
                 |[x] -> Set x
                 | _ -> failwith ("set just with one parameter")
-                end
-        | "Map" -> begin
-                match $3 with
-                | [x;y] -> Map (x,y)
-                | _ -> failwith ("map just two parameter")
                 end
         | "Array" -> begin
                match $3 with
