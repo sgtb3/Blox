@@ -1,5 +1,6 @@
 # phony targets
-.PHONY: all clean scanner parser ast sast test menhirtest bloxcomp scancomp parsercomp
+.PHONY: all clean scanner parser ast sast test menhirtest 
+		bloxcomp parsercomp scancomp 
 
 # name of output file
 EXEC = blox_exec.amf
@@ -37,16 +38,15 @@ testfiles := $(wildcard $(TSTDIR)/*)
 # default makefile target
 all: clean scanner ast parser scancomp parsercomp
 
-# creates scanner.ml and moves it to gen/
+# create the Scanner
 scanner:
 	@echo "\n====================================================="	
-	@echo "Creating scanner.ml ..."
+	@echo "Using ocamllex to generate the Scanner ..."
 	$(LEXGEN) $(SRCDIR)/scanner.mll
 	@mv $(SRCDIR)/scanner.ml $(GENDIR)/scanner.ml
 	@echo "=====================================================\n"	
 
-# creates ast compiled interface (ast.cmi) and ast compiled object code 
-# (ast.cmo) files and moves them to the appropriate directories
+# compile the Abstract Syntax Tree 
 ast:
 	@echo "\n====================================================="	
 	@echo "Compiling AST (ast.cmi and ast.cmo) ..."
@@ -55,19 +55,18 @@ ast:
 	@mv $(SRCDIR)/ast.cmo $(OBJDIR)/ast.cmo
 	@echo "=====================================================\n"
 
-# creates parser source code (parser.ml), parser module interface 
-# (parser.mli), and parser generator verbose output files and moves them 
-# to appropriate directory
+# create the Parser
 parser: 
 	@echo "\n====================================================="	
-	@echo "Creating parser.ml and parser.mli ..."
+	@echo "Using ocamlyacc to generate the Parser ..."
 	$(PARSGEN) $(PARSGENFLAG) $(SRCDIR)/parser.mly
 	@mv $(SRCDIR)/parser.ml $(GENDIR)/parser.ml
 	@mv $(SRCDIR)/parser.mli $(GENDIR)/parser.mli
-	#@mv $(SRCDIR)/parser.output $(GENDIR)/parser.output
-	#@cat $(GENDIR)/parser.output
+	@mv $(SRCDIR)/parser.output $(GENDIR)/parser.output
+	@cat $(GENDIR)/parser.output
 	@echo "=====================================================\n"
 
+# compile the Scanner
 scancomp:
 	@echo "\n====================================================="	
 	@echo "Compiling the Scanner ..."
@@ -75,6 +74,7 @@ scancomp:
 	@mv $(GENDIR)/scanner.cmo $(OBJDIR)/scanner.cmo 
 	@echo "=====================================================\n"
 
+# compile the Parser
 parsercomp:
 	@echo "\n====================================================="	
 	@echo "Compiling the Parser ..."
@@ -82,7 +82,7 @@ parsercomp:
 	@mv $(GENDIR)/parser.cmo $(OBJDIR)/parser.cmo 
 	@echo "=====================================================\n"
 
-# runs the test script and displays the test log
+# run the test script and display the test log
 test:
 	@echo "\n====================================================="	
 	@echo "Running test script ..."
@@ -93,11 +93,11 @@ test:
 	@cat $(GENDIR)/$(TESTSH).log
 	@echo "=====================================================\n"
 
-# runs the menhir's interpreter as an alternative debugging tool
+# run menhir's interpreter as an alternative debugging tool
 menhirtest:
 	menhir --interpret --interpret-show-cst $(SRCDIR)/parser.mly
 
-# removes all files in gen/ and obj/
+# remove all files in gen/ and obj/
 clean:
 	@echo "\n====================================================="	
 	@echo "Cleaning up auxiliary files ..."

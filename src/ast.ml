@@ -1,83 +1,80 @@
 (* ocamlyacc Abstract Syntax Tree for Blox *)
 
 type op = 
-  Add 
-| Sub 
-| Mult 
-| Div 
-| Equal 
-| Neq 
-| Less 
-| Leq 
-| Greater 
-| Geq 
-| FrameEq
-| And 
-| Or
+    Add 
+  | Sub 
+  | Mult 
+  | Div 
+  | Equal 
+  | Neq 
+  | Less 
+  | Leq 
+  | Greater 
+  | Geq 
+  | FrameEq
+  | And 
+  | Or
 
 type uop = 
-  Neg 
-| Not 
+    Neg 
+  | Not 
 
 type typ = 
-  Int
-| Bool
-| Void
-| Float
-| Null
-| String
-| Frame
-| ObjGen of typ
-| Array of typ
-| Set   of typ
-| Map   of typ * typ
-| Default of string
+    Int
+  | Bool
+  | Void
+  | Float
+  | Null
+  | String
+  | Frame
+  | ObjGen  of typ
+  | Array   of typ
+  | Set     of typ
+  | Map     of typ * typ
+  | Default of string
 
-(*
-type block = {
-  open_faces  : bool  array;
-  face_colors : float array;
+type blck = {
+  open_faces  : bool array;
 }
-*)
-(*type frame = {
+
+type frame = {
   x       : int;
   y       : int;
   z       : int;
   name    : string;
-  (*blocks  : block array array array;*)
+  blocks  : blck array array array;
   (*joins : DynArray*)
 }
-*)
 
 type bind = typ * string
 
 type expr = 
-  Literal of int
-| BoolLit of bool
-| Float   of float
-| Null    of string (*nullpointer belong to Default s*)
-| Id      of string
-| Objid   of string * string
-| ObjGen  of typ
-| Set     of expr list
-| Map     of (expr * expr) list
-| Array   of expr list
-| String  of string (*represent const string*)
-| Binop   of expr * op * expr
-| Unop    of uop * expr
-| Assign  of string * expr
-| Call    of string * expr list
-| Noexpr
+    Literal of int
+  | BoolLit of bool
+  | Float   of float
+  | Null    of string (*nullpointer belong to Default s*)
+  | Id      of string
+  | Objid   of string * string
+  | ObjGen  of typ
+  | Set     of expr list
+  | Map     of (expr * expr) list
+  | Array   of expr list
+  | String  of string (*represent const string*)
+  | Binop   of expr   * op * expr
+  | Unop    of uop    * expr
+  | Assign  of string * expr
+  | Call    of string * expr list
+  | Noexpr
 
 type stmt = 
-  Block  of stmt list
-| Expr   of expr
-| If     of expr * stmt * stmt
-| For    of expr * expr * expr * stmt
-| While  of expr * stmt
-| Return of expr
-| Break
-| Continue
+    Block  of stmt list
+  | Expr   of expr
+  | If     of expr * stmt * stmt
+  | For    of expr * expr * expr * stmt
+  | While  of expr * stmt
+  | Return of expr
+  | Break
+  | Continue
 
 type func_decl = { 
   typ     : typ;

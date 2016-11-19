@@ -6,7 +6,8 @@ public class Frame {
     int y;
     int z;
     String name;
-    ArrayList<ArrayList<ArrayList<Block>>> blocks;
+    Block[][][] blocks;
+    //ArrayList<ArrayList<ArrayList<Block>>> blocks;
     ArrayList<Object[]> joins;
 
     Frame(String name, int x, int y, int z) {

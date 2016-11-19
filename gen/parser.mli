@@ -4,6 +4,8 @@ type token =
   | RPAREN
   | LBRACE
   | RBRACE
+  | LBRACK
+  | RBRACK
   | COMMA
   | PLUS
   | MINUS
@@ -11,7 +13,6 @@ type token =
   | DIVIDE
   | ASSIGN
   | NOT
-  | MOD
   | FRAMEEQ
   | EQ
   | NEQ
@@ -24,24 +25,19 @@ type token =
   | AND
   | OR
   | DOT
-  | COLON
-  | RETURN
   | IF
   | ELSE
   | FOR
-  | WHILE
   | INT
   | BOOL
   | VOID
-  | BREAK
-  | CONTINUE
   | BUILD
   | JOIN
   | FRAME
   | SET
-  | MAP
-  | AT
   | EOF
+  | LTN
+  | GTN
   | ID of (string)
   | STRING of (string)
   | FLOAT of (float)
