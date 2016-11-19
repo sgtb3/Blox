@@ -82,7 +82,7 @@ typedef:
         | "Void" -> Void
         | "String" -> String
         | "Float" -> Float
-        | "Map" | "Set" -> failwith ("set map init must with parameters") 
+        | "Set" -> failwith ("set map init must with parameters") 
 				| x -> Default x 
     }
     | ID LTN typedef_list_opt GTN {
@@ -147,8 +147,6 @@ stmt:
   expr SEMI                                 { Expr $1               }
   | RETURN SEMI                             { Return Noexpr         }
   | RETURN expr SEMI                        { Return $2             }
-  | BREAK                                   { Break                 }
-  | CONTINUE                                { Continue              }
   | LBRACE stmt_list RBRACE                 { Block(List.rev $2)    }
   | IF LPAREN expr RPAREN stmt %prec NOELSE { If($3, $5, Block([])) }
   | IF LPAREN expr RPAREN stmt ELSE stmt    { If($3, $5, $7)        }
@@ -181,7 +179,6 @@ expr:
   | expr AND     expr            { Binop($1, And,     $3) }
   | expr OR      expr            { Binop($1, Or,      $3) }
   | MINUS expr %prec NEG         { Unop(Neg, $2)          }
-  | ID DOT ID                    { Objid($1, $3)          }
   | NOT expr                     { Unop(Not, $2)          }
   | ID ASSIGN expr               { Assign($1, $3)         }
   | ID LPAREN actuals_opt RPAREN { Call($1, $3)           }
