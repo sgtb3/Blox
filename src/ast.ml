@@ -37,14 +37,30 @@ type blck = {
   open_faces  : bool array;
 }
 
+type join = {
+  fr1_name : string;
+  fr1_x    : int;
+  fr1_y    : int;
+  fr1_z    : int;
+  fr1_face : string;
+  
+  fr2_name : string;
+  fr2_x    : int;
+  fr2_y    : int;
+  fr2_z    : int;
+  fr2_face : string;
+}
+
+
 type frame = {
   x       : int;
   y       : int;
   z       : int;
   name    : string;
   blocks  : blck array array array;
-  (*joins : DynArray*)
+  joins   : join array;
 }
+
 
 type bind = typ * string
 

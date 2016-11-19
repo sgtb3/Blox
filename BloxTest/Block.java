@@ -2,12 +2,10 @@ public class Block {
 
     boolean[] open_faces;
     private float[] face_colors;
-    private Frame parent;
 
     public Block(Frame parent) {
-        open_faces = new boolean[] { true, true, true, true, true, true }; // E, W, N, S, F, B
-        face_colors = new float[]  { 0, 0, 0, 0, 0, 0 };
-        this.parent = parent;
+                                   //  E     W     N     S     F     B
+        open_faces = new boolean[] { true, true, true, true, true, true }; 
     }
 
     @Override
