@@ -7,16 +7,14 @@
 %token FRAMEEQ EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
 %token DOT COLON
 %token IF ELSE FOR INT BOOL VOID
-%token BREAK CONTINUE
 %token BUILD JOIN 
-%token FRAME SET AT
+%token FRAME SET
 %token EOF
-
 %token LTN GTN
 %token <string> ID
 %token <string> STRING
-%token <float> FLOAT
-%token <int> LITERAL
+%token <float>  FLOAT
+%token <int>    LITERAL
 
 %nonassoc NOELSE
 %nonassoc ELSE
@@ -65,9 +63,6 @@ formal_list:
 typ: 
   INT     { Int    }
 | BOOL    { Bool   }
-| VOID    { Void   }
-| FLOAT   { Float  }
-| STRING  { String }
 | FRAME   { Frame  }
 
 typedef_list:
@@ -109,14 +104,6 @@ typedef:
                end
         | _ -> failwith ("not suppport template except set map")
     }
-
-/* for map */
-expr_pair_list:
-    /*nothing*/ {[]}
-    | expr_pair_true_list {$1}
-expr_pair_true_list:
-    | expr COLON expr {[($1, $3)]}
-    | expr_pair_true_list COMMA expr COLON expr {($3,$5)::$1}
 
 /* for set */
 expr_list_set:
@@ -177,19 +164,15 @@ expr_opt:
 
 expr:
     LITERAL                      { Literal($1)            }
-  | FLOAT                        { Float($1)              }/* check this later*/
-  | STRING                       { String($1)             }
   | ID                           { Id($1)                 }
   | TRUE                         { BoolLit(true)          }
   | FALSE                        { BoolLit(false)         }
   | set                          { $1                     }
-  | map                          { $1                     }
   | arr                          { $1                     }
   | expr PLUS    expr            { Binop($1, Add,     $3) }
   | expr MINUS   expr            { Binop($1, Sub,     $3) }
   | expr TIMES   expr            { Binop($1, Mult,    $3) }
   | expr DIVIDE  expr            { Binop($1, Div,     $3) }
-  | expr MOD     expr            { Binop($1, Mod,     $3) }
   | expr EQ      expr            { Binop($1, Equal,   $3) }
   | expr NEQ     expr            { Binop($1, Neq,     $3) }
   | expr LT      expr            { Binop($1, Less,    $3) }
@@ -204,5 +187,4 @@ expr:
   | NOT expr                     { Unop(Not, $2)          }
   | ID ASSIGN expr               { Assign($1, $3)         }
   | ID LPAREN actuals_opt RPAREN { Call($1, $3)           }
-  | AT typedef 									 { ObjGen($2)							} 
   | LPAREN expr RPAREN           { $2                     }
