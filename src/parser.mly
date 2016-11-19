@@ -2,7 +2,7 @@
 
 %{ open Ast %}
 
-%token SEMI LPAREN RPAREN LBRACE RBRACE COMMA
+%token SEMI LPAREN RPAREN LBRACE RBRACE LBRACK RBRACK COMMA
 %token PLUS MINUS TIMES DIVIDE ASSIGN NOT
 %token FRAMEEQ EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
 %token DOT COLON
@@ -11,7 +11,6 @@
 %token BUILD JOIN 
 %token FRAME SET AT
 %token EOF
-%token LMBRACE RMBRACE
 
 %token LTN GTN
 %token <string> ID
@@ -27,7 +26,6 @@
 %left AND
 %left EQ NEQ FRAMEEQ
 %left LT GT LEQ GEQ
-%left MOD
 %left PLUS MINUS
 %left TIMES DIVIDE
 %right NOT NEG
@@ -143,7 +141,7 @@ map:
 set:
     SET LPAREN expr_list_set RPAREN {Set(List.rev $3)}
 arr:
-    LMBRACE expr_list_set RMBRACE {Array (List.rev $2)}
+    LBRACK expr_list_set RBRACK {Array (List.rev $2)}
 
 vdecl_list:
     /* nothing */    { []       }

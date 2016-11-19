@@ -12,8 +12,8 @@ rule token = parse
 | "!="       { NEQ      } 
 | '{'        { LBRACE   } 
 | '}'        { RBRACE   } 
-| '['        { LMBRACE  } (*add [] for array init*)
-| ']'        { RMBRACE  } 
+| '['        { LBRACK  } (*add [] for array init*)
+| ']'        { RBRACK  } 
 | '<'        { LT       } 
 | ';'        { SEMI     } 
 | "@"        { AT       }
@@ -28,7 +28,6 @@ rule token = parse
 | "||"       { OR       } 
 | '/'        { DIVIDE   }
 | ':'        { COLON    }
-| '%'        { MOD      }
 | ".="       { FRAMEEQ  }
 | '!'        { NOT      }
 | '.'        { DOT      }
