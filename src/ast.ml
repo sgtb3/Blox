@@ -14,7 +14,6 @@ type op =
 | FrameEq
 | And 
 | Or
-| Mod
 
 type uop = 
   Neg 

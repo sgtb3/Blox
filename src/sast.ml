@@ -3,44 +3,44 @@
 open Ast
 
 type expr =
-  Literal          of int
-  | BoolLit        of bool
-  | Float          of float
-	| Null           of typ
-  | Id             of string * typ(* id token *)
-	| Objid   			 of (string * string) * typ
-  | Set            of expr list * typ
-  | Map	           of (expr * expr) list * typ
-  | Array  	       of expr list * typ
-  | Binop          of (expr * op * expr) * typ
-  | Unop        	 of (uop * expr) * typ
-	| Assign         of (string * expr) * typ
-  | Call           of (string * expr list) * typ
-	| ObjGen         of typ * typ
+    Literal of  int
+  | BoolLit of  bool
+  | Float   of  float
+  | Null    of  typ
+  | Id      of  string * typ (* id token *)
+  | Objid   of (string * string) * typ
+  | Set     of  expr list * typ
+  | Map	    of (expr * expr) list * typ
+  | Array   of  expr list * typ
+  | Binop   of (expr * op * expr) * typ
+  | Unop    of (uop * expr) * typ
+  | Assign  of (string * expr) * typ
+  | Call    of (string * expr list) * typ
+  | ObjGen  of typ * typ
 
 let get_expr_type_info epr = match epr with
-	| Literal _             -> Int
-	| BoolLit _             -> Bool
-	| Float _               -> Float
-  | Null x                -> x
-	| Id (_, x)             -> x
-	| Objid (_, x)          -> x
-	| Set (_, x)            -> x
-	| Map (_, x)            -> x
-	| Array (_, x)          -> x
-	| Binop (_, x)          -> x
-	| Unop (_, x)           -> x
-	| Assign (_, x)         -> x
-	| Call (_, x)           -> x
-	| ObjGen (_, x)         -> x
+	  Literal _     -> Int
+	| BoolLit _     -> Bool
+	| Float   _     -> Float
+	| Null    x     -> x
+	| Id     (_, x) -> x
+	| Objid  (_, x) -> x
+	| Set    (_, x) -> x
+	| Map    (_, x) -> x
+	| Array  (_, x) -> x
+	| Binop  (_, x) -> x
+	| Unop   (_, x) -> x
+	| Assign (_, x) -> x
+	| Call   (_, x) -> x
+	| ObjGen (_, x) -> x
 
 type stmt =
-  Block     of  stmt list
-  | Expr    of  expr
-	| If      of  expr * stmt list * stmt list
-  | Return  of  expr
-  | For     of  expr * expr * expr * stmt list
-  | While   of  expr * stmt list
+    Block  of stmt list
+  | Expr   of expr
+	| If     of expr * stmt list   * stmt list
+  | For    of expr * expr * expr * stmt list
+  | While  of expr * stmt list
+  | Return of expr
   | Break
   | Continue
 
@@ -48,22 +48,22 @@ type stmt =
 (*
 	type lambda_decl = 
 	  {
-			lkey     : string; (*for matching*)
+			lkey     : string; (* for matching *)
 			ltyp		 : typ;
 			lfname   : string; (* random hash *)
 			lformals : (typ * string) list;
 			lbody    : stmt list;
-			lret     : typ (* the return value*)
+			lret     : typ     (* the return value *)
     }
 *)
 type func_decl = 
   {
-		key     : string; (* for matching*)
+		key     : string; (* for matching *)
 		typ			: typ;
 		fname   : string;
 		formals : (typ * string) list;
 		body    : stmt list;
-		ret     : typ (*the return value type*)
+		ret     : typ     (* the return value type *)
   }
 
 (* just raw fdecl *)
@@ -80,7 +80,7 @@ let new_null_fdecl() =
 (*raw fdecl with type*)
 let new_raw_type_fdecl thistype =
 	{
-		key    = "";
+		key     = "";
 		typ     = thistype;
 		fname   = "";
 		formals = [];
@@ -102,13 +102,15 @@ let get_func_result fdecl = match fdecl with
     | {ret=rtype;_} -> rtype
 
 let check_bool this_type =
-    if this_type = Bool then ()
-    else failwith ("check bool error")
+    if this_type = Bool 
+    	then ()
+    else 
+    	failwith ("check bool error")
 
-(*from a stmts list get a return stmt and get the return type*)
+(* from a stmts list get a return stmt and get the return type *)
 let rec get_rtype stmt_list = match stmt_list with
-    | [] -> Void (*no return stmts just return void*)
+    | []            -> Void 							(* no return stmts just return void *)
     | (Return x::y) -> get_expr_type_info x
-    | (x :: y) -> get_rtype y
+    | (x :: y)      -> get_rtype y
 
-(* debug code for sast*)
+(* debug code for sast *)

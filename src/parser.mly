@@ -3,16 +3,16 @@
 %{ open Ast %}
 
 %token SEMI LPAREN RPAREN LBRACE RBRACE COMMA
-%token PLUS MINUS TIMES DIVIDE ASSIGN NOT MOD
+%token PLUS MINUS TIMES DIVIDE ASSIGN NOT
 %token FRAMEEQ EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
 %token DOT COLON
-%token RETURN IF ELSE FOR WHILE INT BOOL VOID
+%token IF ELSE FOR INT BOOL VOID
 %token BREAK CONTINUE
 %token BUILD JOIN 
-%token FRAME SET MAP AT
+%token FRAME SET AT
 %token EOF
 %token LMBRACE RMBRACE
-%token NULL DEFAULT
+
 %token LTN GTN
 %token <string> ID
 %token <string> STRING
@@ -71,8 +71,6 @@ typ:
 | FLOAT   { Float  }
 | STRING  { String }
 | FRAME   { Frame  }
-/* | SET     { Set    } */
-/* | MAP     { Map    } */
 
 typedef_list:
     typedef {[$1]}

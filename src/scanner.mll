@@ -39,7 +39,6 @@ rule token = parse
 | "if"       { IF       } 
 | "else"     { ELSE     } 
 | "for"      { FOR      } 
-| "return"   { RETURN   } 
 | "int"      { INT      }
 | "bool"     { BOOL     } 
 | "true"     { TRUE     } 
