@@ -39,7 +39,6 @@ program:
 decls:
    /* nothing */ { [], []                 }
  | decls vdecl   { ($2 :: fst $1), snd $1 }
- | decls fdecl   { fst $1, ($2 :: snd $1) }
 
 formals_opt:
     /* nothing */ { []          }
@@ -128,12 +127,9 @@ stmt_true_list:
 
 stmt:
   expr SEMI                                 { Expr $1               }
-  | RETURN SEMI                             { Return Noexpr         }
-  | RETURN expr SEMI                        { Return $2             }
   | LBRACE stmt_list RBRACE                 { Block(List.rev $2)    }
   | IF LPAREN expr RPAREN stmt %prec NOELSE { If($3, $5, Block([])) }
   | IF LPAREN expr RPAREN stmt ELSE stmt    { If($3, $5, $7)        }
-  | WHILE LPAREN expr RPAREN stmt           { While($3, $5)         }
   | FOR LPAREN expr_opt SEMI expr SEMI expr_opt RPAREN stmt
                                             { For($3, $5, $7, $9)   }
 
@@ -158,7 +154,7 @@ expr:
   | expr LEQ     expr            { Binop($1, Leq,     $3) }
   | expr GT      expr            { Binop($1, Greater, $3) }
   | expr GEQ     expr            { Binop($1, Geq,     $3) } 
-  | expr FRAMEEQ expr                { Binop($1, FrameEq, $3) } 
+  | expr FRAMEEQ expr            { Binop($1, FrameEq, $3) } 
   | expr AND     expr            { Binop($1, And,     $3) }
   | expr OR      expr            { Binop($1, Or,      $3) }
   | MINUS expr %prec NEG         { Unop(Neg, $2)          }

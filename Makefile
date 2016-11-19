@@ -1,5 +1,5 @@
 # phony targets
-.PHONY: all clean scanner parser ast sast test menhirtest bloxcomp
+.PHONY: all clean scanner parser ast sast test menhirtest bloxcomp scancomp parsercomp
 
 # name of output file
 EXEC = blox_exec.amf
@@ -14,7 +14,7 @@ OBJEXT = .cmo
 # 	-v : verbose output option for ocamlyacc
 LEXGEN = ocamllex
 PARSGEN = ocamlyacc
-PARSGENFLAG =
+PARSGENFLAG = -v
 
 # ocaml compiler and flags
 # 	-c : compile without producing executable files
@@ -35,7 +35,7 @@ VPATH = src:gen:obj
 testfiles := $(wildcard $(TSTDIR)/*)
 
 # default makefile target
-all: clean scanner ast parser sast
+all: clean scanner ast parser scancomp parsercomp
 
 # creates scanner.ml and moves it to gen/
 scanner:
@@ -68,21 +68,15 @@ parser:
 	#@cat $(GENDIR)/parser.output
 	@echo "=====================================================\n"
 
-# creates the sematically checked AST (sast). scanner, ast, and parser 
-# should already be created making sast
-sast:
+scancomp:
 	@echo "\n====================================================="	
-	@echo "Creating SAST ..."
-	$(OCC) -I $(GENDIR) $(OCCFLAGS1) $(SRCDIR)/sast.ml
-	$(OCC) -I $(GENDIR) $(OCCFLAGS1) $(GENDIR)/parser.mli
-	$(OCC) -I $(GENDIR) $(OCCFLAGS1) $(GENDIR)/scanner.ml
-	@mv $(SRCDIR)/sast.cmi $(GENDIR)/sast.cmi
-	@mv $(SRCDIR)/sast.cmo $(OBJDIR)/sast.cmo
-	@echo "\n-----------------------------------------------------"
 	@echo "Compiling the Scanner ..."
 	$(OCC) -I $(GENDIR) $(OCCFLAGS1) $(GENDIR)/scanner.ml
 	@mv $(GENDIR)/scanner.cmo $(OBJDIR)/scanner.cmo 
-	@echo "\n-----------------------------------------------------"
+	@echo "=====================================================\n"
+
+parsercomp:
+	@echo "\n====================================================="	
 	@echo "Compiling the Parser ..."
 	$(OCC) -I $(GENDIR) $(OCCFLAGS1) $(GENDIR)/parser.ml
 	@mv $(GENDIR)/parser.cmo $(OBJDIR)/parser.cmo 
