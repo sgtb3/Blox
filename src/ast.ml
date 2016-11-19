@@ -56,14 +56,14 @@ type expr =
   Literal of int
 | BoolLit of bool
 | Float   of float
-| Null of string (*nullpointer belong to Default s*)
+| Null    of string (*nullpointer belong to Default s*)
 | Id      of string
 | Objid   of string * string
-| ObjGen of typ
+| ObjGen  of typ
 | Set     of expr list
 | Map     of (expr * expr) list
 | Array   of expr list
-| String of string (*represent const string*)
+| String  of string (*represent const string*)
 | Binop   of expr * op * expr
 | Unop    of uop * expr
 | Assign  of string * expr
