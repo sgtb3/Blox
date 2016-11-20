@@ -8,7 +8,7 @@ rule token = parse
 | '('        { LPAREN   } 
 | ')'        { RPAREN   } 
 | '<'        { LT       } 
-| ">"        { GT       }
+| '>'        { GT       }
 | '='        { ASSIGN   } 
 | ','        { COMMA    } 
 | ';'        { SEMI     } 
