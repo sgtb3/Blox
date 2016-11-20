@@ -26,6 +26,10 @@
 		For reference -
 		Definition:
 			Join(Frame A, int[] A_coord, String A_face, Frame B, int[] B_coord, String B_face)
+
+			Join(Frame A, [Set of optional Faces to Join on in A], Frame B, [Set of optional Faces to Join on in B] )
+			Join takes two frames and the set of faces (1,1,1,E) (rules) that the join can take place on, this relationship can be one to one, or many to many.
+
 		Example:
 			Join(A, coord(1, 1, 2), "E", B, coord(1, 1, 1), "W");
 	*/ 
