@@ -29,7 +29,6 @@ let get_expr_type_info epr = match epr with
   | Null    x     -> x
   (* | BoolLit _     -> Bool *)
   (* | Float   _     -> Float *)
-  
   (* | Objid  (_, x) -> x *)
   (* | Set    (_, x) -> x *)
   (* | Map    (_, x) -> x *)

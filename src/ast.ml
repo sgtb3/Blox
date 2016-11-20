@@ -25,21 +25,14 @@ type typ = Int | Frame | Array of typ | Default of string | Void
   | Map     of typ * typ *)
   
 type blck = {
-  open_faces : bool array;
+  faces : bool array;
 }
 
 type join = {
-  fr1_name : string;
-  fr1_x    : int;
-  fr1_y    : int;
-  fr1_z    : int;
-  fr1_face : string;
-  
-  fr2_name : string;
-  fr2_x    : int;
-  fr2_y    : int;
-  fr2_z    : int;
-  fr2_face : string;
+  f1_name : string;
+  f1_loc  : int * int * int * string;
+  f2_name : string;
+  f2_loc  : int * int * int;
 }
 
 type frame = {
@@ -97,12 +90,12 @@ type program = bind list
 (* type program = bind list * func_decl list *)
 
 (* Pretty-printing functions *)
-let string_of_op = function
+(* let string_of_op = function
   | Add   -> "+"
   | Less  -> "<"
-  | Equal -> "=="
+  | Equal -> "==" *)
 
-  (* | Sub     -> "-"
+(* | Sub     -> "-"
   | Mult    -> "*"
   | Div     -> "/"
   | Neq     -> "!="
@@ -112,24 +105,25 @@ let string_of_op = function
   | Geq     -> ">="
   | And     -> "&&"
   | Or      -> "||" *)
-
+(* 
 let string_of_uop = function
     Neg -> "-"
   (* | Not -> "!" *)
-
+ *)
+(* 
 let rec string_of_typ = function
     Int       -> "int"
   | Frame     -> "Frame"
-	| Default x -> x
-  | Void       -> "void"
+  | Void      -> "void"
   | Array x   -> "Array_" ^ (string_of_typ x)
-  (* | _ -> raise (Failure ("ast.ml: string_of_typ: unsupported type")) *)
+	| Default x -> x
 
-  (* | Bool       -> "bool" *)
-  
-  (* | Float      -> "float" *)
-  (* | Null       -> "Null" *)
-  (* | String     -> "String" *)
-  (* | Set x      -> "Set_"   ^ (string_of_typ x) *)
-  (* | Map (x, y) -> "Map_"   ^ (string_of_typ x) ^ "_" ^ (string_of_typ y) *)
-  
+
+  | _ -> raise (Failure ("ast.ml: string_of_typ: unsupported type"))
+  | Bool       -> "bool"
+  | Float      -> "float"
+  | Null       -> "Null"
+  | String     -> "String"
+  | Set x      -> "Set_"   ^ (string_of_typ x)
+  | Map (x, y) -> "Map_"   ^ (string_of_typ x) ^ "_" ^ (string_of_typ y)
+   *)

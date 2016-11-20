@@ -36,16 +36,16 @@
 
 %%
 
-program:
+program: 
   decls EOF { $1 }
 
 decls:
-   /* nothing */ { [], []                 }
+   /* nothing */ { []               }
  | decls vdecl   { ($2 :: fst $1), snd $1 }
 
-formals_opt:
-	/* nothing */ { []          }
-| formal_list   { List.rev $1 }
+/*formals_opt:*/
+	/* nothing *//* { []          }*/
+/*| formal_list   { List.rev $1 }*/
 
 formal_list:
     typ ID                   { [($1, $2)]     }
