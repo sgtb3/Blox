@@ -1,25 +1,25 @@
 	
-	Frame<1,1,5> fives;
-	Frame<2,1,1> twos;
-	Frame<3,1,5> threes;
+	Frame<1,1,5> five;
+	Frame<2,1,1> two;
+	Frame<3,1,5> three;
 
 	Set<Frame> fives;
 	Set<Frame> twos;
 	Set<Frame> threes;
 
 	for (int i = 0; i < 14; i++) {
-		Frame A = fives;
-		legs.add(A);
+		Frame A = five;
+		fives.add(A);
 	}
 	
-	for (int i = 0; i < 14; i++) {
-		Frame B = twos;
-		legs.add(B);
+	for (int i = 0; i < 17; i++) {
+		Frame B = two;
+		twos.add(B);
 	}
 
 	for (int i = 0; i < 14; i++) {
-		Frame C = threes;
-		legs.add(C);
+		Frame C = three;
+		threes.add(C);
 	}
 
 	/*
