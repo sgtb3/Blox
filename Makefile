@@ -36,7 +36,7 @@ VPATH = src:gen:obj
 testfiles := $(wildcard $(TSTDIR)/*)
 
 # default makefile target
-all: clean scanner ast parser scancomp parsercomp
+all: clean scanner ast parser sast
 
 # create the Scanner
 scanner:
@@ -66,6 +66,29 @@ ast:
 	@mv $(SRCDIR)/ast.cmo $(OBJDIR)/ast.cmo
 	@echo "=====================================================\n"
 
+
+# creates the sematically checked AST (sast). 
+# scanner, ast, and parser should already before created making sast
+sast:
+	@echo "\n====================================================="	
+	@echo "Creating SAST ..."
+	$(OCC) -I $(GENDIR) $(OCCFLAGS1) $(SRCDIR)/sast.ml
+	$(OCC) -I $(GENDIR) $(OCCFLAGS1) $(GENDIR)/parser.mli
+	$(OCC) -I $(GENDIR) $(OCCFLAGS1) $(GENDIR)/scanner.ml
+	@mv $(SRCDIR)/sast.cmi $(GENDIR)/sast.cmi
+	@mv $(SRCDIR)/sast.cmo $(OBJDIR)/sast.cmo
+	@echo "\n-----------------------------------------------------"
+	@echo "Compiling the Scanner ..."
+	$(OCC) -I $(GENDIR) $(OCCFLAGS1) $(GENDIR)/scanner.ml
+	@mv $(GENDIR)/scanner.cmo $(OBJDIR)/scanner.cmo 
+	@echo "\n-----------------------------------------------------"
+	@echo "Compiling the Parser ..."
+	$(OCC) -I $(GENDIR) $(OCCFLAGS1) $(GENDIR)/parser.ml
+	@mv $(GENDIR)/parser.cmo $(OBJDIR)/parser.cmo 
+	@echo "=====================================================\n"
+
+
+
 # compile the Scanner
 scancomp:
 	@echo "\n====================================================="	
@@ -81,6 +104,8 @@ parsercomp:
 	$(OCC) -I $(GENDIR) $(OCCFLAGS1) $(GENDIR)/parser.ml
 	@mv $(GENDIR)/parser.cmo $(OBJDIR)/parser.cmo 
 	@echo "=====================================================\n"
+
+
 
 # run the test script and display the test log
 test:
