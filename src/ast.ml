@@ -32,7 +32,7 @@ type join = {
   f1_name : string;
   f1_loc  : int * int * int * string;
   f2_name : string;
-  f2_loc  : int * int * int;
+  f2_loc  : int * int * int * string;
 }
 
 type frame = {
