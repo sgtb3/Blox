@@ -2,32 +2,35 @@
 
 %{ open Ast %}
 
-%token SEMI LPAREN RPAREN LBRACE RBRACE LBRACK RBRACK COMMA
-%token PLUS MINUS TIMES DIVIDE ASSIGN NOT
-%token FRAMEEQ EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
-%token DOT
-%token IF ELSE FOR INT BOOL VOID
-%token BUILD JOIN 
-%token FRAME SET
+/*
+	%token LBRACE RBRACE LBRACK RBRACK 
+	%token PLUS MINUS TIMES DIVIDE NOT
+	%token FRAMEEQ EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
+	%token LTN GTN
+	%token DOT
+	%token IF ELSE FOR BOOL VOID
+	%token BUILD SET
+	%token <string> STRING
+	%nonassoc NOELSE
+	%nonassoc ELSE
+	%left OR
+	%left AND
+	%left EQ NEQ FRAMEEQ
+	%left LT GT LEQ GEQ
+	%left PLUS MINUS
+	%left TIMES DIVIDE
+	%right NOT NEG
+*/	
+	
+%token SEMI LPAREN RPAREN COMMA
+%token ASSIGN 
+%token INT
+%token JOIN 
+%token FRAME
 %token EOF
-%token LTN GTN
 %token <string> ID
-%token <string> STRING
-%token <float>  FLOAT
-%token <int>    LITERAL
-
-%nonassoc NOELSE
-%nonassoc ELSE
+%token <int> LITERAL
 %right ASSIGN
-%left DOT
-%left OR
-%left AND
-%left EQ NEQ FRAMEEQ
-%left LT GT LEQ GEQ
-%left PLUS MINUS
-%left TIMES DIVIDE
-%right NOT NEG
-
 %start program
 %type <Ast.program> program
 
