@@ -43,7 +43,7 @@ and comment = parse
 	| '!'        { NOT      }
 	| '.'        { DOT      }
 	| "Set"      { SET      }
-	| "Rule"		 { RULE			}
+	| "Rule"	 { RULE		}
 	| "Build"    { BUILD    }
 	| "if"       { IF       } 
 	| "else"     { ELSE     } 

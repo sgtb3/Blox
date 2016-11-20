@@ -13,9 +13,9 @@ type op = Add | Equal | Less
   | Or *)
 
 type uop = Neg  (* | Not  *)
-type typ = Int | Frame | Default of string
+type typ = Int | Frame | Array of typ | Default of string | Void
+
   (* | Bool
-  | Void
   | Float
   | Null
   | String
@@ -56,6 +56,7 @@ type bind = typ * string
 type expr = 
     Literal of int
   | Id      of string
+  | Array   of expr list
   | Unop    of uop    * expr
   | Assign  of string * expr
   | Call    of string * expr list
@@ -68,18 +69,18 @@ type expr =
   (* | ObjGen  of typ *)
   (* | Set     of expr list *)
   (* | Map     of (expr * expr) list *)
-  (* | Array   of expr list *)
+  
   (* | String  of string (*represent const string*) *)
   (* | Binop   of expr   * op * expr *)
   
 type stmt = 
-  | Expr   of expr
-
+    Expr of expr
+  | Return of expr
   (* | Block  of stmt list *)
   (* | If     of expr * stmt * stmt *)
   (* | For    of expr * expr * expr * stmt *)
   (* | While  of expr * stmt *)
-  (* | Return of expr *)
+  
   (* | Break *)
   (* | Continue *)
 (* 
@@ -120,11 +121,12 @@ let rec string_of_typ = function
     Int       -> "int"
   | Frame     -> "Frame"
 	| Default x -> x
-  (* | Array x   -> "Array_" ^ (string_of_typ x) *)
+  | Void       -> "void"
+  | Array x   -> "Array_" ^ (string_of_typ x)
   (* | _ -> raise (Failure ("ast.ml: string_of_typ: unsupported type")) *)
 
   (* | Bool       -> "bool" *)
-  (* | Void       -> "void" *)
+  
   (* | Float      -> "float" *)
   (* | Null       -> "Null" *)
   (* | String     -> "String" *)

@@ -61,7 +61,6 @@ Join(base,(36,1,1,F), R, (1,1,1,B));
 Join(base,(40,1,1,F), L, (1,1,1,B));
 Join(base,(44,1,1,F), D, (1,1,1,B));
 
-/* Need to specify which frame is supposed to be converted to amf
-return base;
-??
-*/
+print base;
+
+/* Need to specify which frame is supposed to be converted to amf??*/
