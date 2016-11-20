@@ -7,11 +7,14 @@ rule token = parse
 | "/ * "     { comment lexbuf }          (* Comments   *) 
 | '('        { LPAREN   } 
 | ')'        { RPAREN   } 
+| '<'        { LT       } 
+| ">"        { GT       }
 | '='        { ASSIGN   } 
 | ','        { COMMA    } 
 | ';'        { SEMI     } 
 | "Join"     { JOIN     }
 | "Frame"    { FRAME    }
+| "Print"    { PRINT    }
 | "int"      { INT      }
 | ['0'-'9']+ as lxm { LITERAL(int_of_string lxm) } 
 | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_'] * as lxm { ID(lxm) }
@@ -28,10 +31,8 @@ and comment = parse
 	| '}'        { RBRACE   } 
 	| '['        { LBRACK   }
 	| ']'        { RBRACK   } 
-	| '<'        { LT       } 
 	| "@"        { AT       }
-	| "<="       { LEQ      } 
-	| ">"        { GT       } 
+	| "<="       { LEQ      }  
 	| '+'        { PLUS     } 
 	| ">="       { GEQ      } 
 	| '-'        { MINUS    }

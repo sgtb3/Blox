@@ -5,7 +5,7 @@
 /*
 	%token LBRACE RBRACE LBRACK RBRACK 
 	%token PLUS MINUS TIMES DIVIDE NOT
-	%token FRAMEEQ EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
+	%token FRAMEEQ EQ NEQ LEQ GEQ TRUE FALSE AND OR
 	%token LTN GTN 
 	%token DOT
 	%token IF ELSE FOR BOOL VOID
@@ -22,8 +22,8 @@
 	%right NOT NEG
 */	
 	
-%token SEMI LPAREN RPAREN COMMA
-%token ASSIGN 
+%token SEMI LPAREN RPAREN LT GT COMMA
+%token ASSIGN PRINT
 %token INT
 %token JOIN 										
 %token FRAME
@@ -69,7 +69,7 @@ expr:
   | ID ASSIGN expr               { Assign($1, $3)         }
  /* | ID LPAREN actuals_opt RPAREN { Call($1, $3)           } */
   | LPAREN expr RPAREN           { $2                     }			
-	| JOIN ID ASSIGN expr  				 { Join(Assign($1, $3))   }
+	| JOIN ID ASSIGN expr  				 { Join(Assign($2, $4))   }
 	
 expr_opt:
     /* nothing */ { Noexpr }
