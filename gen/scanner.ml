@@ -898,237 +898,237 @@ and __ocaml_lex_token_rec lexbuf __ocaml_lex_state =
   match Lexing.engine __ocaml_lex_tables __ocaml_lex_state lexbuf with
       | 0 ->
 # 6 "src/scanner.mll"
-                        ( token lexbuf )
+                     ( token lexbuf )
 # 903 "src/scanner.ml"
 
   | 1 ->
 # 7 "src/scanner.mll"
-              ( comment lexbuf )
+             ( comment lexbuf )
 # 908 "src/scanner.ml"
 
   | 2 ->
 # 8 "src/scanner.mll"
-              ( LPAREN   )
+             ( LPAREN   )
 # 913 "src/scanner.ml"
 
   | 3 ->
 # 9 "src/scanner.mll"
-              ( ASSIGN   )
+             ( ASSIGN   )
 # 918 "src/scanner.ml"
 
   | 4 ->
 # 10 "src/scanner.mll"
-              ( RPAREN   )
+             ( RPAREN   )
 # 923 "src/scanner.ml"
 
   | 5 ->
 # 11 "src/scanner.mll"
-              ( EQ       )
+             ( EQ       )
 # 928 "src/scanner.ml"
 
   | 6 ->
 # 12 "src/scanner.mll"
-              ( NEQ      )
+             ( NEQ      )
 # 933 "src/scanner.ml"
 
   | 7 ->
 # 13 "src/scanner.mll"
-              ( LBRACE   )
+             ( LBRACE   )
 # 938 "src/scanner.ml"
 
   | 8 ->
 # 14 "src/scanner.mll"
-              ( RBRACE   )
+             ( RBRACE   )
 # 943 "src/scanner.ml"
 
   | 9 ->
 # 15 "src/scanner.mll"
-              ( LBRACK   )
+             ( LBRACK   )
 # 948 "src/scanner.ml"
 
   | 10 ->
 # 16 "src/scanner.mll"
-              ( RBRACK   )
+             ( RBRACK   )
 # 953 "src/scanner.ml"
 
   | 11 ->
 # 17 "src/scanner.mll"
-              ( LT       )
+             ( LT       )
 # 958 "src/scanner.ml"
 
   | 12 ->
 # 18 "src/scanner.mll"
-              ( SEMI     )
+             ( SEMI     )
 # 963 "src/scanner.ml"
 
   | 13 ->
 # 19 "src/scanner.mll"
-              ( AT       )
+             ( AT       )
 # 968 "src/scanner.ml"
 
   | 14 ->
 # 20 "src/scanner.mll"
-              ( LEQ      )
+             ( LEQ      )
 # 973 "src/scanner.ml"
 
   | 15 ->
 # 21 "src/scanner.mll"
-              ( COMMA    )
+             ( COMMA    )
 # 978 "src/scanner.ml"
 
   | 16 ->
 # 22 "src/scanner.mll"
-              ( GT       )
+             ( GT       )
 # 983 "src/scanner.ml"
 
   | 17 ->
 # 23 "src/scanner.mll"
-              ( PLUS     )
+             ( PLUS     )
 # 988 "src/scanner.ml"
 
   | 18 ->
 # 24 "src/scanner.mll"
-              ( GEQ      )
+             ( GEQ      )
 # 993 "src/scanner.ml"
 
   | 19 ->
 # 25 "src/scanner.mll"
-              ( MINUS    )
+             ( MINUS    )
 # 998 "src/scanner.ml"
 
   | 20 ->
 # 26 "src/scanner.mll"
-              ( AND      )
+             ( AND      )
 # 1003 "src/scanner.ml"
 
   | 21 ->
 # 27 "src/scanner.mll"
-              ( TIMES    )
+             ( TIMES    )
 # 1008 "src/scanner.ml"
 
   | 22 ->
 # 28 "src/scanner.mll"
-              ( OR       )
+             ( OR       )
 # 1013 "src/scanner.ml"
 
   | 23 ->
 # 29 "src/scanner.mll"
-              ( DIVIDE   )
+             ( DIVIDE   )
 # 1018 "src/scanner.ml"
 
   | 24 ->
 # 30 "src/scanner.mll"
-              ( FRAMEEQ  )
+             ( FRAMEEQ  )
 # 1023 "src/scanner.ml"
 
   | 25 ->
 # 31 "src/scanner.mll"
-              ( NOT      )
+             ( NOT      )
 # 1028 "src/scanner.ml"
 
   | 26 ->
 # 32 "src/scanner.mll"
-              ( DOT      )
+             ( DOT      )
 # 1033 "src/scanner.ml"
 
   | 27 ->
 # 33 "src/scanner.mll"
-              ( SET      )
+             ( SET      )
 # 1038 "src/scanner.ml"
 
   | 28 ->
 # 34 "src/scanner.mll"
-              ( BUILD    )
+             ( BUILD    )
 # 1043 "src/scanner.ml"
 
   | 29 ->
 # 35 "src/scanner.mll"
-              ( JOIN     )
+             ( JOIN     )
 # 1048 "src/scanner.ml"
 
   | 30 ->
 # 36 "src/scanner.mll"
-              ( FRAME    )
+             ( FRAME    )
 # 1053 "src/scanner.ml"
 
   | 31 ->
 # 37 "src/scanner.mll"
-              ( IF       )
+             ( IF       )
 # 1058 "src/scanner.ml"
 
   | 32 ->
 # 38 "src/scanner.mll"
-              ( ELSE     )
+             ( ELSE     )
 # 1063 "src/scanner.ml"
 
   | 33 ->
 # 39 "src/scanner.mll"
-              ( FOR      )
+             ( FOR      )
 # 1068 "src/scanner.ml"
 
   | 34 ->
 # 40 "src/scanner.mll"
-              ( INT      )
+             ( INT      )
 # 1073 "src/scanner.ml"
 
   | 35 ->
 # 41 "src/scanner.mll"
-              ( BOOL     )
+             ( BOOL     )
 # 1078 "src/scanner.ml"
 
   | 36 ->
 # 42 "src/scanner.mll"
-              ( TRUE     )
+             ( TRUE     )
 # 1083 "src/scanner.ml"
 
   | 37 ->
 # 43 "src/scanner.mll"
-              ( FALSE    )
+             ( FALSE    )
 # 1088 "src/scanner.ml"
 
   | 38 ->
 let
 # 44 "src/scanner.mll"
-                 lxm
+                lxm
 # 1094 "src/scanner.ml"
 = Lexing.sub_lexeme lexbuf lexbuf.Lexing.lex_start_pos lexbuf.Lexing.lex_curr_pos in
 # 44 "src/scanner.mll"
-                     ( LITERAL(int_of_string lxm) )
+                    ( LITERAL(int_of_string lxm) )
 # 1098 "src/scanner.ml"
 
   | 39 ->
 let
 # 45 "src/scanner.mll"
-                             lxm
+                            lxm
 # 1104 "src/scanner.ml"
 = Lexing.sub_lexeme lexbuf lexbuf.Lexing.lex_start_pos lexbuf.Lexing.lex_curr_pos in
 # 45 "src/scanner.mll"
-                                 ( STRING(lxm) )
+                                ( STRING(lxm) )
 # 1108 "src/scanner.ml"
 
   | 40 ->
 let
 # 46 "src/scanner.mll"
-                                                       lxm
+                                                      lxm
 # 1114 "src/scanner.ml"
 = Lexing.sub_lexeme lexbuf lexbuf.Lexing.lex_start_pos lexbuf.Lexing.lex_curr_pos in
 # 46 "src/scanner.mll"
-                                                           ( ID(lxm) )
+                                                          ( ID(lxm) )
 # 1118 "src/scanner.ml"
 
   | 41 ->
 # 47 "src/scanner.mll"
-       ( EOF )
+      ( EOF )
 # 1123 "src/scanner.ml"
 
   | 42 ->
 let
 # 48 "src/scanner.mll"
-        char
+       char
 # 1129 "src/scanner.ml"
 = Lexing.sub_lexeme_char lexbuf lexbuf.Lexing.lex_start_pos in
 # 48 "src/scanner.mll"
-             ( raise (Failure("illegal character " ^ Char.escaped char)) )
+            ( raise (Failure("illegal character " ^ Char.escaped char)) )
 # 1133 "src/scanner.ml"
 
   | __ocaml_lex_state -> lexbuf.Lexing.refill_buff lexbuf; 
@@ -1140,12 +1140,12 @@ and __ocaml_lex_comment_rec lexbuf __ocaml_lex_state =
   match Lexing.engine __ocaml_lex_tables __ocaml_lex_state lexbuf with
       | 0 ->
 # 51 "src/scanner.mll"
-         ( token lexbuf   )
+       ( token lexbuf   )
 # 1145 "src/scanner.ml"
 
   | 1 ->
 # 52 "src/scanner.mll"
-          ( comment lexbuf )
+       ( comment lexbuf )
 # 1150 "src/scanner.ml"
 
   | __ocaml_lex_state -> lexbuf.Lexing.refill_buff lexbuf; 

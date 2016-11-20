@@ -46,15 +46,6 @@ scanner:
 	@mv $(SRCDIR)/scanner.ml $(GENDIR)/scanner.ml
 	@echo "=====================================================\n"	
 
-# compile the Abstract Syntax Tree 
-ast:
-	@echo "\n====================================================="	
-	@echo "Compiling AST (ast.cmi and ast.cmo) ..."
-	$(OCC) $(OCCFLAGS1) $(SRCDIR)/ast.ml
-	@mv $(SRCDIR)/ast.cmi $(GENDIR)/ast.cmi
-	@mv $(SRCDIR)/ast.cmo $(OBJDIR)/ast.cmo
-	@echo "=====================================================\n"
-
 # create the Parser
 parser: 
 	@echo "\n====================================================="	
@@ -64,6 +55,15 @@ parser:
 	@mv $(SRCDIR)/parser.mli $(GENDIR)/parser.mli
 	@mv $(SRCDIR)/parser.output $(GENDIR)/parser.output
 	@cat $(GENDIR)/parser.output
+	@echo "=====================================================\n"
+
+# compile the Abstract Syntax Tree 
+ast:
+	@echo "\n====================================================="	
+	@echo "Compiling the Abstract Syntax Tree ..."
+	$(OCC) $(OCCFLAGS1) $(SRCDIR)/ast.ml
+	@mv $(SRCDIR)/ast.cmi $(GENDIR)/ast.cmi
+	@mv $(SRCDIR)/ast.cmo $(OBJDIR)/ast.cmo
 	@echo "=====================================================\n"
 
 # compile the Scanner
@@ -93,10 +93,12 @@ test:
 	@cat $(GENDIR)/$(TESTSH).log
 	@echo "=====================================================\n"
 
-# run menhir's interpreter as an alternative debugging tool
+# run menhir's interpreter to show concrete syntax tree
+# enter token identifiers to see if they're accepted or rejected
+# example of "Frame<1,1,3> A;" : ID LT INT COMMA INT COMMA INT GT ID SEMI EOF
 menhirtest:
 	menhir --interpret --interpret-show-cst $(SRCDIR)/parser.mly
-
+	
 # remove all files in gen/ and obj/
 clean:
 	@echo "\n====================================================="	
