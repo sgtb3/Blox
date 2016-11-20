@@ -13,7 +13,13 @@ type op = Add | Equal | Less
   | Or *)
 
 type uop = Neg  (* | Not  *)
-type typ = Int | Frame | Array of typ | Default of string | Void
+type typ = 
+    Int 
+  | Frame 
+  | Array of typ 
+  | Default of string 
+  | Join of typ
+  | Void 
 
   (* | Bool
   | Float

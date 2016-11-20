@@ -41,8 +41,8 @@ program:
   decls EOF { $1 }
 
 decls:
-   /* nothing */ { []               }
- | decls vdecl   { ($2 :: fst $1), snd $1 }
+   /* nothing */ { [] }
+ | decls vdecl   { ($2 :: $1) }
 
 /*formals_opt:*/
 	/* nothing *//* { []          }*/
