@@ -1,40 +1,31 @@
 (* ocamlyacc Abstract Syntax Tree for Blox *)
 
-type op = 
-    Add 
-  | Sub 
+type op = Add | Equal | Less 
+(*| Sub 
   | Mult 
   | Div 
-  | Equal 
   | Neq 
-  | Less 
   | Leq 
   | Greater 
   | Geq 
   | FrameEq
   | And 
-  | Or
+  | Or *)
 
-type uop = 
-    Neg 
-  | Not 
-
-type typ = 
-    Int
-  | Bool
+type uop = Neg  (* | Not  *)
+type typ = Int | Frame | Default of string
+  (* | Bool
   | Void
   | Float
   | Null
   | String
-  | Frame
   | ObjGen  of typ
   | Array   of typ
   | Set     of typ
-  | Map     of typ * typ
-  | Default of string
-
+  | Map     of typ * typ *)
+  
 type blck = {
-  open_faces  : bool array;
+  open_faces : bool array;
 }
 
 type join = {
@@ -51,7 +42,6 @@ type join = {
   fr2_face : string;
 }
 
-
 type frame = {
   x       : int;
   y       : int;
@@ -61,78 +51,83 @@ type frame = {
   joins   : join array;
 }
 
-
 type bind = typ * string
 
 type expr = 
     Literal of int
-  | BoolLit of bool
-  | Float   of float
-  | Null    of string (*nullpointer belong to Default s*)
   | Id      of string
-  | Objid   of string * string
-  | ObjGen  of typ
-  | Set     of expr list
-  | Map     of (expr * expr) list
-  | Array   of expr list
-  | String  of string (*represent const string*)
-  | Binop   of expr   * op * expr
   | Unop    of uop    * expr
   | Assign  of string * expr
   | Call    of string * expr list
   | Noexpr
 
+  (* | BoolLit of bool *)
+  (* | Float   of float *)
+  (* | Null    of string nullpointer belong to Default s *)
+  (* | Objid   of string * string *)
+  (* | ObjGen  of typ *)
+  (* | Set     of expr list *)
+  (* | Map     of (expr * expr) list *)
+  (* | Array   of expr list *)
+  (* | String  of string (*represent const string*) *)
+  (* | Binop   of expr   * op * expr *)
+  
 type stmt = 
-    Block  of stmt list
   | Expr   of expr
-  | If     of expr * stmt * stmt
-  | For    of expr * expr * expr * stmt
-  | While  of expr * stmt
-  | Return of expr
-  | Break
-  | Continue
 
+  (* | Block  of stmt list *)
+  (* | If     of expr * stmt * stmt *)
+  (* | For    of expr * expr * expr * stmt *)
+  (* | While  of expr * stmt *)
+  (* | Return of expr *)
+  (* | Break *)
+  (* | Continue *)
+(* 
 type func_decl = { 
   typ     : typ;
   fname   : string;
   formals : bind list;
   locals  : bind list;
   body    : stmt list;
-}
+} *)
 
-type program = bind list * func_decl list
+type program = bind list
+
+(* type program = bind list * func_decl list *)
 
 (* Pretty-printing functions *)
-
 let string_of_op = function
-    Add     -> "+"
-  | Sub     -> "-"
+  | Add   -> "+"
+  | Less  -> "<"
+  | Equal -> "=="
+
+  (* | Sub     -> "-"
   | Mult    -> "*"
   | Div     -> "/"
-  | Equal   -> "=="
   | Neq     -> "!="
   | FrameEq -> ".="
-  | Less    -> "<"
   | Leq     -> "<="
   | Greater -> ">"
   | Geq     -> ">="
   | And     -> "&&"
-  | Or      -> "||"
+  | Or      -> "||" *)
 
 let string_of_uop = function
     Neg -> "-"
-  | Not -> "!"
+  (* | Not -> "!" *)
 
 let rec string_of_typ = function
-    Int        -> "int"
-  | Bool       -> "bool"
-  | Void       -> "void"
-  | Float      -> "float"
-	| Null       -> "Null"
-  | String     -> "String"
-  | Frame      -> "Frame"
-	| Default x  -> x
-  | Array x    -> "Array_" ^ (string_of_typ x)
-  | Set x      -> "Set_"   ^ (string_of_typ x)
-  | Map (x, y) -> "Map_"   ^ (string_of_typ x) ^ "_" ^ (string_of_typ y)
-  | _          -> raise (Failure ("ast.ml: string_of_typ: unsupported type"))
+    Int       -> "int"
+  | Frame     -> "Frame"
+	| Default x -> x
+  (* | Array x   -> "Array_" ^ (string_of_typ x) *)
+  (* | _ -> raise (Failure ("ast.ml: string_of_typ: unsupported type")) *)
+
+  (* | Bool       -> "bool" *)
+  (* | Void       -> "void" *)
+  (* | Float      -> "float" *)
+  (* | Null       -> "Null" *)
+  (* | String     -> "String" *)
+  (* | Set x      -> "Set_"   ^ (string_of_typ x) *)
+  (* | Map (x, y) -> "Map_"   ^ (string_of_typ x) ^ "_" ^ (string_of_typ y) *)
+  
