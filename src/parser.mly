@@ -24,7 +24,6 @@
 	
 %token SEMI LPAREN RPAREN LT GT COMMA
 %token ASSIGN PRINT
-%token INT
 %token JOIN 										
 %token FRAME
 %token EOF
@@ -53,7 +52,6 @@ formal_list:
   | formal_list COMMA typ ID { ($3, $4) :: $1 }
 
 typ:
-   INT  { Int   }
   |FRAME{ Frame }	
 	
 vdecl_list:
@@ -78,7 +76,6 @@ expr:
   | ID                           { Id($1)                 }
   | ID ASSIGN expr               { Assign($1, $3)         }
   | LPAREN expr RPAREN           { $2                     }	
-	| TUPLE LPAREN expr expr expr expr RPAREN {Tuple($3, $4, $5, $6)}			
 	
 expr_opt:
     /* nothing */ { Noexpr }
