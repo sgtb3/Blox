@@ -28,6 +28,7 @@
 %token JOIN 										
 %token FRAME
 %token EOF
+%token TUPLE
 %token <string> ID
 %token <int> LITERAL
 %right ASSIGN										/* precedence level never useful */
@@ -55,7 +56,6 @@ typ:
    INT  { Int   }
   |FRAME{ Frame }	
 	
- 
 vdecl_list:
     /* nothing */    { []       }
   | vdecl_list vdecl { $2 :: $1 }
@@ -63,13 +63,22 @@ vdecl_list:
 vdecl:
    typ ID SEMI { ($1, $2) } 
 
+stmt_list:
+    /* nothing */ {[]} 
+  | stmt_list stmt { $2 :: $1 }
+	 
+stmt:
+  expr SEMI                                { Expr $1               }
+ | /* LBRACE stmt_list RBRACE                 { Block(List.rev $2)    } */
+ | JOIN LPAREN expr expr expr expr RPAREN SEMI   { Join($3, $4, $5, $6) }
+ | FRAME LT expr expr expr GT expr			 { Frame <$3, $4, $5> $7 }
+	 
 expr:
     LITERAL                      { Literal($1)            }
   | ID                           { Id($1)                 }
   | ID ASSIGN expr               { Assign($1, $3)         }
- /* | ID LPAREN actuals_opt RPAREN { Call($1, $3)           } */
-  | LPAREN expr RPAREN           { $2                     }			
-	| JOIN ID ASSIGN expr  				 { Join(Assign($2, $4))   }
+  | LPAREN expr RPAREN           { $2                     }	
+	| TUPLE LPAREN expr expr expr expr RPAREN {Tuple($3, $4, $5, $6)}			
 	
 expr_opt:
     /* nothing */ { Noexpr }
@@ -112,13 +121,3 @@ stmt_true_list:
     stmt SEMI {[$1]}
     | stmt SEMI stmt_true_list {$1 :: $3}
 */	
-
-/*
-stmt_list:
-    /nothing/ {[]} 
-  | stmt_list stmt { $2 :: $1 }
-	 
-stmt:
-  expr SEMI                                 { Expr $1               }
- | LBRACE stmt_list RBRACE                 { Block(List.rev $2)    } 
-*/
