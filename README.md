@@ -32,3 +32,13 @@ contents of the generated `testall.log` file.
 
 #### Block Orientation
 ![Orient](res/orient.png?raw=true)
+
+#### Joins
+Join(Frame A, [Set of optional Faces to Join on in A], Frame B, [Set of optional Faces to Join on in B] )
+
+Join takes two frames and the set of faces (1,1,1,E) (rules) that the join can take place on, this relationship can be one to one, or many to many.
+
+	/* Create an H */
+	Frame H = five;
+	Join(H,(1,1,3,E), two, (1,1,1,W));
+	Join(H,(3,1,3,E), five, (1,1,3,W));
