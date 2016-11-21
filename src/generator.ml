@@ -6,6 +6,41 @@ module A = Ast
 
 module StringMap = Map.Make(String)
 
+(* Work in progress faceCheck funcion*)
+(*
+let arr = Array.make 3 (Array.make 3 (Array.make 3 0));;
+
+
+let faceCheck a = 
+  let x = ref 0 in
+
+  for i = 0 to Array.length a - 1 do
+    let y = ref 0
+    and xarr = a.(i) in
+
+    for j = 0 to Array.length xarr - 1 do
+      let z = ref 0
+      and yarr = xarr.(j) in
+
+      for k = 0 to Array.length a.(i).(j) - 1 do
+        yarr.(k) <- !x + !y + !z;
+        incr z
+
+      done;
+      incr y
+
+    done;
+    incr x
+
+  done;
+
+;;
+*)
+
+
+
+
+
 let translate (globals, functions) =
   let context = L.global_context () in
   let the_module = L.create_module context "MicroC"
