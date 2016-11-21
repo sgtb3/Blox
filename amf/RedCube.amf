@@ -35,7 +35,5 @@
         <triangle><v1>7</v1><v2>6</v2><v3>5</v3></triangle>							
       </volume>
     </mesh>
-	<!-- Red Color + Transparent -->		
-	<color><r>1</r><g>0</g><b>0</b><a>0.5</a></color>	
   </object>
 </amf>
