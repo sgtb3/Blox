@@ -1,9 +1,8 @@
 # phony targets
-.PHONY: all clean scanner parser ast sast test menhirtest 
-		bloxcomp parsercomp scancomp 
+.PHONY: all clean scanner parser ast sast scancomp parscomp analcomp gencomp bloxcomp build test menhirtest 
 
-# name of output file
-EXEC = blox_exec.amf
+# name of blox binary file
+EXEC = blox
 
 # name of test shell script
 TESTSH = testAll
@@ -32,11 +31,12 @@ OBJDIR = obj
 TSTDIR = tests
 AMFDIR = amf
 
+# add src, gen, and obj directories to Make path when looking for files
 VPATH = src:gen:obj
 testfiles := $(wildcard $(TSTDIR)/*)
 
 # default makefile target
-all: clean scanner ast parser sast
+all: clean scanner ast parser sast scancomp parscomp analcomp gencomp bloxcomp build
 
 # create the Scanner
 scanner:
@@ -77,17 +77,7 @@ sast:
 	$(OCC) -I $(GENDIR) $(OCCFLAGS1) $(GENDIR)/scanner.ml
 	@mv $(SRCDIR)/sast.cmi $(GENDIR)/sast.cmi
 	@mv $(SRCDIR)/sast.cmo $(OBJDIR)/sast.cmo
-	@echo "\n-----------------------------------------------------"
-	@echo "Compiling the Scanner ..."
-	$(OCC) -I $(GENDIR) $(OCCFLAGS1) $(GENDIR)/scanner.ml
-	@mv $(GENDIR)/scanner.cmo $(OBJDIR)/scanner.cmo 
-	@echo "\n-----------------------------------------------------"
-	@echo "Compiling the Parser ..."
-	$(OCC) -I $(GENDIR) $(OCCFLAGS1) $(GENDIR)/parser.ml
-	@mv $(GENDIR)/parser.cmo $(OBJDIR)/parser.cmo 
 	@echo "=====================================================\n"
-
-
 
 # compile the Scanner
 scancomp:
@@ -98,14 +88,49 @@ scancomp:
 	@echo "=====================================================\n"
 
 # compile the Parser
-parsercomp:
+parscomp:
 	@echo "\n====================================================="	
 	@echo "Compiling the Parser ..."
 	$(OCC) -I $(GENDIR) $(OCCFLAGS1) $(GENDIR)/parser.ml
 	@mv $(GENDIR)/parser.cmo $(OBJDIR)/parser.cmo 
 	@echo "=====================================================\n"
 
+# compile the Semantic Analyzer
+analcomp:
+	@echo "\n====================================================="	
+	@echo "Compiling the Semantic Analyzer ..."
+	$(OCC) -I $(GENDIR) $(OCCFLAGS1) $(SRCDIR)/analyzer.ml
+	@mv $(SRCDIR)/analyzer.cmo $(OBJDIR)/analyzer.cmo 
+	@echo "=====================================================\n"
 
+# compiler the Code Generator
+gencomp:
+	@echo "\n====================================================="	
+	@echo "Compiling the Code Generator ..."
+	$(OCC) -I $(GENDIR) $(OCCFLAGS1) $(SRCDIR)/generator.ml
+	@mv $(SRCDIR)/generator.cmo $(OBJDIR)/generator.cmo 
+	@echo "=====================================================\n"
+
+# not yet complete
+bloxcomp: 
+	@echo "\n====================================================="	
+	@echo "Compiling the Blox top-level ..."
+	$(OCC) -I $(GENDIR) $(OCCFLAGS1) $(SRCDIR)/blox.ml
+	@mv $(SRCDIR)/blox.cmo $(OBJDIR)/blox.cmo 
+	@echo "=====================================================\n"
+
+build:
+	@echo "\n====================================================="	
+	@echo "Creating the Blox compiler ..."
+	$(OCC) $(OCCFLAGS2) $(EXEC) \
+	$(OBJDIR)/parser.cmo \
+	$(OBJDIR)/scanner.cmo \
+	$(OBJDIR)/ast.cmo \
+	$(OBJDIR)/sast.cmo \
+	$(OBJDIR)/analyzer.cmo \
+	$(OBJDIR)/generator.cmo \
+	$(OBJDIR)/blox.cmo 
+	@echo "=====================================================\n"
 
 # run the test script and display the test log
 test:
@@ -130,11 +155,4 @@ clean:
 	@echo "Cleaning up auxiliary files ..."
 	@rm -rf $(GENDIR)/*
 	@rm -rf $(OBJDIR)/*
-	@echo "=====================================================\n"
-
-# not yet complete
-bloxcomp: 
-	@echo "\n====================================================="	
-	@echo "Compiling the Blox compiler ..."
-	$(OCC) $(OCCFLAGS2) $(EXEC) $(AMF)/$(EXEC).
 	@echo "=====================================================\n"

@@ -1,7 +1,6 @@
 (* Top-level of the Blox compiler: scan & parse the input, check the resulting 
   AST, and generate the AMF file as output *)
 
-(* Need to get *)
 type action = Usage | Ast | Compile | AMF
 
 let usage = 
