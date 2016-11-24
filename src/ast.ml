@@ -1,135 +1,28 @@
-(* ocamlyacc Abstract Syntax Tree for Blox *)
+(* FYI - order or types matters. Any type used in another type must be declared earlier. Also, it helps to start from the bottom and trace backwards. *)
 
-type op = Add | Equal | Less 
-(*| Sub 
-  | Mult 
-  | Div 
-  | Neq 
-  | Leq 
-  | Greater 
-  | Geq 
-  | FrameEq
-  | And 
-  | Or *)
+(* Primitive type constructors - Block should probably be here *)
+type primi_typ = 
+    Int of int          (* A primitive integer takes 1 arg: an int *)
+  | Void                (* A void primitive takes no args *)
 
-type uop = Neg  (* | Not  *)
-type typ = 
-    Int 
-  | Frame 
-  | Array of typ 
-  | Default of string 
-  | Join of typ
-  | Void 
-
-  (* | Bool
-  | Float
-  | Null
-  | String
-  | ObjGen  of typ
-  | Array   of typ
-  | Set     of typ
-  | Map     of typ * typ *)
-  
-type blck = {
-  faces : bool array;
-}
-
-type join = {
-  f1_name : string;
-  f1_loc  : int * int * int * string;
-  f2_name : string;
-  f2_loc  : int * int * int * string;
-}
-
-type frame = {
-  x       : int;
-  y       : int;
-  z       : int;
-  name    : string;
-  blocks  : blck array array array;
-  joins   : join array;
-}
-
-type bind = typ * string
-
+(* Expression constructors (of arg1 * arg2 * ... ) *)
 type expr = 
-    Literal of int
-  | Id      of string
-  | Array   of expr list
-  | Unop    of uop    * expr
-  | Assign  of string * expr
-  | Call    of string * expr list
-  | Noexpr
+    Int of int          (* An integer expression takes 1 arg: an int *)
+  | Id of string        (* An Id expression takes 1 arg: a string *)
 
-  (* | BoolLit of bool *)
-  (* | Float   of float *)
-  (* | Null    of string nullpointer belong to Default s *)
-  (* | Objid   of string * string *)
-  (* | ObjGen  of typ *)
-  (* | Set     of expr list *)
-  (* | Map     of (expr * expr) list *)
-  
-  (* | String  of string (*represent const string*) *)
-  (* | Binop   of expr   * op * expr *)
-  
+(* Statement constructors (of arg1 * arg2 * ... ) *)
 type stmt = 
-    Expr of expr
-  | Return of expr
-  (* | Block  of stmt list *)
-  (* | If     of expr * stmt * stmt *)
-  (* | For    of expr * expr * expr * stmt *)
-  (* | While  of expr * stmt *)
-  
-  (* | Break *)
-  (* | Continue *)
-(* 
-type func_decl = { 
-  typ     : typ;
-  fname   : string;
-  formals : bind list;
-  locals  : bind list;
-  body    : stmt list;
-} *)
+    Block of stmt list  (* A block statement takes 1 arg: a list of statements *)
+  | Expr of expr        (* An expression-statement takes 1 arg: an expression *)
 
-type program = bind list
+(* Frame declaration *)
+type fr_decl = { 
+  x : int;              (* 3 ints representing dimensions *)
+  y : int;
+  z : int; 
+  fr_name : string;     (* A string representing the frame name *)
+}
 
-(* type program = bind list * func_decl list *)
-
-(* Pretty-printing functions *)
-(* let string_of_op = function
-  | Add   -> "+"
-  | Less  -> "<"
-  | Equal -> "==" *)
-
-(* | Sub     -> "-"
-  | Mult    -> "*"
-  | Div     -> "/"
-  | Neq     -> "!="
-  | FrameEq -> ".="
-  | Leq     -> "<="
-  | Greater -> ">"
-  | Geq     -> ">="
-  | And     -> "&&"
-  | Or      -> "||" *)
-(* 
-let string_of_uop = function
-    Neg -> "-"
-  (* | Not -> "!" *)
- *)
-(* 
-let rec string_of_typ = function
-    Int       -> "int"
-  | Frame     -> "Frame"
-  | Void      -> "void"
-  | Array x   -> "Array_" ^ (string_of_typ x)
-	| Default x -> x
-
-
-  | _ -> raise (Failure ("ast.ml: string_of_typ: unsupported type"))
-  | Bool       -> "bool"
-  | Float      -> "float"
-  | Null       -> "Null"
-  | String     -> "String"
-  | Set x      -> "Set_"   ^ (string_of_typ x)
-  | Map (x, y) -> "Map_"   ^ (string_of_typ x) ^ "_" ^ (string_of_typ y)
-   *)
+(* A Blox program *)
+type program = 
+  fr_decl list (* A list of frame declarations *)
