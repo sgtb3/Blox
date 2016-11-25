@@ -1,6 +1,3 @@
-(* Top-level of the Blox compiler: scan & parse the input, check the resulting 
-  AST, and generate the AMF file as output *)
-
 type action = Usage | Ast | Compile | AMF
 
 let usage = 
@@ -32,3 +29,6 @@ let _ =
     | Compile ->  let m = Generator.translate ast 
                   in
                   print_string (Generator.string_of_module m)
+
+(* Top-level of the Blox compiler: scan & parse the input, check the resulting 
+  AST, and generate the AMF file as output *)

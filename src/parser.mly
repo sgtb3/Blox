@@ -1,7 +1,7 @@
 %{ open Ast %}
   
 %token FOPEN FCLOSE COMMA SEMI
-%token FRAME VOID               
+%token FRAME VOID PRINT            
 %token EOF
 %token <string> ID
 %token <int> INTLIT
@@ -34,4 +34,3 @@ stmt:
 expr:
   | INTLIT   { Int($1) }
   | ID { Id($1)  }
-

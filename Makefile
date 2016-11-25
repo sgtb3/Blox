@@ -1,5 +1,5 @@
 # phony targets
-.PHONY: all clean scanner parser ast sast scancomp parscomp analcomp gencomp bloxcomp build test menhirtest 
+.PHONY: all clean scanner parser ast sast scancomp parscomp anlyzcomp gencomp bloxcomp build test menhirtest 
 
 # name of blox binary file
 EXEC = blox
@@ -36,7 +36,7 @@ VPATH = src:gen:obj
 testfiles := $(wildcard $(TSTDIR)/*)
 
 # default makefile target
-all: clean scanner ast parser sast scancomp parscomp analcomp gencomp bloxcomp build
+all: clean scanner ast parser sast scancomp parscomp anlyzcomp gencomp bloxcomp build
 
 # create the Scanner
 scanner:
@@ -96,11 +96,12 @@ parscomp:
 	@echo "=====================================================\n"
 
 # compile the Semantic Analyzer
-analcomp:
+anlyzcomp:
 	@echo "\n====================================================="	
 	@echo "Compiling the Semantic Analyzer ..."
 	$(OCC) -I $(GENDIR) $(OCCFLAGS1) $(SRCDIR)/analyzer.ml
 	@mv $(SRCDIR)/analyzer.cmo $(OBJDIR)/analyzer.cmo 
+	@mv $(SRCDIR)/analyzer.cmi $(OBJDIR)/analyzer.cmi
 	@echo "=====================================================\n"
 
 # compiler the Code Generator
