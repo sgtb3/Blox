@@ -1,8 +1,11 @@
 # phony targets
-.PHONY: all clean scanner parser ast sast scancomp parscomp anlyzcomp gencomp bloxcomp build test menhirtest 
+.PHONY: all clean scanner parser ast sast scancomp parscomp anlyzcomp gencomp bloxcomp build test menhirtest testHWAST 
 
 # name of blox binary file
 EXEC = blox
+
+#name of HelloWorld testfile
+HELLO = HelloWorld
 
 # name of test shell script
 TESTSH = testAll
@@ -36,113 +39,123 @@ VPATH = src:gen:obj
 testfiles := $(wildcard $(TSTDIR)/*)
 
 # default makefile target
-all: clean scanner ast parser sast scancomp parscomp anlyzcomp gencomp bloxcomp build
+# gencomp
+all: clean scanner ast parser sast scancomp parscomp anlyzcomp bloxcomp build testHWAST
 
 # create the Scanner
 scanner:
-	@echo "\n====================================================="	
+	@echo "\n========================================================="	
 	@echo "Using ocamllex to generate the Scanner ..."
-	$(LEXGEN) $(SRCDIR)/scanner.mll
+	@$(LEXGEN) $(SRCDIR)/scanner.mll
 	@mv $(SRCDIR)/scanner.ml $(GENDIR)/scanner.ml
-	@echo "=====================================================\n"	
+	@echo "=========================================================\n"	
 
 # create the Parser
 parser: 
-	@echo "\n====================================================="	
+	@echo "\n========================================================="	
 	@echo "Using ocamlyacc to generate the Parser ..."
-	$(PARSGEN) $(PARSGENFLAG) $(SRCDIR)/parser.mly
+	@$(PARSGEN) $(PARSGENFLAG) $(SRCDIR)/parser.mly
 	@mv $(SRCDIR)/parser.ml $(GENDIR)/parser.ml
 	@mv $(SRCDIR)/parser.mli $(GENDIR)/parser.mli
 	@mv $(SRCDIR)/parser.output $(GENDIR)/parser.output
 	@cat $(GENDIR)/parser.output
-	@echo "=====================================================\n"
+	@echo "=========================================================\n"
 
 # compile the Abstract Syntax Tree 
 ast:
-	@echo "\n====================================================="	
+	@echo "\n========================================================="	
 	@echo "Compiling the Abstract Syntax Tree ..."
-	$(OCC) $(OCCFLAGS1) $(SRCDIR)/ast.ml
+	@$(OCC) $(OCCFLAGS1) $(SRCDIR)/ast.ml
 	@mv $(SRCDIR)/ast.cmi $(GENDIR)/ast.cmi
 	@mv $(SRCDIR)/ast.cmo $(OBJDIR)/ast.cmo
-	@echo "=====================================================\n"
+	@echo "=========================================================\n"
 
 
 # creates the sematically checked AST (sast). 
 # scanner, ast, and parser should already before created making sast
 sast:
-	@echo "\n====================================================="	
+	@echo "\n========================================================="	
 	@echo "Creating SAST ..."
-	$(OCC) -I $(GENDIR) $(OCCFLAGS1) $(SRCDIR)/sast.ml
-	$(OCC) -I $(GENDIR) $(OCCFLAGS1) $(GENDIR)/parser.mli
-	$(OCC) -I $(GENDIR) $(OCCFLAGS1) $(GENDIR)/scanner.ml
+	@$(OCC) -I $(GENDIR) $(OCCFLAGS1) $(SRCDIR)/sast.ml
+	@$(OCC) -I $(GENDIR) $(OCCFLAGS1) $(GENDIR)/parser.mli
+	@$(OCC) -I $(GENDIR) $(OCCFLAGS1) $(GENDIR)/scanner.ml
 	@mv $(SRCDIR)/sast.cmi $(GENDIR)/sast.cmi
 	@mv $(SRCDIR)/sast.cmo $(OBJDIR)/sast.cmo
-	@echo "=====================================================\n"
+	@echo "=========================================================\n"
 
 # compile the Scanner
 scancomp:
-	@echo "\n====================================================="	
+	@echo "\n========================================================="	
 	@echo "Compiling the Scanner ..."
-	$(OCC) -I $(GENDIR) $(OCCFLAGS1) $(GENDIR)/scanner.ml
+	@$(OCC) -I $(GENDIR) $(OCCFLAGS1) $(GENDIR)/scanner.ml
 	@mv $(GENDIR)/scanner.cmo $(OBJDIR)/scanner.cmo 
-	@echo "=====================================================\n"
+	@echo "=========================================================\n"
 
 # compile the Parser
 parscomp:
-	@echo "\n====================================================="	
+	@echo "\n========================================================="	
 	@echo "Compiling the Parser ..."
-	$(OCC) -I $(GENDIR) $(OCCFLAGS1) $(GENDIR)/parser.ml
+	@$(OCC) -I $(GENDIR) $(OCCFLAGS1) $(GENDIR)/parser.ml
 	@mv $(GENDIR)/parser.cmo $(OBJDIR)/parser.cmo 
-	@echo "=====================================================\n"
+	@echo "=========================================================\n"
 
 # compile the Semantic Analyzer
 anlyzcomp:
-	@echo "\n====================================================="	
+	@echo "\n========================================================="	
 	@echo "Compiling the Semantic Analyzer ..."
-	$(OCC) -I $(GENDIR) $(OCCFLAGS1) $(SRCDIR)/analyzer.ml
+	@$(OCC) -I $(GENDIR) $(OCCFLAGS1) $(SRCDIR)/analyzer.ml
 	@mv $(SRCDIR)/analyzer.cmo $(OBJDIR)/analyzer.cmo 
-	@mv $(SRCDIR)/analyzer.cmi $(OBJDIR)/analyzer.cmi
-	@echo "=====================================================\n"
+	@mv $(SRCDIR)/analyzer.cmi $(GENDIR)/analyzer.cmi
+	@echo "=========================================================\n"
 
-# compiler the Code Generator
+# compile the Code Generator
 gencomp:
-	@echo "\n====================================================="	
+	@echo "\n========================================================="	
 	@echo "Compiling the Code Generator ..."
-	$(OCC) -I $(GENDIR) $(OCCFLAGS1) $(SRCDIR)/generator.ml
+	@$(OCC) -I $(GENDIR) $(OCCFLAGS1) $(SRCDIR)/generator.ml
 	@mv $(SRCDIR)/generator.cmo $(OBJDIR)/generator.cmo 
-	@echo "=====================================================\n"
+	@echo "=========================================================\n"
 
-# not yet complete
+# not yet complete - compile Blox top-level interface
 bloxcomp: 
-	@echo "\n====================================================="	
+	@echo "\n========================================================="	
 	@echo "Compiling the Blox top-level ..."
-	$(OCC) -I $(GENDIR) $(OCCFLAGS1) $(SRCDIR)/blox.ml
+	@$(OCC) -I $(GENDIR) $(OCCFLAGS1) $(SRCDIR)/blox.ml
 	@mv $(SRCDIR)/blox.cmo $(OBJDIR)/blox.cmo 
-	@echo "=====================================================\n"
+	@mv $(SRCDIR)/blox.cmi $(GENDIR)/blox.cmi
+	@echo "=========================================================\n"
 
+# create the Blox compiler from the object files
 build:
-	@echo "\n====================================================="	
+	@echo "\n========================================================="	
 	@echo "Creating the Blox compiler ..."
-	$(OCC) $(OCCFLAGS2) $(EXEC) \
+	@$(OCC) $(OCCFLAGS2) $(EXEC) \
 	$(OBJDIR)/parser.cmo \
 	$(OBJDIR)/scanner.cmo \
 	$(OBJDIR)/ast.cmo \
 	$(OBJDIR)/sast.cmo \
 	$(OBJDIR)/analyzer.cmo \
-	$(OBJDIR)/generator.cmo \
-	$(OBJDIR)/blox.cmo 
-	@echo "=====================================================\n"
+	$(OBJDIR)/blox.cmo
+	@# $(OBJDIR)/generator.cmo \ # uncomment this when generator works
+	@echo "=========================================================\n"
+
+testHWAST:
+	@echo "\n========================================================="	
+	@echo "Testing Blox compiler AST ..."
+	@echo "\n$(HELLO).blox:\n"
+	@./$(EXEC) -a $(SRCDIR)/$(HELLO).blox
+	@echo "=========================================================\n"
 
 # run the test script and display the test log
 test:
-	@echo "\n====================================================="	
+	@echo "\n========================================================="	
 	@echo "Running test script ..."
 	@./$(TESTSH).sh
 	@mv $(TESTSH).log $(GENDIR)/$(TESTSH).log
-	@echo "\n-----------------------------------------------------"
+	@echo "\n---------------------------------------------------------"
 	@echo "Opening $(TESTSH).sh log ..."
 	@cat $(GENDIR)/$(TESTSH).log
-	@echo "=====================================================\n"
+	@echo "=========================================================\n"
 
 # run menhir's interpreter to show concrete syntax tree
 # enter token identifiers to see if they're accepted or rejected
@@ -152,8 +165,9 @@ menhirtest:
 	
 # remove all files in gen/ and obj/
 clean:
-	@echo "\n====================================================="	
+	@echo "\n========================================================="	
 	@echo "Cleaning up auxiliary files ..."
 	@rm -rf $(GENDIR)/*
 	@rm -rf $(OBJDIR)/*
-	@echo "=====================================================\n"
+	@rm -rf $(EXEC)
+	@echo "=========================================================\n"

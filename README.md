@@ -6,7 +6,7 @@ This repository contains the source code for the Blox programming language.
 * __src__  : source files 
 * __out__  : generated files
 * __obj__  : compiled object files
-* __amf__  : generated AMF files
+* __amf__  : AMF resources
 * __tests__: language tests
 * __res__  : resource files
 * __BloxTest__ : proof-of-concept Java program
@@ -26,8 +26,8 @@ contents of the generated `testall.log` file.
 #### TODO 
 
 * Complete the compiler back-end
-* Complete Hello World
-* Create test cases
+* Finish the remainder of Hello World
+* Create test suite
 * Optimize front-end
 
 #### Block Orientation

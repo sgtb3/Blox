@@ -20,6 +20,23 @@ type fr_decl = {        (* Frame declaration *)
 type program =          (* A Blox program *)
   fr_decl list          (* A list of frame declarations *)
 
+let rec string_of_expr = function         (* print expressions *)
+    Int(x) -> string_of_int x
+  | Id(x)  -> x
+
+let rec string_of_stmt = function         (* print statements *)
+    Block(stmts) -> "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
+  | Expr(expr)   -> string_of_expr expr ^ "\n"
+
+let string_of_frdecl fr =                 (* print frame declarations *)
+  "Frame<" ^ string_of_int fr.x ^ "," ^ 
+             string_of_int fr.y ^ "," ^ 
+             string_of_int fr.z ^ "> " ^ 
+             fr.fr_name ^ ";\n"
+
+let string_of_program frdecs =            (* print program (a list of frame declarations) *)
+  String.concat "" (List.rev (List.map string_of_frdecl frdecs) )
+
 (* 
   FYI:
   - Order for types matters. Any type used in another type must be declared 
