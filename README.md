@@ -44,20 +44,21 @@ Join takes two frames and the set of faces (1,1,1,E) (rules) that the join can t
 	Join(H,(3,1,3,E), five, (1,1,3,W));
 	
 ### Converting a Frame to AMF
-* AMF needs 8 points to represent a cuboid and 12 vertices to represent volume (i.e. 2 triangles for each of the 6 faces). 
+
+* AMF needs 8 vertices to represent a cuboid and 12 vertices to represent volume (i.e. 2 triangles for each of the 6 faces). 
 
 #### The 7 points will be represented in a table `(Point, <x,y,z>)`
 ```
-AMF Point   |   AMF coordinate <1, 1, 1>
-----------------------------------------
-  0         |   <1,1,1>
-  1         |   <1,0,1>
-  2         |   <0,1,1>
-  3         |   <0,0,1>
-  4         |   <1,1,0>
-  5         |   <1,0,0>
-  6         |   <0,1,0>
-  7         |   <0,0,0>
+AMF Vertex #  |   AMF Vertex coordinates <1, 1, 1>
+---------------------------------------------------
+  0           |   <1,1,1>
+  1           |   <1,0,1>
+  2           |   <0,1,1>
+  3           |   <0,0,1>
+  4           |   <1,1,0>
+  5           |   <1,0,0>
+  6           |   <0,1,0>
+  7           |   <0,0,0>
 ```
 
 * The important thing to note here is that we can stretch this cuboid in any possible direction(s) and the AMF coordinates
@@ -65,40 +66,40 @@ AMF Point   |   AMF coordinate <1, 1, 1>
 * For example, `Frame <1,1,1> A;` has the table represented above.
 ```
 Frame <1,3,1> B;  (which differs from A only in y direction) has the the following table:
-AMF Point   |   AMF coordinate <1, 3, 1>
-----------------------------------------
-  0         |   <1,3,1>
-  1         |   <1,0,1>
-  2         |   <0,3,1>
-  3         |   <0,0,1>
-  4         |   <1,3,0>
-  5         |   <1,0,0>
-  6         |   <0,3,0>
-  7         |   <0,0,0>
+AMF Vertex #  |   AMF Vertex coordinates <1, 3, 1>
+---------------------------------------------------
+  0           |   <1,3,1>
+  1           |   <1,0,1>
+  2           |   <0,3,1>
+  3           |   <0,0,1>
+  4           |   <1,3,0>
+  5           |   <1,0,0>
+  6           |   <0,3,0>
+  7           |   <0,0,0>
 
 Frame <1,1,3> C;  (which differs from A only in z direction) has the the following table:
-AMF Point   |   AMF coordinate <1, 1, 3>
-----------------------------------------
-  0         |   <1,1,3>
-  1         |   <1,0,3>
-  2         |   <0,1,3>
-  3         |   <0,0,3>
-  4         |   <1,1,0>
-  5         |   <1,0,0>
-  6         |   <0,1,0>
-  7         |   <0,0,0>
+AMF Vertex #  |   AMF Vertex coordinates <1, 1, 3>
+---------------------------------------------------
+  0           |   <1,1,3>
+  1           |   <1,0,3>
+  2           |   <0,1,3>
+  3           |   <0,0,3>
+  4           |   <1,1,0>
+  5           |   <1,0,0>
+  6           |   <0,1,0>
+  7           |   <0,0,0>
   
 Frame <3,3,1> D;  (which differs from A only in x and y directions) has the the following table:
-AMF Point   |   AMF coordinate <3, 3, 1>
-----------------------------------------
-  0         |   <3,3,1>
-  1         |   <3,0,1>
-  2         |   <0,3,1>
-  3         |   <0,0,1>
-  4         |   <3,3,0>
-  5         |   <3,0,0>
-  6         |   <0,3,0>
-  7         |   <0,0,0>
+AMF Vertex #  |   AMF Vertex coordinates <3, 3, 1>
+---------------------------------------------------
+  0           |   <3,3,1>
+  1           |   <3,0,1>
+  2           |   <0,3,1>
+  3           |   <0,0,1>
+  4           |   <3,3,0>
+  5           |   <3,0,0>
+  6           |   <0,3,0>
+  7           |   <0,0,0>
 
 etc.
 ```
