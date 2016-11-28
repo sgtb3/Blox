@@ -7,6 +7,8 @@ rule token = parse
 | '>'                  { FCLOSE         }
 | ','                  { COMMA          }
 | ';'                  { SEMI           }
+| '{'                  { LCURL          }
+| '}'                  { RCURL          }
 | "Frame"              { FRAME          }
 | "print"							 { PRINT          }
 | ['0'-'9']+ as lxm    { INTLIT(int_of_string lxm) }
