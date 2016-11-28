@@ -1,7 +1,8 @@
 %{ open Ast %}
   
-%token FOPEN FCLOSE LCURL RCURL COMMA SEMI
-%token FRAME VOID PRINT            
+%token FOPEN FCLOSE COMMA SEMI ASSIGN
+%token FRAME VOID PRINT JOIN
+%token LCURL RCURL LPAREN RPAREN
 %token EOF
 %token <string> ID
 %token <int> INTLIT
@@ -23,44 +24,56 @@ stmt_list:
 
 /* should be the same as type prim in AST */
 stmt:
-    expr SEMI         { Expr($1) }
-	| join
-  | fr_declar
-  | fr_print
+    expr SEMI         { Expr($1)     }
+  | JOIN LPAREN join_arg COMMA join_arg RPAREN SEMI { Join($3,$5) }
+  | FRAME FOPEN INTLIT COMMA INTLIT COMMA INTLIT FCLOSE ID SEMI
+    { { x = $3; 
+        y = $5;
+        z = $7;
+        fr_name = $9; } }
+  | PRINT ID SEMI
+    { { fr_id = $2; } }
+
+
+	/*| join              { Join()       }
+  | fr_decl           { Fr_decl($1)  }
+  | fr_print          { Fr_print($1) }*/
 
 expr:
-    VOID       { Void($1)}
-  | INTLIT     { Int($1) }
-  | ID         { Id($1)  }
-  | fr_assign
+    VOID             { Void           }
+  | INTLIT           { Int($1)        }
+  | ID               { Id($1)         }
+  | ID ASSIGN expr   { Assign($1, $3) }
 
 fr_print:
-  print ID SEMI
+  PRINT ID SEMI
+  { { fr_id = $2; } }
 
-fr_declar:
+fr_decl:
   FRAME FOPEN INTLIT COMMA INTLIT COMMA INTLIT FCLOSE ID SEMI 
   { { x = $3; 
       y = $5;
       z = $7;
       fr_name = $9; } }
-
-fr_assign:
-  FRAME ID ASSIGN ID
 	
 join:
   JOIN LPAREN join_arg COMMA join_arg RPAREN SEMI
+  { { fr_a = $3;
+      fr_b = $5; } }
 
 join_arg:
-	ID COMMA LCURL face_set RCURL { fr_name = $1, $4 }
+	ID COMMA LCURL face_set RCURL
+  { { fr_name = $1;
+      blck_face = $4; } }
 
 face_set:
-	  face_id
-	|	face_set COMMA face_id
+	  face_id                  { [$1]     }
+	|	face_set COMMA face_id   { $3 :: $1 }
 
 face_id:
 	LPAREN INTLIT COMMA INTLIT COMMA INTLIT COMMA ID RPAREN
-  { { fr_x = $2;
-      fr_y = $4;
-      fr_z = $6;
-      fr_face = $8; } }
+  { { x = $2;
+      y = $4;
+      z = $6;
+      face = $8; } }
 	

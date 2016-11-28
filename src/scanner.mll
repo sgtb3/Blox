@@ -3,16 +3,18 @@
 rule token = parse
 	[' ' '\t' '\r' '\n'] { token lexbuf   }    (* Whitespace *)
 | "/* "            	   { comment lexbuf }    (* Comments   *)
+| '='                  { ASSIGN         }
 | '<'                  { FOPEN          }
 | '>'                  { FCLOSE         }
 | ','                  { COMMA          }
 | ';'                  { SEMI           }
 | '{'                  { LCURL          }
 | '}'                  { RCURL          }
-| '('		       { LPAREN         }
-| ')'		       { RPAREN         }
+| '('		           { LPAREN         }
+| ')'		           { RPAREN         }
+| "Join"               { JOIN           }
 | "Frame"              { FRAME          }
-| "print"	       { PRINT          }
+| "print"	           { PRINT          }
 | ['0'-'9']+ as lxm    { INTLIT(int_of_string lxm) }
 | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_'] * as lxm { ID(lxm) }
 | eof { EOF } 

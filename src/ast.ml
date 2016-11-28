@@ -5,10 +5,24 @@ type primi_typ =        (* Primitive type constructors - Block should probably b
 type expr =             (* Expression constructors (of arg1 * arg2 * ... ) *)
     Int of int          (* An integer expression takes 1 arg: an int *)
   | Id of string        (* An Id expression takes 1 arg: a string *)
+  | Assign of string * expr
 
-type stmt =             (* Statement constructors (of arg1 * arg2 * ... ) *)
-    Block of stmt list  (* A block statement takes 1 arg: a list of statements *)
-  | Expr of expr        (* An expression-statement takes 1 arg: an expression *)
+type face_id = {
+  x : int;
+  y :int;
+  z : int;
+  face : string;
+}
+
+type join_arg = {
+  fr_name : string;
+  blck_face : face_id;  (*This should technically be a set of faces, not just one necessarily *)
+}
+
+type join = {
+  fr_a : join_arg;
+  fr_b : join_arg;
+}
 
 type fr_decl = {        (* Frame declaration *)
   x : int;              (* 3 ints representing dimensions *)
@@ -17,16 +31,19 @@ type fr_decl = {        (* Frame declaration *)
   fr_name : string;     (* A string representing the frame name *)
 }
 
-type join_arg = {
-  fr_name : string;
-  fr_x : int;
-  fr_y : int;
-  fr_z : int;
-  fr_face : string;
+type fr_print = {
+  fr_id : string;
 }
 
-type program =          (* A Blox program *)
-  fr_decl list          (* A list of frame declarations *)
+type stmt =             (* Statement constructors (of arg1 * arg2 * ... ) *)
+    Block of stmt list  (* A block statement takes 1 arg: a list of statements *)
+  | Expr of expr        (* An expression-statement takes 1 arg: an expression *)
+  | Join of join_arg * join_arg
+  | Fr_decl of int * int * int * string
+  | Fr_print of string
+
+type program =            (* A Blox program *)
+  stmt list               (* A list of stmts *)
 
 let rec string_of_expr = function         (* print expressions *)
     Int(x) -> string_of_int x
