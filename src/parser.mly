@@ -17,8 +17,9 @@ program:
   stmt_list EOF { $1 }
 
 stmt_list:
-    stmt
-  | stmt_list stmt
+    /* nothing */         { [] }
+  | stmt_list stmt  { $2 :: $1 }
+
 
 /* should be the same as type prim in AST */
 stmt:
