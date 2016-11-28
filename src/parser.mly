@@ -51,7 +51,7 @@ join:
   JOIN LPAREN join_arg COMMA join_arg RPAREN SEMI
 
 join_arg:
-	ID COMMA LCURL face_set RCURL
+	ID COMMA LCURL face_set RCURL { fr_name = $1, $4 }
 
 face_set:
 	  face_id
@@ -59,4 +59,8 @@ face_set:
 
 face_id:
 	LPAREN INTLIT COMMA INTLIT COMMA INTLIT COMMA ID RPAREN
+  { { fr_x = $2;
+      fr_y = $4;
+      fr_z = $6;
+      fr_face = $8; } }
 	

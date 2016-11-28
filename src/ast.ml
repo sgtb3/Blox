@@ -13,8 +13,16 @@ type stmt =             (* Statement constructors (of arg1 * arg2 * ... ) *)
 type fr_decl = {        (* Frame declaration *)
   x : int;              (* 3 ints representing dimensions *)
   y : int;
-  z : int; 
+  z : int;
   fr_name : string;     (* A string representing the frame name *)
+}
+
+type join_arg = {
+  fr_name : string;
+  fr_x : int;
+  fr_y : int;
+  fr_z : int;
+  fr_face : string;
 }
 
 type program =          (* A Blox program *)
@@ -35,7 +43,7 @@ let string_of_frdecl fr =                 (* print frame declarations *)
              fr.fr_name ^ ";\n"
 
 let string_of_program frdecs =            (* print program (a list of frame declarations) *)
-  String.concat "" (List.rev (List.map string_of_frdecl frdecs) )
+  String.concat "" (List.rev (List.map string_of_frdecl frdecs))
 
 (* 
   FYI:
