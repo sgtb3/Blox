@@ -38,10 +38,11 @@ public class Test {
     // This is a Compiler function - checks for contiguous Block faces
     public static void faceCheck(ArrayList<ArrayList<ArrayList<Block>>> A) {
 
-        int x = 0;
+        int x;
         int y;
         int z;
 
+        int x = 0;
         for (ArrayList<ArrayList<Block>> ylist : A) {
             
             y = 0;

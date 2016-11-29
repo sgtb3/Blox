@@ -5,7 +5,7 @@ module StringMap = Map.Make(String)
 
 let run (stmts) =                  (* let check (globals, functions) = (* *) *)
   
-  print_endline "compile not implemented yet"
+  print_endline "Analyzer not implemented yet ...\n"
 (*
   let report_duplicate exceptf list =   (* Raise an exception if the given list has a duplicate frames *)
     let rec helper = function
