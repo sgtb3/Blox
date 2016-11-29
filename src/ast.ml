@@ -56,12 +56,14 @@ let string_of_frdecl x y z name =                 (* print frame declarations *)
              string_of_int z ^ "> " ^ 
              name ^ ";\n"
 
+(*let string_of_join_arg DO THIS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*)
+
 let rec string_of_stmt = function         (* print statements *)
     Block(stmts) -> "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
   | Expr(expr)   -> string_of_expr expr ^ "\n"
-  | Fr_decl(x, y, z, name) -> string_of_frdecl x y z name 
-
-
+  | Join(x, y)   -> "Join(" ^ string_of_join_arg x ^ ", " ^ string_of_join_arg y ^ ")\n"
+  | Fr_decl(x, y, z, name) -> string_of_frdecl x y z name
+  | Fr_print(name) -> "Print " ^ name
 
 let string_of_program s =            (* print program (a list of frame declarations) *)
   String.concat "" (List.rev (List.map string_of_stmt s))
