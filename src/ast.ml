@@ -48,19 +48,23 @@ type program =            (* A Blox program *)
 let rec string_of_expr = function         (* print expressions *)
     Int(x) -> string_of_int x
   | Id(x)  -> x
+  | Assign(x, y) -> "Frame " ^ x ^ " = " ^ string_of_expr y
+
+let string_of_frdecl x y z name =                 (* print frame declarations *)
+  "Frame<" ^ string_of_int x ^ "," ^ 
+             string_of_int y ^ "," ^ 
+             string_of_int z ^ "> " ^ 
+             name ^ ";\n"
 
 let rec string_of_stmt = function         (* print statements *)
     Block(stmts) -> "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
   | Expr(expr)   -> string_of_expr expr ^ "\n"
+  | Fr_decl(x, y, z, name) -> string_of_frdecl x y z name 
 
-let string_of_frdecl fr =                 (* print frame declarations *)
-  "Frame<" ^ string_of_int fr.x ^ "," ^ 
-             string_of_int fr.y ^ "," ^ 
-             string_of_int fr.z ^ "> " ^ 
-             fr.fr_name ^ ";\n"
 
-let string_of_program frdecs =            (* print program (a list of frame declarations) *)
-  String.concat "" (List.rev (List.map string_of_frdecl frdecs))
+
+let string_of_program s =            (* print program (a list of frame declarations) *)
+  String.concat "" (List.rev (List.map string_of_stmt s))
 
 (* 
   FYI:
