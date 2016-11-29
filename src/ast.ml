@@ -56,14 +56,23 @@ let string_of_frdecl x y z name =                 (* print frame declarations *)
              string_of_int z ^ "> " ^ 
              name ^ ";\n"
 
-(*let string_of_join_arg DO THIS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*)
+let string_of_face_id f =
+  "(" ^ string_of_int f.x ^ ", " ^ string_of_int f.y ^ ", " ^ string_of_int f.z ^ ", " ^ f.face ^ ")"
+
+let rec string_of_face_id_list = function
+    face_id               -> string_of_face_id face_id
+  | face_id face_id_list  -> string_of_face_id face_id ^ ", " ^ string_of_face_id_list face_id_list
+
+let string_of_join_arg x =
+  x.fr_name ^ ", {" ^ string_of_face_id_list x.blck_face ^ "}\n"
+
 
 let rec string_of_stmt = function         (* print statements *)
     Block(stmts) -> "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
   | Expr(expr)   -> string_of_expr expr ^ "\n"
   | Join(x, y)   -> "Join(" ^ string_of_join_arg x ^ ", " ^ string_of_join_arg y ^ ")\n"
   | Fr_decl(x, y, z, name) -> string_of_frdecl x y z name
-  | Fr_print(name) -> "Print " ^ name
+  | Fr_print(name) -> "Print " ^ name ^ "\n"
 
 let string_of_program s =            (* print program (a list of frame declarations) *)
   String.concat "" (List.rev (List.map string_of_stmt s))
