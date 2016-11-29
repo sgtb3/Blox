@@ -221,3 +221,101 @@ let faceCheck a =
 
 ;;
 *)
+
+(*JOIN FXN*)
+(*UNCHECKED AND UNTESTED*)
+let join frameA (a,b,c,d) frameB (e,f,g,h) = 
+	let ax = a in
+	let ay = b in
+	let az = c in
+	let afacetr = d in
+	
+	let bx = e in
+	let by = f in
+	let bz = g in
+	let bfacetr = h in
+	
+	let axshift = 0 in
+	let ayshift = 0 in
+	let azshift = 0 in
+	
+	let bxshift = 0 in
+	let byshift = 0 in
+	let bzshift = 0 in 
+
+	if frameA = frameB then prerr_string "Error: Attempting to join blocks from the same Frame.";  
+			
+	let aface = false in 
+	
+	if afacetr = "E" then aface = frameA[ax][ay][az].open_faces[0]
+		else
+	if afacetr = "W" then aface = frameA[ax][ay][az].open_faces[1]
+		else
+	if afacetr = "N" then aface = frameA[ax][ay][az].open_faces[2]
+		else
+	if afacetr = "S" then aface = frameA[ax][ay][az].open_faces[3]
+		else
+	if afacetr = "F" then aface = frameA[ax][ay][az].open_faces[4]
+		else
+	if afacetr = "B" then aface = frameA[ax][ay][az].open_faces[5] in
+
+	let bface = false in
+	
+	if bfacetr = "E" then(
+		bface = frameb[bx][by][bz].open_faces[0];
+		bxshift = (ax - 1) - bx;
+		byshift = ay - by;
+		bzshift = az - bz)
+		
+	else if bfacetr = "W" then( 
+		bface = frameb[bx][by][bz].open_faces[1];
+		bxshift = (ax + 1) - bx;
+		byshift = ay - by;
+		bzshift = az - bz)
+		
+	else if bfacetr = "N" then( 
+		bface = frameb[bx][by][bz].open_faces[2];
+		bxshift = ax - bx;
+		byshift = (ay - 1) - by;
+		bzshift = az - bz)
+		
+	else if bfacetr = "S" then( 
+		bface = frameb[bx][by][bz].open_faces[3];
+		bxshift = ax - bx;
+		byshift = (ay + 1) - by;
+		bzshift = az - bz) 
+		
+	else if bfacetr = "F" then( 
+		bface = frameb[bx][by][bz].open_faces[4];
+		bxshift = ax - bx;
+		byshift = ay - by;
+		bzshift = (az - 1) - bz)
+		
+	else if bfacetr = "B" then( 
+		bface = frameb[bx][by][bz].open_faces[5];
+		bxshift = ax - bx;
+		byshift = ay - by;
+		bzshift = (az + 1) - bz) in
+	
+	(* check if frameA's block face is available *)
+	if not(aface) then prerr_string "Error: Block face is not available for Join with";
+	
+	(* check if frameB's block face is available *)
+	if not(bface) then prerr_string "Error: Block face is not available for Join with";
+	
+	(* check for opposite faces *)
+	if (((afacetr = "E") && not(bfacetr = "W")) ||
+			((afacetr = "W") && not(bfacetr "W")))
+		then prerr_string "Error: Illegal face option.";
+
+	if (((afacetr = "N") && not(bfacetr = "S")) ||
+		  ((afacetr = "S") && not(bfacetr "N")))
+		then prerr_string "Error: Illegal face option.";
+	
+	if (((afacetr = "N") && not(bfacetr = "S")) ||
+		  ((afacetr = "S") && not(bfacetr "N")))
+		then prerr_string "Error: Illegal face option.";
+
+	(*  ========== ALL CHECKS PASSED. BEGIN JOIN PROCESS ========== *)
+		
+  (* create an entry for Frame "joins" list *)		
