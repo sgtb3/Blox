@@ -9,14 +9,14 @@ type expr =             (* Expression constructors (of arg1 * arg2 * ... ) *)
 
 type face_id = {
   x : int;
-  y :int;
+  y : int;
   z : int;
   face : string;
 }
 
 type join_arg = {
   fr_name : string;
-  blck_face : face_id;  (*This should technically be a set of faces, not just one necessarily *)
+  blck_face : face_id list;  (*This should technically be a set of faces, not just one necessarily *)
 }
 
 type join = {

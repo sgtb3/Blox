@@ -34,7 +34,6 @@ stmt:
   | fr_print          { Fr_print($1) }*/
 
 expr:
-    VOID             { Void           }
   | INTLIT           { Int($1)        }
   | ID               { Id($1)         }
   | ID ASSIGN expr   { Assign($1, $3) }
