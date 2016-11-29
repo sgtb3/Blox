@@ -37,7 +37,7 @@ expr:
   | INTLIT           { Int($1)        }
   | ID               { Id($1)         }
   | ID ASSIGN expr   { Assign($1, $3) }
-
+/*
 fr_print:
   PRINT ID SEMI
   { { fr_id = $2; } }
@@ -53,7 +53,7 @@ join:
   JOIN LPAREN join_arg COMMA join_arg RPAREN SEMI
   { { fr_a = $3;
       fr_b = $5; } }
-
+*/
 join_arg:
 	ID COMMA LCURL face_set RCURL
   { { fr_name = $1;

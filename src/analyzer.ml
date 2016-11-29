@@ -4,6 +4,9 @@ open Sast
 module StringMap = Map.Make(String)
 
 let run (stmts) =                  (* let check (globals, functions) = (* *) *)
+  
+  print_endline "compile not implemented yet"
+(*
   let report_duplicate exceptf list =   (* Raise an exception if the given list has a duplicate frames *)
     let rec helper = function
 	     n1 :: n2 :: _ when n1 = n2 -> raise (Failure (exceptf n1))
@@ -17,8 +20,11 @@ let run (stmts) =                  (* let check (globals, functions) = (* *) *)
     else 
       raise err
   in*)
-  report_duplicate (fun n -> "duplicate frame " ^ n) (List.map (fun frd -> frd.fr_name) stmts);
-
+  report_duplicate (fun n -> "duplicate frame " ^ n) 
+    (List.map (fun sts -> match sts with 
+                            Fr_decl(_,_,_,nm) -> 
+                              nm.fr_name) stmts);
+*)
   (* let built_in_decls =            (* Function declaration for a named function *)
     StringMap.add "print" { 
       fname = "print"; 
