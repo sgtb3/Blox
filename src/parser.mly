@@ -26,16 +26,10 @@ stmt_list:
 stmt:
     expr SEMI         { Expr($1)     }
   | JOIN LPAREN join_arg COMMA join_arg RPAREN SEMI { Join($3,$5) }
-  | FRAME FOPEN INTLIT COMMA INTLIT COMMA INTLIT FCLOSE ID SEMI
-    { { x = $3; 
-        y = $5;
-        z = $7;
-        fr_name = $9; } }
-  | PRINT ID SEMI
-    { { fr_id = $2; } }
+  | FRAME FOPEN INTLIT COMMA INTLIT COMMA INTLIT FCLOSE ID SEMI { Fr_decl($3,$5,$7,$9) }
+  | PRINT ID SEMI { Fr_print($2) }
 
-
-	/*| join              { Join()       }
+	/*| join              { Join($1)       }
   | fr_decl           { Fr_decl($1)  }
   | fr_print          { Fr_print($1) }*/
 
