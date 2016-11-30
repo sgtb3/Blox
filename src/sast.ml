@@ -15,5 +15,12 @@ type sfr_decl = {
   fr_nameS : string;
 }
 
+type sface_id = {
+  xS : int;
+  yS : int;
+  zS : int;
+  faceS : string;
+}
+
 type program = 
   fr_decl list

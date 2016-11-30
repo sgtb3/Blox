@@ -65,8 +65,5 @@ face_set:
 
 face_id:
 	LPAREN INTLIT COMMA INTLIT COMMA INTLIT COMMA ID RPAREN
-  { { x = $2;
-      y = $4;
-      z = $6;
-      face = $8; } }
+  { { dim = ($2,$4,$6); face = $8; } }
 	
