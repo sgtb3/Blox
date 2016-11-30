@@ -36,7 +36,7 @@ stmt:
 expr:
   | INTLIT           { Int($1)        }
   | ID               { Id($1)         }
-  | ID ASSIGN expr   { Assign($1, $3) }
+  | FRAME ID ASSIGN expr   { Assign($2, $4) }
 /*
 fr_print:
   PRINT ID SEMI
@@ -56,7 +56,7 @@ join:
 */
 join_arg:
 	ID COMMA LCURL face_set RCURL
-  { { fr_name = $1;
+  { { frname = $1;
       blck_face = $4; } }
 
 face_set:
