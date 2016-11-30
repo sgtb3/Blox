@@ -319,3 +319,240 @@ let join frameA (a,b,c,d) frameB (e,f,g,h) =
 	(*  ========== ALL CHECKS PASSED. BEGIN JOIN PROCESS ========== *)
 		
   (* create an entry for Frame "joins" list *)		
+	
+	
+	(* OLD STUFF BELOW *)
+(*
+	/****************
+* helloworld.blox
+****************/
+
+/* Create basic frames to construct letters with */
+Frame<1,1,1> one;
+Frame<2,1,1> twox;
+Frame<1,2,1> twoy;
+Frame<3,1,1> threex;
+Frame<1,3,1> threey;
+Frame<1,5,1> fivey;
+Frame<46,5,1> base;
+
+    // This is a Compiler function
+    private static void Join(Frame A, int[] A_coord, String A_face,
+                             Frame B, int[] B_coord, String B_face) {
+// FUNCTION CALL
+# let join frameA (a,b,c,d) frameB (e,f,g,h) = abs (a - b);;
+val join : 'a -> int * int * 'b * 'c -> 'd -> 'e * 'f * 'g * 'h -> int = <fun>
+
+type faces = {east:bool; west:bool; north:bool; south:bool; front:bool; back:bool};;
+type frame = {x:int; y:int; z:int; name:string; sides:faces};;
+let frameA = {x=1; y=1; z=1; name="one"; sides ={east = true; west = true; north = true; south = true; front = true; back = true}};;
+let frameB = {x=2; y=1; z=1; name="twox"; sides ={east = true; west = true; north = true; south = true; front = true; back = true}};;
+let frameC = {x=1; y=1; z=1; name="one"};;
+ 
+let join frameA (a,b,c,d) frameB (e,f,g,h) = 
+	let ax = a in
+	let ay = b in
+	let az = c in
+	let achar = d in
+	
+	let bx = e in
+	let by = f in
+	let bz = g in
+	let bchar = h in
+	
+	let axshift = 0 in
+	let ayshift = 0 in
+	let azshift = 0 in
+	
+	let bxshift = 0 in
+	let byshift = 0 in
+	let bzshift = 0 in 
+	
+
+	if frameA = frameB then print_string "Error: Attempting to join blocks from the same Frame." 
+		else 
+			
+	let aface = false in 
+
+  if frameA.name = "E" then aface = frameA.sides.east
+		else
+	if frameA.name = "W" then aface = frameA.sides.west
+		else
+	if frameA.name = "N" then aface = frameA.sides.north
+		else
+	if frameA.name = "S" then aface = frameA.sides.south
+		else
+	if frameA.name = "F" then aface = frameA.sides.front
+		else
+	if frameA.name = "B" then aface = frameA.sides.back 
+    and aface = false;; in 
+		
+	let check2() = 
+  let bface = false;; in
+	
+  if frameB.name = "E" then bface = frameB.sides.east in
+		bxshift = (ax - 1) - bx in
+		byshift = ay - by in
+		bzshift = az - bz 
+		else
+	if frameB.name = "W" then bface = frameB.sides.west in
+		bxshift = (ax + 1) - bx in
+		byshift = ay - by in
+		bzshift = az - bz 
+		else
+	if frameB.name = "N" then bface = frameB.sides.north in
+		bxshift = ax - bx in
+		byshift = (ay - 1) - by in
+		bzshift = az - bz 
+		else
+	if frameB.name = "S" then bface = frameB.sides.south in
+		bxshift = ax - bx in
+		byshift = (ay + 1) - by in
+		bzshift = az - bz 
+		else
+	if frameB.name = "F" then bface = frameB.sides.front in
+		bxshift = ax - bx in
+		byshift = ay - by in
+		bzshift = (az - 1) - bz 
+		else 
+	if frameB.name = "B" then bface = frameB.sides.back in
+		bxshift = ax - bx in
+		byshift = ay - by in
+		bzshift = az - bz 
+		;;
+		
+		
+
+  
+	  let bface = false;; 
+	
+  if frameB.name = "E" then (bface = frameB.sides.east) and
+		let bxshift = (2 - 1) in
+		let byshift = 3- 4 in
+		let bzshift = 6 - 22;; 
+	
+	
+	
+	
+
+														 
+
+/* Create an H */
+Frame H = fivey;
+Join(H, (1,3,1,E), twox, (1,1,1,W));
+Join(H, (3,3,1,E), fivey, (1,3,1,W));
+
+/* Create an E */
+Frame E = fivey;
+Join(E, (1,1,1,E), twox, (1,1,1,W));
+Join(E, (1,3,1,E), twox, (1,1,1,W));
+Join(E, (1,5,1,E), twox, (1,1,1,W));
+
+/* Create an L */
+Frame L = fivey;
+Join(L, (1,1,1,E), twox, (1,1,1,W));
+
+/* Create an O */
+Frame O = fivey;
+Join(O, (1,1,1,E), twox, (1,1,1,W));
+Join(O, (1,5,1,E), twox, (1,1,1,W));
+Join(O, (3,1,1,E), fivey, (1,1,1,W));
+
+/* Create a W */
+Frame W = fivey;
+Join(W, (1,1,1,E), threex, (1,1,1,W));
+Join(W, (4,1,1,E), fivey, (1,1,1,W));
+Join(W, (3,1,1,N), twoy, (1,1,1,S));
+
+/* Create an R */
+Frame R = threey;
+Join(R,(1,3,1,E), twox, (1,1,1,W));
+
+/* Create an D */
+Frame D = threey;
+Join(D,(1,1,1,E), one, (1,1,1,W));
+Join(D,(1,3,1,E), one, (1,1,1,W));
+Join(D,(2,1,1,E), fivey, (1,1,1,W));
+
+/* Join letters to the base */
+Join(base,(1,1,1,F), H, (1,1,1,B));
+Join(base,(6,1,1,F), E, (1,1,1,B));
+Join(base,(10,1,1,F), L, (1,1,1,B));
+Join(base,(14,1,1,F), L, (1,1,1,B));
+Join(base,(18,1,1,F), O, (1,1,1,B));
+Join(base,(25,1,1,F), W, (1,1,1,B));
+Join(base,(31,1,1,F), O, (1,1,1,B));
+Join(base,(36,1,1,F), R, (1,1,1,B));
+Join(base,(40,1,1,F), L, (1,1,1,B));
+Join(base,(44,1,1,F), D, (1,1,1,B));
+
+print base;
+
+/* Need to specify which frame is supposed to be converted to amf??*/
+let join frameA (a,b,c,d) frameB (e,f,g,h) = 
+	let ax = a in
+	let ay = b in
+	let az = c in
+	let achar = d in
+	
+	let bx = e in
+	let by = f in
+	let bz = g in
+	let bchar = h in
+	
+	let axshift = 0 in
+	let ayshift = 0 in
+	let azshift = 0 in
+	
+	let bxshift = ref 0 in
+	let byshift = ref 0 in
+	let bzshift = ref 0 in 
+
+	if frameA = frameB then print_string "Error: Attempting to join blocks from the same Frame." 
+		else
+
+let bface = false in
+  if frameB.name = "E" then 
+	(bface = frameB.sides.east; 
+		bxshift := (ax - 1) - bx;
+		byshift := ay - by;
+		bzshift := az - bz)
+		
+		else if frameB.name = "W" then 
+		(bface = frameB.sides.west;
+		bxshift := (ax + 1) - bx;
+		byshift := ay - by;
+		bzshift := az - bz)
+		
+		else if frameB.name = "N" then 
+		(bface := frameB.sides.north;
+		bxshift := ax - bx;
+		byshift := (ay - 1) - by;
+		bzshift := az - bz)
+		
+		else if frameB.name = "S" then 
+		(bface := frameB.sides.south;
+		bxshift := ax - bx;
+		byshift := (ay + 1) - by;
+		bzshift := az - bz) 
+		
+		else if frameB.name = "F" then 
+		(bface = frameB.sides.front;
+		bxshift := ax - bx;
+		byshift := ay - by;
+		bzshift := (az - 1) - bz)
+		
+		else if frameB.name = "B" then 
+		(bface := frameB.sides.back;
+		bxshift := ax - bx;
+		byshift := ay - by;
+		bzshift := az - bz);;
+*)
+		
+	
+	
+	
+	
+	
+	
+	
