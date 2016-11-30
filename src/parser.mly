@@ -26,6 +26,7 @@ stmt:
   | PRINT ID SEMI { Fr_print($2) }
   | JOIN LPAREN join_arg COMMA join_arg RPAREN SEMI { Join($3,$5) }
   | FRAME FOPEN INTLIT COMMA INTLIT COMMA INTLIT FCLOSE ID SEMI { Fr_decl($3,$5,$7,$9) }
+  | LCURL stmt_list RCURL { Block(List.rev $2) }
 
 expr:
   | ID                   { Id($1)  }

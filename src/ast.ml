@@ -1,5 +1,5 @@
 type primi_typ =
-    Int of int
+    Int
   | Void
 
 type expr =
