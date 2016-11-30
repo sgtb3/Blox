@@ -42,41 +42,45 @@ type stmt =
 
 type program = stmt list
 
-let rec string_of_expr = function         (* print expressions *)
+(* print expressions *)
+let rec string_of_expr = function         
     Int(x) -> string_of_int x
   | Id(x)  -> x
   | Assign(x, y) -> "Frame " ^ x ^ " = " ^ string_of_expr y ^ ";"
 
-let string_of_frdecl x y z name =         (* print frame declarations *)
+(* print frame declarations *)
+let string_of_frdecl x y z name =         
   "Frame<" ^ string_of_int x ^ "," ^
              string_of_int y ^ "," ^
              string_of_int z ^ "> " ^
              name ^ ";\n"
 
+(* print dimensions *)
 let string_of_dim (x,y,z) =
-  string_of_int x ^ ", " ^
-  string_of_int y ^ ", " ^
+  string_of_int x ^ "," ^
+  string_of_int y ^ "," ^
   string_of_int z
 
-(* f  = type face_id *)
+(* print type face_id *)
 let string_of_face_id f =
   "(" ^  string_of_dim f.dim ^ f.face ^ ")"
 
+(* print list of face_id's *)
 let string_of_face_id_list fid =
   String.concat "," (List.rev (List.map string_of_face_id fid))
-(*  face_id               ->  string_of_face_id face_id
-  | face_id face_id_list  ->  string_of_face_id face_id ^ ", " ^
-                              string_of_face_id_list face_id_list *)
-(*x type = type join arg *)
-let string_of_join_arg x =
-  x.frname ^ "{" ^ string_of_face_id_list x.blck_face ^ "}\n"
 
-let rec string_of_stmt = function (* print statements *)
+(* print list of join args *)
+let string_of_join_arg x =
+  x.frname ^ ", {" ^ string_of_face_id_list x.blck_face ^ "}"
+
+(* print statements *)
+let rec string_of_stmt = function 
     Block(stmts) -> "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
   | Expr(expr)   -> string_of_expr expr ^ "\n"
   | Join(x, y)   -> "Join(" ^ string_of_join_arg x ^ ", " ^ string_of_join_arg y ^ ")\n"
   | Fr_decl(x, y, z, name) -> string_of_frdecl x y z name
-  | Fr_print(name) -> "Print " ^ name ^ "\n"
+  | Fr_print(name) -> "Print " ^ name ^ ";\n"
 
+(* print program *)
 let string_of_program stmts =  (* print program (a list of frame declarations) *)
   String.concat "" (List.rev (List.map string_of_stmt stmts))
