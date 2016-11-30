@@ -13,7 +13,7 @@ type face_id = {
 }
 
 type join_arg = {
-  fr_name : string;
+  frname : string;
   blck_face : face_id list;
 }
 
@@ -45,7 +45,7 @@ type program = stmt list
 let rec string_of_expr = function         (* print expressions *)
     Int(x) -> string_of_int x
   | Id(x)  -> x
-  | Assign(x, y) -> "Frame " ^ x ^ " = " ^ string_of_expr y
+  | Assign(x, y) -> "Frame " ^ x ^ " = " ^ string_of_expr y ^ ";"
 
 let string_of_frdecl x y z name =         (* print frame declarations *)
   "Frame<" ^ string_of_int x ^ "," ^
@@ -69,7 +69,7 @@ let string_of_face_id_list fid =
                               string_of_face_id_list face_id_list *)
 (*x type = type join arg *)
 let string_of_join_arg x =
-  x.fr_name ^ "{" ^ string_of_face_id_list x.blck_face ^ "}\n"
+  x.frname ^ "{" ^ string_of_face_id_list x.blck_face ^ "}\n"
 
 let rec string_of_stmt = function (* print statements *)
     Block(stmts) -> "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
