@@ -224,6 +224,7 @@ let faceCheck a =
 
 (*JOIN FXN*)
 (*UNCHECKED AND UNTESTED*)
+open Dynarray
 let join frameA (a,b,c,d) frameB (e,f,g,h) = 
 	let ax = a in
 	let ay = b in
@@ -235,13 +236,13 @@ let join frameA (a,b,c,d) frameB (e,f,g,h) =
 	let bz = g in
 	let bfacetr = h in
 	
-	let axshift = 0 in
-	let ayshift = 0 in
-	let azshift = 0 in
+	let ax_shift = 0 in
+	let ay_shift = 0 in
+	let az_shift = 0 in
 	
-	let bxshift = 0 in
-	let byshift = 0 in
-	let bzshift = 0 in 
+	let bx_shift = 0 in
+	let by_shift = 0 in
+	let bz_shift = 0 in 
 
 	if frameA = frameB then prerr_string "Error: Attempting to join blocks from the same Frame.";  
 			
@@ -257,51 +258,51 @@ let join frameA (a,b,c,d) frameB (e,f,g,h) =
 		else
 	if afacetr = "F" then aface = frameA[ax][ay][az].open_faces[4]
 		else
-	if afacetr = "B" then aface = frameA[ax][ay][az].open_faces[5] in
+	if afacetr = "B" then aface = frameA[ax][ay][az].open_faces[5] 
 
 	let bface = false in
 	
 	if bfacetr = "E" then(
-		bface = frameb[bx][by][bz].open_faces[0];
-		bxshift = (ax - 1) - bx;
-		byshift = ay - by;
-		bzshift = az - bz)
+		bface = frameB[bx][by][bz].open_faces[0];
+		bx_shift = (ax - 1) - bx;
+		by_shift = ay - by;
+		bz_shift = az - bz)
 		
 	else if bfacetr = "W" then( 
-		bface = frameb[bx][by][bz].open_faces[1];
-		bxshift = (ax + 1) - bx;
-		byshift = ay - by;
-		bzshift = az - bz)
+		bface = frameB[bx][by][bz].open_faces[1];
+		bx_shift = (ax + 1) - bx;
+		by_shift = ay - by;
+		bz_shift = az - bz)
 		
 	else if bfacetr = "N" then( 
-		bface = frameb[bx][by][bz].open_faces[2];
-		bxshift = ax - bx;
-		byshift = (ay - 1) - by;
-		bzshift = az - bz)
+		bface = frameB[bx][by][bz].open_faces[2];
+		bx_shift = ax - bx;
+		by_shift = (ay - 1) - by;
+		bz_shift = az - bz)
 		
 	else if bfacetr = "S" then( 
-		bface = frameb[bx][by][bz].open_faces[3];
-		bxshift = ax - bx;
-		byshift = (ay + 1) - by;
-		bzshift = az - bz) 
+		bface = frameB[bx][by][bz].open_faces[3];
+		bx_shift = ax - bx;
+		by_shift = (ay + 1) - by;
+		bz_shift = az - bz) 
 		
 	else if bfacetr = "F" then( 
-		bface = frameb[bx][by][bz].open_faces[4];
-		bxshift = ax - bx;
-		byshift = ay - by;
-		bzshift = (az - 1) - bz)
+		bface = frameB[bx][by][bz].open_faces[4];
+		bx_shift = ax - bx;
+		by_shift = ay - by;
+		bz_shift = (az - 1) - bz)
 		
 	else if bfacetr = "B" then( 
-		bface = frameb[bx][by][bz].open_faces[5];
-		bxshift = ax - bx;
-		byshift = ay - by;
-		bzshift = (az + 1) - bz) in
+		bface = frameB[bx][by][bz].open_faces[5];
+		bx_shift = ax - bx;
+		by_shift = ay - by;
+		bz_shift = (az + 1) - bz) in
 	
 	(* check if frameA's block face is available *)
-	if not(aface) then prerr_string "Error: Block face is not available for Join with";
+	if not(aface) then prerr_string; "Error: Block face is not available for Join with";
 	
 	(* check if frameB's block face is available *)
-	if not(bface) then prerr_string "Error: Block face is not available for Join with";
+	if not(bface) then prerr_string; "Error: Block face is not available for Join with";
 	
 	(* check for opposite faces *)
 	if (((afacetr = "E") && not(bfacetr = "W")) ||
@@ -320,13 +321,58 @@ let join frameA (a,b,c,d) frameB (e,f,g,h) =
 		
   (* create an entry for Frame "joins" list *)		
 	
+	type joins_entry = {frameone:frame; coordinatesone:int*int*int*int; frametwo:frame; coordinatestwo:int*int*int*int} in
+	frameA.joins.add = join_entry in  (* add the join entry into A's joins *)
+  frameB.joins.add = join_entry in  (* add the join entry into B's joins *)
+	
+	(* Determine shift values for A and B *)
+	if bx_shift < 0 then(
+		ax_shift = -bx_shift;
+		bx_shift = 0;)
+	
+	if by_shift < 0 then(
+		ay_shift = -by_shift;
+		by_shift = 0;)
+		
+	if bz_shift < 0 then(
+		az_shift = -bz_shift;
+		bz_shift = 0;)
+		
+	(* Determine size of new array *)
+
+	let cx_max = frameA.x + ax_shift in
+	if cx_max < (frameB.x + bx_shift) then 
+		cx_max = frameB.x + bx_shift;		
+		
+	let cy_max = frameA.y + ay_shift in
+	if cy_max < (frameB.y + by_shift) then 
+		cy_max = frameB.y + by_shift;
+
+	let cz_max = frameA.z + az_shift in
+	if cz_max < (frameB.z + bz_shift) then 
+		cz_max = frameB.z + bz_shift;		
+		
+  (* create an entry for Frame "joins" list *)		
+	
 	
 	(* OLD STUFF BELOW *)
 (*
 	/****************
 * helloworld.blox
 ****************/
+type blck = {faces : bool array};;
+let blck1 = {faces = [|false;false;false;false;false;false|]};;
+let frame
+let frame1 = Array.init 3 (fun _ -> Array.init 3 (fun _ -> (Array.make 3 blck1)));;
 
+A.get(Ax).get(Ay).get(Az).open_faces[0];"
+A[Ax][Ay][Az].open_faces[0];
+
+frame1.blck1.faces[1][1][1]
+hat = frame1[ax][ay][az]
+
+type faces = {one:bool; two:bool};;
+let blockfaces = {one=true; two=false};;
 /* Create basic frames to construct letters with */
 Frame<1,1,1> one;
 Frame<2,1,1> twox;
