@@ -1,14 +1,14 @@
 open Ast
 
-type sexpr =  
-    SIntLit of int 
+type sexpr =
+    SIntLit of int
   | SId of string * primi_typ
 
-type sstmt = 
-    SBlock of stmt list 
+type sstmt =
+    SBlock of stmt list
   | SExpr of expr
 
-type sfr_decl = { 
+type sfr_decl = {
   xS : int;
   yS : int;
   zS : int;
@@ -16,11 +16,9 @@ type sfr_decl = {
 }
 
 type sface_id = {
-  xS : int;
-  yS : int;
-  zS : int;
+  dimS : int * int * int;
   faceS : string;
 }
 
-type program = 
+type program =
   fr_decl list
