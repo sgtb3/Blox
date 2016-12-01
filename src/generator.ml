@@ -1,6 +1,42 @@
 
 
 (* faceCheck function *)
+let faceCheck a = 
+
+  for i = 0 to Array.length a - 1 do
+
+    for j = 0 to Array.length a.(i) - 1 do
+
+      for k = 0 to Array.length a.(i).(j) - 1 do
+        let b = a.(i).(j).(k) in
+
+        if Array.length b.faces = 6 then(
+
+          let xblck = (if i < Array.length a - 1 then a.(i + 1).(j).(k) else {faces = [||]}) in
+          let yblck = (if j < Array.length a.(i) - 1 then a.(i).(j + 1).(k) else {faces = [||]}) in
+          let zblck = (if k < Array.length a.(i).(j) - 1 then a.(i).(j).(k + 1) else {faces = [||]}) in
+
+          if Array.length xblck.faces = 6 then(
+            Array.set b.faces 0 false;
+            Array.set xblck.faces 1 false)
+          else ignore();
+
+          if Array.length yblck.faces = 6 then(
+            Array.set b.faces 2 false;
+            Array.set yblck.faces 3 false)
+          else ignore();
+
+          if Array.length zblck.faces = 6 then(
+            Array.set b.faces 4 false;
+            Array.set zblck.faces 5 false)
+          else ignore())
+
+        else ignore();
+
+      done;
+    done;
+  done;
+
 
 (* Helper function for Join*)
 let frm_mod xarg yarg zarg blcksarg =
@@ -108,11 +144,11 @@ let join frameA (a,b,c,d) frameB (e,f,g,h) =
 	else ignore();
 
 	(*  ========== ALL CHECKS PASSED. BEGIN JOIN PROCESS ========== *)
-		
+	(* PROBABLY WON'T NEED THIS
   (* create an entry for Frame "joins" list *)		
 	type joins_entry = {frameone:frame; coordinatesone:int*int*int*int; frametwo:frame; coordinatestwo:int*int*int*int} in
 	frameA.joins.add = join_entry in  (* add the join entry into A's joins *)
-  frameB.joins.add = join_entry in  (* add the join entry into B's joins *)
+  frameB.joins.add = join_entry in  (* add the join entry into B's joins *) *)
 	
 	(* Determine shift values for A and B *)
 	if bx_shift < 0 then(
@@ -149,56 +185,42 @@ let join frameA (a,b,c,d) frameB (e,f,g,h) =
 
 	(* Create new array of blocks *)
 	let Cblcks = Array.init cx_max (fun _ -> Array.init cy_max (fun _ -> (Array.init cz_max 
-		(fun _ -> let b = {faces = [|false;false;false;false;false;false|] } in b )))) in
+		(fun _ -> let b = {faces = [||] } in b )))) in
 
 	(* Fill Cblcks with blocks from array A *)
-	let x = ref 0 in
-
 	for i = 0 to frameA.x - 1 do
-		let y = ref 0 in
 
 		for j = 0 to frameA.y - 1 do
-			let z = ref 0 in
 
 			for k = 0 to frameA.z - 1 do
-				let b = (Array.get (Array.get (Array.get frameA.blocks x) y) z) in
-				if Array.length b.faces = 6 then (Array.set (Array.get (Array.get Cblcks x) y) z b)
+
+				let b = (Array.get (Array.get (Array.get frameA.blocks i) j) k) in
+				if Array.length b.faces = 6 then (Array.set (Array.get (Array.get Cblcks i) j) k b)
 				else ignore();
 
-				incr z
 			done;
-			incr y
 		done;
-		incr x
 	done;
 
 
 	(* Fill Cblcks with blocks from array B *)
-	let x = ref 0 in
-
 	for i = 0 to frameB.x - 1 do
-		let y = ref 0 in
 
 		for j = 0 to frameB.y - 1 do
-			let z = ref 0 in
 
 			for k = 0 to frameB.z - 1 do
-				let b = (Array.get (Array.get (Array.get frameB.blocks x) y) z) in
-				if Array.length b.faces = 6 then (Array.set (Array.get (Array.get Cblcks x) y) z b)
+
+				let b = (Array.get (Array.get (Array.get frameB.blocks i) j) k) in
+				if Array.length b.faces = 6 then (Array.set (Array.get (Array.get Cblcks i) j) k b)
 				else ignore();
 
-				incr z
 			done;
-			incr y
 		done;
-		incr x
 	done;
 
-    (* Run faceCheck !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*)
-	(*faceCheck Cblcks*)
+    (* Run faceCheck *)
+	faceCheck Cblcks
 
 	(* Update Frame A with Cblocks array to finish merge of B into A *)
 	let A = frm_mod cx_max cy_max cz_max Cblcks
-
-
 
