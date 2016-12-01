@@ -1,135 +1,98 @@
-(* ocamlyacc Abstract Syntax Tree for Blox *)
+type primi_typ =
+    Int
+  | Void
 
-type op = Add | Equal | Less 
-(*| Sub 
-  | Mult 
-  | Div 
-  | Neq 
-  | Leq 
-  | Greater 
-  | Geq 
-  | FrameEq
-  | And 
-  | Or *)
+type expr =
+    Int of int
+  | Id of string
+  | Assign of string * expr
 
-type uop = Neg  (* | Not  *)
-type typ = 
-    Int 
-  | Frame 
-  | Array of typ 
-  | Default of string 
-  | Join of typ
-  | Void 
-
-  (* | Bool
-  | Float
-  | Null
-  | String
-  | ObjGen  of typ
-  | Array   of typ
-  | Set     of typ
-  | Map     of typ * typ *)
   
 type blck = {
   faces : bool array;
-}
-
-type join = {
-  f1_name : string;
-  f1_loc  : int * int * int * string;
-  f2_name : string;
-  f2_loc  : int * int * int * string;
 }
 
 type frame = {
   x       : int;
   y       : int;
   z       : int;
-  name    : string;
   blocks  : blck array array array;
-  joins   : join array;
 }
 
-type bind = typ * string
+type face_id = {
+  dim  : int * int * int;
+  face : string;
+}
 
-type expr = 
-    Literal of int
-  | Id      of string
-  | Array   of expr list
-  | Unop    of uop    * expr
-  | Assign  of string * expr
-  | Call    of string * expr list
-  | Noexpr
+type join_arg = {
+  frname : string;
+  blck_face : face_id list;
+}
 
-  (* | BoolLit of bool *)
-  (* | Float   of float *)
-  (* | Null    of string nullpointer belong to Default s *)
-  (* | Objid   of string * string *)
-  (* | ObjGen  of typ *)
-  (* | Set     of expr list *)
-  (* | Map     of (expr * expr) list *)
-  
-  (* | String  of string (*represent const string*) *)
-  (* | Binop   of expr   * op * expr *)
-  
-type stmt = 
-    Expr of expr
-  | Return of expr
-  (* | Block  of stmt list *)
-  (* | If     of expr * stmt * stmt *)
-  (* | For    of expr * expr * expr * stmt *)
-  (* | While  of expr * stmt *)
-  
-  (* | Break *)
-  (* | Continue *)
-(* 
-type func_decl = { 
-  typ     : typ;
-  fname   : string;
-  formals : bind list;
-  locals  : bind list;
-  body    : stmt list;
-} *)
+type join = {
+  fr_a : join_arg;
+  fr_b : join_arg;
+}
 
-type program = bind list
+type fr_decl = {
+  x : int;
+  y : int;
+  z : int;
+  fr_name : string;
+}
 
-(* type program = bind list * func_decl list *)
+type fr_print = {
+  fr_id : string;
+}
 
-(* Pretty-printing functions *)
-(* let string_of_op = function
-  | Add   -> "+"
-  | Less  -> "<"
-  | Equal -> "==" *)
+type stmt =
+    Block of stmt list
+  | Expr of expr
+  | Join of join_arg * join_arg
+  | Fr_decl of int * int * int * string
+  | Fr_print of string
 
-(* | Sub     -> "-"
-  | Mult    -> "*"
-  | Div     -> "/"
-  | Neq     -> "!="
-  | FrameEq -> ".="
-  | Leq     -> "<="
-  | Greater -> ">"
-  | Geq     -> ">="
-  | And     -> "&&"
-  | Or      -> "||" *)
-(* 
-let string_of_uop = function
-    Neg -> "-"
-  (* | Not -> "!" *)
- *)
-(* 
-let rec string_of_typ = function
-    Int       -> "int"
-  | Frame     -> "Frame"
-  | Void      -> "void"
-  | Array x   -> "Array_" ^ (string_of_typ x)
-	| Default x -> x
+type program = stmt list
 
+(* print expressions *)
+let rec string_of_expr = function         
+    Int(x) -> string_of_int x
+  | Id(x)  -> x
+  | Assign(x, y) -> "Frame " ^ x ^ " = " ^ string_of_expr y ^ ";"
 
-  | _ -> raise (Failure ("ast.ml: string_of_typ: unsupported type"))
-  | Bool       -> "bool"
-  | Float      -> "float"
-  | Null       -> "Null"
-  | String     -> "String"
-  | Set x      -> "Set_"   ^ (string_of_typ x)
-  | Map (x, y) -> "Map_"   ^ (string_of_typ x) ^ "_" ^ (string_of_typ y)
-   *)
+(* print frame declarations *)
+let string_of_frdecl x y z name =         
+  "Frame<" ^ string_of_int x ^ "," ^
+             string_of_int y ^ "," ^
+             string_of_int z ^ "> " ^
+             name ^ ";\n"
+
+(* print dimensions *)
+let string_of_dim (x,y,z) =
+  string_of_int x ^ "," ^
+  string_of_int y ^ "," ^
+  string_of_int z
+
+(* print type face_id *)
+let string_of_face_id f =
+  "(" ^  string_of_dim f.dim ^ f.face ^ ")"
+
+(* print list of face_id's *)
+let string_of_face_id_list fid =
+  String.concat "," (List.rev (List.map string_of_face_id fid))
+
+(* print list of join args *)
+let string_of_join_arg x =
+  x.frname ^ ", {" ^ string_of_face_id_list x.blck_face ^ "}"
+
+(* print statements *)
+let rec string_of_stmt = function 
+    Block(stmts) -> "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
+  | Expr(expr)   -> string_of_expr expr ^ "\n"
+  | Join(x, y)   -> "Join(" ^ string_of_join_arg x ^ ", " ^ string_of_join_arg y ^ ")\n"
+  | Fr_decl(x, y, z, name) -> string_of_frdecl x y z name
+  | Fr_print(name) -> "Print " ^ name ^ ";\n"
+
+(* print program *)
+let string_of_program stmts =  (* print program (a list of frame declarations) *)
+  String.concat "" (List.rev (List.map string_of_stmt stmts))

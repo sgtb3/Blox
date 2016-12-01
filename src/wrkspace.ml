@@ -1,6 +1,27 @@
+(* trying to write the faceCheck function *)
 
 
-(* faceCheck function *)
+type blck = {
+  faces : bool array;
+}
+
+type frame = {
+  x       : int;
+  y       : int;
+  z       : int;
+  blocks  : blck array array array;
+}
+
+let blck1 = {faces = [|true;true;true;true;true;true|]};;
+
+let arr = Array.init 3 (fun _ -> Array.init 3 (fun _ -> (Array.init 3 (fun _ -> let b = {faces = [|true;true;true;true;true;true|] } in b ))));;
+
+let frm = {x = 3; y = 3; z = 3; blocks = arr}
+
+let frm_mod xarg yarg zarg blcksarg =
+  let f = {x = xarg; y = yarg; z = zarg; blocks = blcksarg} in f
+;;
+
 let faceCheck a = 
 
   for i = 0 to Array.length a - 1 do
@@ -37,27 +58,23 @@ let faceCheck a =
     done;
   done;
 
-
-(* Helper function for Join*)
-let frm_mod xarg yarg zarg blcksarg =
-  let f = {x = xarg; y = yarg; z = zarg; blocks = blcksarg} in f
+;;
 
 
-(* Join Function*)
 let join frameA a b c d frameB e f g h = 
-  let ax = a in 
-  let ay = b in
-  let az = c in
+  let ax = a - 1 in 
+  let ay = b - 1 in
+  let az = c - 1 in
   let afacetr = d in
   
-  let bx = e in
-  let by = f in
-  let bz = g in
+  let bx = e - 1 in
+  let by = f - 1 in
+  let bz = g - 1 in
   let bfacetr = h in
   
-
+(*)
   if frameA = frameB then prerr_string "Error: Attempting to join blocks from the same Frame."
-  else ignore();
+  else ignore(); *)
       
   let aface =
     (if afacetr = "E" then
@@ -75,12 +92,12 @@ let join frameA a b c d frameB e f g h =
     else false) in
 
   let (bface, bx_shift, by_shift, bz_shift) =
-    (if bfacetr = "E" then (frameB.blocks.(ax).(ay).(az).faces.(0), (ax - 1) - bx, ay - by, az - bz)
-    else if bfacetr = "W" then(frameB.blocks.(ax).(ay).(az).faces.(1), (ax + 1) - bx, ay - by, az - bz)
-    else if bfacetr = "N" then(frameB.blocks.(ax).(ay).(az).faces.(2), ax - bx, (ay - 1) - by, az - bz)
-    else if bfacetr = "S" then(frameB.blocks.(ax).(ay).(az).faces.(3), ax - bx, (ay + 1) - by, az - bz) 
-    else if bfacetr = "F" then(frameB.blocks.(ax).(ay).(az).faces.(4), ax - bx, ay - by, (az - 1) - bz)
-    else if bfacetr = "B" then(frameB.blocks.(ax).(ay).(az).faces.(5), ax - bx, ay - by, (az + 1) - bz)
+    (if bfacetr = "E" then (frameB.blocks.(bx).(by).(bz).faces.(0), (ax - 1) - bx, ay - by, az - bz)
+    else if bfacetr = "W" then(frameB.blocks.(bx).(by).(bz).faces.(1), (ax + 1) - bx, ay - by, az - bz)
+    else if bfacetr = "N" then(frameB.blocks.(bx).(by).(bz).faces.(2), ax - bx, (ay - 1) - by, az - bz)
+    else if bfacetr = "S" then(frameB.blocks.(bx).(by).(bz).faces.(3), ax - bx, (ay + 1) - by, az - bz) 
+    else if bfacetr = "F" then(frameB.blocks.(bx).(by).(bz).faces.(4), ax - bx, ay - by, (az - 1) - bz)
+    else if bfacetr = "B" then(frameB.blocks.(bx).(by).(bz).faces.(5), ax - bx, ay - by, (az + 1) - bz)
     else (false, 0, 0, 0)) in
   
   (* check if frameA's block face is available *)
@@ -120,8 +137,8 @@ let join frameA a b c d frameB e f g h =
 
   let (az_shift, bz_shift) =
     (if bz_shift < 0 then (-bz_shift, 0) else (0, bz_shift)) in
-  
 
+  
   (* Determine size of new array *)
   let cx_max = (max (frameA.x + ax_shift) (frameB.x + bx_shift)) in
   let cy_max = (max (frameA.y + ax_shift) (frameB.y + by_shift)) in
@@ -140,7 +157,8 @@ let join frameA a b c d frameB e f g h =
       for k = 0 to frameA.z - 1 do
 
         let b = (Array.get (Array.get (Array.get frameA.blocks i) j) k) in
-        if Array.length b.faces = 6 then (Array.set (Array.get (Array.get c i) j) k b)
+        if Array.length b.faces = 6 then
+          (Array.set (Array.get (Array.get c (i + ax_shift)) (j + ay_shift)) (k + az_shift) b)
         else ignore();
 
       done;
@@ -156,43 +174,20 @@ let join frameA a b c d frameB e f g h =
       for k = 0 to frameB.z - 1 do
 
         let b = (Array.get (Array.get (Array.get frameB.blocks i) j) k) in
-        if Array.length b.faces = 6 then (Array.set (Array.get (Array.get c i) j) k b)
+        if Array.length b.faces = 6 then
+          (Array.set (Array.get (Array.get c (i + bx_shift)) (j + by_shift)) (k + bz_shift) b)
         else ignore();
 
       done;
     done;
   done;
 
+  (* Run faceCheck *)
+  faceCheck c;
 
   (* Update Frame A with Cblocks array to finish merge of B into A *)
   let frameA = frm_mod cx_max cy_max cz_max c in
 
-  (* Run faceCheck *)
-  faceCheck frameA.blocks
-
-(* Rec function to find frames attached to printed frame and shift their values *)
-#load "str.cma"
-
-open Printf
-let frame_list = ref " "
-let read blox_file : string list =
-	let ic = open_in blox_file in
-		let read () = try Some (input_line ic) 
-		              with End_of_file -> None in
-			let rec loop acc = match read () with
-				| Some s -> (try let _ = Str.search_forward (Str.regexp "Print") s 0 in
-					frame_list := s; loop (s :: acc)
-										 with _ -> (); loop (s :: acc))
-				| None -> close_in ic; List.rev acc in loop [];;
-
-ignore(read "HelloWorld.blox");;
-
-(* Function to save frames and values to amf file *)
-let write amf_file =						 	  				
-	let oc = open_out amf_file in    	(* create or truncate file, return channel *)
-		fprintf oc "%s\n" !frame_list;  (* write something *)   
-		close_out oc                		(* flush and close the channel *)
-(* normal exit: all channels are flushed and closed *);;
-
-write "HelloWorld.amf";;
+  frameA
+;;
 

@@ -1,120 +1,47 @@
-/* ocamlyacc Parser for Blox */
-
 %{ open Ast %}
-
-/*
-	%token LBRACE RBRACE LBRACK RBRACK 
-	%token PLUS MINUS TIMES DIVIDE NOT
-	%token FRAMEEQ EQ NEQ LEQ GEQ TRUE FALSE AND OR
-	%token LTN GTN 
-	%token DOT
-	%token IF ELSE FOR BOOL VOID
-	%token BUILD SET
-	%token <string> STRING
-	%nonassoc NOELSE
-	%nonassoc ELSE
-	%left OR
-	%left AND
-	%left EQ NEQ FRAMEEQ
-	%left LT GT LEQ GEQ
-	%left PLUS MINUS
-	%left TIMES DIVIDE
-	%right NOT NEG
-*/	
-	
-%token SEMI LPAREN RPAREN LT GT COMMA
-%token ASSIGN PRINT
-%token JOIN 										
-%token FRAME
+  
+%token FOPEN FCLOSE COMMA SEMI ASSIGN
+%token FRAME VOID PRINT JOIN
+%token LCURL RCURL LPAREN RPAREN
 %token EOF
-%token TUPLE
 %token <string> ID
-%token <int> LITERAL
-%right ASSIGN										/* precedence level never useful */
-%start program
-%type <Ast.program> program
+%token <int> INTLIT
+
+/* the start symbol of the grammar */
+%start program                 
+
+/* the type of the start symbol - this is 'type program' from the AST */
+%type <Ast.program> program    
 
 %%
-
-program: 
-  decls EOF { $1 }
-
-decls:
-   /* nothing */ { [] }
- | decls vdecl   { ($2 :: $1) }
-
-/*formals_opt:*/
-	/* nothing *//* { []          }*/
-/*| formal_list   { List.rev $1 }*/
-
-formal_list:
-    typ ID                   { [($1, $2)]     }
-  | formal_list COMMA typ ID { ($3, $4) :: $1 }
-
-typ:
-  |FRAME{ Frame }	
-	
-vdecl_list:
-    /* nothing */    { []       }
-  | vdecl_list vdecl { $2 :: $1 }
-
-vdecl:
-   typ ID SEMI { ($1, $2) } 
+program:
+  stmt_list EOF { $1 }
 
 stmt_list:
-    /* nothing */ {[]} 
-  | stmt_list stmt { $2 :: $1 }
-	 
+    /* nothing */   { [] }
+  | stmt_list stmt  { $2 :: $1 }
+
 stmt:
-  expr SEMI                                { Expr $1               }
- | /* LBRACE stmt_list RBRACE                 { Block(List.rev $2)    } */
- | JOIN LPAREN expr expr expr expr RPAREN SEMI   { Join($3, $4, $5, $6) }
- | FRAME LT expr expr expr GT expr			 { Frame <$3, $4, $5> $7 }
-	 
+    expr SEMI     { Expr($1) }
+  | PRINT ID SEMI { Fr_print($2) }
+  | JOIN LPAREN join_arg COMMA join_arg RPAREN SEMI { Join($3,$5) }
+  | FRAME FOPEN INTLIT COMMA INTLIT COMMA INTLIT FCLOSE ID SEMI { Fr_decl($3,$5,$7,$9) }
+  | LCURL stmt_list RCURL { Block(List.rev $2) }
+
 expr:
-    LITERAL                      { Literal($1)            }
-  | ID                           { Id($1)                 }
-  | ID ASSIGN expr               { Assign($1, $3)         }
-  | LPAREN expr RPAREN           { $2                     }	
+  | ID                   { Id($1)  }
+  | INTLIT               { Int($1) }
+  | FRAME ID ASSIGN expr { Assign($2, $4) }
+
+join_arg:
+	ID COMMA LCURL face_set RCURL
+  { { frname = $1; blck_face = $4; } }
+
+face_set:
+	  face_id                  { [$1] }
+	|	face_set COMMA face_id   { $3 :: $1 }
+
+face_id:
+	LPAREN INTLIT COMMA INTLIT COMMA INTLIT COMMA ID RPAREN
+  { { dim = ($2,$4,$6); face = $8; } }
 	
-expr_opt:
-    /* nothing */ { Noexpr }
-  | expr          { $1 }	
-	
-/*
-typedef_list:
-    typedef {[$1]}
-    | typedef_list COMMA typedef {$3::$1}
-
-typedef_list_opt:
-    /nothing/ {[]}
-    | typedef_list {List.rev $1}
-*/
-/*typedef description*/
-/*
-typedef:
-    ID {
-        match $1 with
-        | "Int" -> Int
-				| "Frame" -> Frame
-				| x -> Default x 
-    }
-*/
-
-/* for function call */
-/*
-actuals_opt:
-    / nothing / { []          }
-  | actuals_list  { List.rev $1 }
-  
-actuals_list:
-    expr                    { [$1]     }
-  | actuals_list COMMA expr { $3 :: $1 }
-*/
-
-
-/*		
-stmt_true_list:
-    stmt SEMI {[$1]}
-    | stmt SEMI stmt_true_list {$1 :: $3}
-*/	
