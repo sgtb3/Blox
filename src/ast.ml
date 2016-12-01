@@ -7,6 +7,18 @@ type expr =
   | Id of string
   | Assign of string * expr
 
+  
+type blck = {
+  faces : bool array;
+}
+
+type frame = {
+  x       : int;
+  y       : int;
+  z       : int;
+  blocks  : blck array array array;
+}
+
 type face_id = {
   dim  : int * int * int;
   face : string;
