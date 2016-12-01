@@ -43,184 +43,131 @@ let frm_mod xarg yarg zarg blcksarg =
   let f = {x = xarg; y = yarg; z = zarg; blocks = blcksarg} in f
 
 
-(*JOIN FXN*)
-(*UNCHECKED AND UNTESTED*)
-let join frameA (a,b,c,d) frameB (e,f,g,h) = 
-	let ax = a in 
-	let ay = b in
-	let az = c in
-	let afacetr = d in
-	
-	let bx = e in
-	let by = f in
-	let bz = g in
-	let bfacetr = h in
-	
-	let ax_shift = 0 in
-	let ay_shift = 0 in
-	let az_shift = 0 in
-	
-	let bx_shift = 0 in
-	let by_shift = 0 in
-	let bz_shift = 0 in 
+(* Join Function*)
+let join frameA a b c d frameB e f g h = 
+  let ax = a in 
+  let ay = b in
+  let az = c in
+  let afacetr = d in
+  
+  let bx = e in
+  let by = f in
+  let bz = g in
+  let bfacetr = h in
+  
 
-	if frameA = frameB then prerr_string "Error: Attempting to join blocks from the same Frame."
-	else ignore();
-			
-	let aface = false in 
-	
-	if afacetr = "E" then 
-		aface = Array.get frameA[ax][ay][az].faces 0
-	else if afacetr = "W" then 
-		aface = Array.get frameA[ax][ay][az].faces 1
-	else if afacetr = "N" then 
-		aface = Array.get frameA[ax][ay][az].faces 2
-	else if afacetr = "S" then 
-		aface = Array.get frameA[ax][ay][az].faces 3
-	else if afacetr = "F" then 
-		aface = Array.get frameA[ax][ay][az].faces 4
-	else if afacetr = "B" then 
-		aface = Array.get frameA[ax][ay][az].faces 5 
-	else ignore();
+  if frameA = frameB then prerr_string "Error: Attempting to join blocks from the same Frame."
+  else ignore();
+      
+  let aface =
+    (if afacetr = "E" then
+      frameA.blocks.(ax).(ay).(az).faces.(0)
+    else if afacetr = "W" then
+      frameA.blocks.(ax).(ay).(az).faces.(1)
+    else if afacetr = "N" then 
+      frameA.blocks.(ax).(ay).(az).faces.(2)
+    else if afacetr = "S" then 
+      frameA.blocks.(ax).(ay).(az).faces.(3)
+    else if afacetr = "F" then 
+      frameA.blocks.(ax).(ay).(az).faces.(4)
+    else if afacetr = "B" then 
+      frameA.blocks.(ax).(ay).(az).faces.(5)
+    else false) in
 
-	let bface = false in
-	
-	if bfacetr = "E" then(
-		bface = Array.get frameB[bx][by][bz].faces 0;
-		bx_shift = (ax - 1) - bx;
-		by_shift = ay - by;
-		bz_shift = az - bz)
-	else if bfacetr = "W" then( 
-		bface = Array.get frameB[bx][by][bz].faces 1;
-		bx_shift = (ax + 1) - bx;
-		by_shift = ay - by;
-		bz_shift = az - bz)
-	else if bfacetr = "N" then( 
-		bface = Array.get frameB[bx][by][bz].faces 2;
-		bx_shift = ax - bx;
-		by_shift = (ay - 1) - by;
-		bz_shift = az - bz)
-	else if bfacetr = "S" then( 
-		bface = Array.get frameB[bx][by][bz].faces 3;
-		bx_shift = ax - bx;
-		by_shift = (ay + 1) - by;
-		bz_shift = az - bz) 
-	else if bfacetr = "F" then( 
-		bface = Array.get frameB[bx][by][bz].faces 4;
-		bx_shift = ax - bx;
-		by_shift = ay - by;
-		bz_shift = (az - 1) - bz)
-	else if bfacetr = "B" then( 
-		bface = Array.get frameB[bx][by][bz].faces 5;
-		bx_shift = ax - bx;
-		by_shift = ay - by;
-		bz_shift = (az + 1) - bz)
-	else ignore();
-	
-	(* check if frameA's block face is available *)
-	if not(aface) then 
-		prerr_string; "Error: Block face is not available for Join with"
-	else ignore();
-	
-	(* check if frameB's block face is available *)
-	if not(bface) then 
-		prerr_string; "Error: Block face is not available for Join with"
-	else ignore();
-	
-	(* check for opposite faces *)
-	if (((afacetr = "E") && not(bfacetr = "W")) ||
-			((afacetr = "W") && not(bfacetr "E"))) then 
-		prerr_string "Error: Illegal face option."
-	else ignore();
+  let (bface, bx_shift, by_shift, bz_shift) =
+    (if bfacetr = "E" then (frameB.blocks.(ax).(ay).(az).faces.(0), (ax - 1) - bx, ay - by, az - bz)
+    else if bfacetr = "W" then(frameB.blocks.(ax).(ay).(az).faces.(1), (ax + 1) - bx, ay - by, az - bz)
+    else if bfacetr = "N" then(frameB.blocks.(ax).(ay).(az).faces.(2), ax - bx, (ay - 1) - by, az - bz)
+    else if bfacetr = "S" then(frameB.blocks.(ax).(ay).(az).faces.(3), ax - bx, (ay + 1) - by, az - bz) 
+    else if bfacetr = "F" then(frameB.blocks.(ax).(ay).(az).faces.(4), ax - bx, ay - by, (az - 1) - bz)
+    else if bfacetr = "B" then(frameB.blocks.(ax).(ay).(az).faces.(5), ax - bx, ay - by, (az + 1) - bz)
+    else (false, 0, 0, 0)) in
+  
+  (* check if frameA's block face is available *)
+  if not(aface) then 
+    prerr_string "Error: Block face is not available for Join with"
+  else ignore();
+  
+  (* check if frameB's block face is available *)
+  if not(bface) then 
+    prerr_string "Error: Block face is not available for Join with"
+  else ignore();
+  
+  (* check for opposite faces *)
+  if (((afacetr = "E") && not(bfacetr = "W")) ||
+      ((afacetr = "W") && not(bfacetr = "E"))) then 
+    prerr_string "Error: Illegal face option."
+  else ignore();
 
-	if (((afacetr = "N") && not(bfacetr = "S")) ||
-		  ((afacetr = "S") && not(bfacetr "N"))) then 
-		prerr_string "Error: Illegal face option."
-	else ignore();
-	
-	if (((afacetr = "F") && not(bfacetr = "B")) ||
-		  ((afacetr = "B") && not(bfacetr "F"))) then 
-		prerr_string "Error: Illegal face option."
-	else ignore();
+  if (((afacetr = "N") && not(bfacetr = "S")) ||
+      ((afacetr = "S") && not(bfacetr = "N"))) then 
+    prerr_string "Error: Illegal face option."
+  else ignore();
+  
+  if (((afacetr = "F") && not(bfacetr = "B")) ||
+      ((afacetr = "B") && not(bfacetr = "F"))) then 
+    prerr_string "Error: Illegal face option."
+  else ignore();
 
-	(*  ========== ALL CHECKS PASSED. BEGIN JOIN PROCESS ========== *)
-	(* PROBABLY WON'T NEED THIS
-  (* create an entry for Frame "joins" list *)		
-	type joins_entry = {frameone:frame; coordinatesone:int*int*int*int; frametwo:frame; coordinatestwo:int*int*int*int} in
-	frameA.joins.add = join_entry in  (* add the join entry into A's joins *)
-  frameB.joins.add = join_entry in  (* add the join entry into B's joins *) *)
-	
-	(* Determine shift values for A and B *)
-	if bx_shift < 0 then(
-		ax_shift = -bx_shift;
-		bx_shift = 0)
-	else ignore();
-	
-	if by_shift < 0 then(
-		ay_shift = -by_shift;
-		by_shift = 0)
-	else ignore();
-		
-	if bz_shift < 0 then(
-		az_shift = -bz_shift;
-		bz_shift = 0)
-	else ignore();
-		
-	(* Determine size of new array *)
-	let cx_max = frameA.x + ax_shift in
-	if cx_max < (frameB.x + bx_shift) then 
-		cx_max = frameB.x + bx_shift
-	else ignore();
-		
-	let cy_max = frameA.y + ay_shift in
-	if cy_max < (frameB.y + by_shift) then 
-		cy_max = frameB.y + by_shift
-	else ignore();
+  (*  ========== ALL CHECKS PASSED. BEGIN JOIN PROCESS ========== *)
 
-	let cz_max = frameA.z + az_shift in
-	if cz_max < (frameB.z + bz_shift) then 
-		cz_max = frameB.z + bz_shift
-	else ignore();
+  (* Determine shift values for A and B *)
+  let (ax_shift, bx_shift) =
+    (if bx_shift < 0 then (-bx_shift, 0) else (0, bx_shift)) in
+
+  let (ay_shift, by_shift) =
+    (if by_shift < 0 then (-by_shift, 0) else (0, by_shift)) in
+
+  let (az_shift, bz_shift) =
+    (if bz_shift < 0 then (-bz_shift, 0) else (0, bz_shift)) in
+  
+
+  (* Determine size of new array *)
+  let cx_max = (max (frameA.x + ax_shift) (frameB.x + bx_shift)) in
+  let cy_max = (max (frameA.y + ax_shift) (frameB.y + by_shift)) in
+  let cz_max = (max (frameA.z + ax_shift) (frameB.z + bz_shift)) in
 
 
-	(* Create new array of blocks *)
-	let Cblcks = Array.init cx_max (fun _ -> Array.init cy_max (fun _ -> (Array.init cz_max 
-		(fun _ -> let b = {faces = [||] } in b )))) in
+  (* Create new array of blocks *)
+  let c = Array.init cx_max (fun _ -> Array.init cy_max (fun _ -> (Array.init cz_max 
+    (fun _ -> let b = {faces = [||] } in b )))) in
 
-	(* Fill Cblcks with blocks from array A *)
-	for i = 0 to frameA.x - 1 do
+  (* Fill c with blocks from array A *)
+  for i = 0 to frameA.x - 1 do
 
-		for j = 0 to frameA.y - 1 do
+    for j = 0 to frameA.y - 1 do
 
-			for k = 0 to frameA.z - 1 do
+      for k = 0 to frameA.z - 1 do
 
-				let b = (Array.get (Array.get (Array.get frameA.blocks i) j) k) in
-				if Array.length b.faces = 6 then (Array.set (Array.get (Array.get Cblcks i) j) k b)
-				else ignore();
+        let b = (Array.get (Array.get (Array.get frameA.blocks i) j) k) in
+        if Array.length b.faces = 6 then (Array.set (Array.get (Array.get c i) j) k b)
+        else ignore();
 
-			done;
-		done;
-	done;
+      done;
+    done;
+  done;
 
 
-	(* Fill Cblcks with blocks from array B *)
-	for i = 0 to frameB.x - 1 do
+  (* Fill c with blocks from array B *)
+  for i = 0 to frameB.x - 1 do
 
-		for j = 0 to frameB.y - 1 do
+    for j = 0 to frameB.y - 1 do
 
-			for k = 0 to frameB.z - 1 do
+      for k = 0 to frameB.z - 1 do
 
-				let b = (Array.get (Array.get (Array.get frameB.blocks i) j) k) in
-				if Array.length b.faces = 6 then (Array.set (Array.get (Array.get Cblcks i) j) k b)
-				else ignore();
+        let b = (Array.get (Array.get (Array.get frameB.blocks i) j) k) in
+        if Array.length b.faces = 6 then (Array.set (Array.get (Array.get c i) j) k b)
+        else ignore();
 
-			done;
-		done;
-	done;
+      done;
+    done;
+  done;
 
-    (* Run faceCheck *)
-	faceCheck Cblcks
 
-	(* Update Frame A with Cblocks array to finish merge of B into A *)
-	let A = frm_mod cx_max cy_max cz_max Cblcks
+  (* Update Frame A with Cblocks array to finish merge of B into A *)
+  let frameA = frm_mod cx_max cy_max cz_max c in
+
+  (* Run faceCheck *)
+  faceCheck frameA.blocks
+
 
