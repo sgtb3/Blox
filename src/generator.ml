@@ -249,48 +249,48 @@ let join frameA (a,b,c,d) frameB (e,f,g,h) =
 	let aface = false in 
 	
 	if afacetr = "E" then 
-		aface = frameA[ax][ay][az].open_faces[0]
+		aface = Array.get frameA[ax][ay][az].faces 0
 	else if afacetr = "W" then 
-		aface = frameA[ax][ay][az].open_faces[1]
+		aface = Array.get frameA[ax][ay][az].faces 1
 	else if afacetr = "N" then 
-		aface = frameA[ax][ay][az].open_faces[2]
+		aface = Array.get frameA[ax][ay][az].faces 2
 	else if afacetr = "S" then 
-		aface = frameA[ax][ay][az].open_faces[3]
+		aface = Array.get frameA[ax][ay][az].faces 3
 	else if afacetr = "F" then 
-		aface = frameA[ax][ay][az].open_faces[4]
-		else if afacetr = "B" then 
-	aface = frameA[ax][ay][az].open_faces[5] 
-		else ignore();
+		aface = Array.get frameA[ax][ay][az].faces 4
+	else if afacetr = "B" then 
+		aface = Array.get frameA[ax][ay][az].faces 5 
+	else ignore();
 
 	let bface = false in
 	
 	if bfacetr = "E" then(
-		bface = frameB[bx][by][bz].open_faces[0];
+		bface = Array.get frameB[bx][by][bz].faces 0;
 		bx_shift = (ax - 1) - bx;
 		by_shift = ay - by;
 		bz_shift = az - bz)
 	else if bfacetr = "W" then( 
-		bface = frameB[bx][by][bz].open_faces[1];
+		bface = Array.get frameB[bx][by][bz].faces 1;
 		bx_shift = (ax + 1) - bx;
 		by_shift = ay - by;
 		bz_shift = az - bz)
 	else if bfacetr = "N" then( 
-		bface = frameB[bx][by][bz].open_faces[2];
+		bface = Array.get frameB[bx][by][bz].faces 2;
 		bx_shift = ax - bx;
 		by_shift = (ay - 1) - by;
 		bz_shift = az - bz)
 	else if bfacetr = "S" then( 
-		bface = frameB[bx][by][bz].open_faces[3];
+		bface = Array.get frameB[bx][by][bz].faces 3;
 		bx_shift = ax - bx;
 		by_shift = (ay + 1) - by;
 		bz_shift = az - bz) 
 	else if bfacetr = "F" then( 
-		bface = frameB[bx][by][bz].open_faces[4];
+		bface = Array.get frameB[bx][by][bz].faces 4;
 		bx_shift = ax - bx;
 		by_shift = ay - by;
 		bz_shift = (az - 1) - bz)
 	else if bfacetr = "B" then( 
-		bface = frameB[bx][by][bz].open_faces[5];
+		bface = Array.get frameB[bx][by][bz].faces 5;
 		bx_shift = ax - bx;
 		by_shift = ay - by;
 		bz_shift = (az + 1) - bz)
@@ -308,7 +308,7 @@ let join frameA (a,b,c,d) frameB (e,f,g,h) =
 	
 	(* check for opposite faces *)
 	if (((afacetr = "E") && not(bfacetr = "W")) ||
-			((afacetr = "W") && not(bfacetr "W"))) then 
+			((afacetr = "W") && not(bfacetr "E"))) then 
 		prerr_string "Error: Illegal face option."
 	else ignore();
 
@@ -317,8 +317,8 @@ let join frameA (a,b,c,d) frameB (e,f,g,h) =
 		prerr_string "Error: Illegal face option."
 	else ignore();
 	
-	if (((afacetr = "N") && not(bfacetr = "S")) ||
-		  ((afacetr = "S") && not(bfacetr "N"))) then 
+	if (((afacetr = "F") && not(bfacetr = "B")) ||
+		  ((afacetr = "B") && not(bfacetr "F"))) then 
 		prerr_string "Error: Illegal face option."
 	else ignore();
 
@@ -359,9 +359,73 @@ let join frameA (a,b,c,d) frameB (e,f,g,h) =
 	let cz_max = frameA.z + az_shift in
 	if cz_max < (frameB.z + bz_shift) then 
 		cz_max = frameB.z + bz_shift
-	else ignore();	
-		
-  (* create an entry for Frame "joins" list *)		
+	else ignore();
+
+
+	(* Create new array of blocks *)
+	let Cblcks = Array.init cx_max (fun _ -> Array.init cy_max (fun _ -> (Array.init cz_max 
+		(fun _ -> let b = {faces = [|false;false;false;false;false;false|] } in b )))) in
+
+	(* Fill Cblcks with blocks from array A *)
+	let x = ref 0 in
+
+	for i = 0 to frameA.x - 1 do
+		let y = ref 0 in
+
+		for j = 0 to frameA.y - 1 do
+			let z = ref 0 in
+
+			for k = 0 to frameA.z - 1 do
+				let b = (Array.get (Array.get (Array.get frameA.blocks x) y) z) in
+				if Array.length b.faces = 6 then (Array.set (Array.get (Array.get Cblcks x) y) z b)
+				else ignore();
+
+				incr z
+			done;
+			incr y
+		done;
+		incr x
+	done;
+
+
+	(* Fill Cblcks with blocks from array B *)
+	let x = ref 0 in
+
+	for i = 0 to frameB.x - 1 do
+		let y = ref 0 in
+
+		for j = 0 to frameB.y - 1 do
+			let z = ref 0 in
+
+			for k = 0 to frameB.z - 1 do
+				let b = (Array.get (Array.get (Array.get frameB.blocks x) y) z) in
+				if Array.length b.faces = 6 then (Array.set (Array.get (Array.get Cblcks x) y) z b)
+				else ignore();
+
+				incr z
+			done;
+			incr y
+		done;
+		incr x
+	done;
+
+	(* Run faceCheck *)
+	faceCheck Cblcks
+
+	(* Update Frame A with Cblocks array to finish merge of B into A *)
+    A.blocks = Cblcks;
+    A.x = cx_max;
+    A.y = cy_max;
+    A.z = cz_max;
+
+
+
+
+
+
+
+
+
 	
 	
 	(* OLD STUFF BELOW *)
