@@ -1,3 +1,12 @@
+
+
+(* faceCheck function *)
+
+(* Helper function for Join*)
+let frm_mod xarg yarg zarg blcksarg =
+  let f = {x = xarg; y = yarg; z = zarg; blocks = blcksarg} in f
+
+
 (*JOIN FXN*)
 (*UNCHECKED AND UNTESTED*)
 let join frameA (a,b,c,d) frameB (e,f,g,h) = 
@@ -185,21 +194,11 @@ let join frameA (a,b,c,d) frameB (e,f,g,h) =
 		incr x
 	done;
 
-	(* Run faceCheck *)
-	faceCheck Cblcks
+    (* Run faceCheck !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*)
+	(*faceCheck Cblcks*)
 
 	(* Update Frame A with Cblocks array to finish merge of B into A *)
-    A.blocks = Cblcks;
-    A.x = cx_max;
-    A.y = cy_max;
-    A.z = cz_max;
+	let A = frm_mod cx_max cy_max cz_max Cblcks
 
 
 
-
-
-
-
-
-
-	
