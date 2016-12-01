@@ -170,4 +170,29 @@ let join frameA a b c d frameB e f g h =
   (* Run faceCheck *)
   faceCheck frameA.blocks
 
+(* Rec function to find frames attached to printed frame and shift their values *)
+#load "str.cma"
+
+open Printf
+let frame_list = ref " "
+let read blox_file : string list =
+	let ic = open_in blox_file in
+		let read () = try Some (input_line ic) 
+		              with End_of_file -> None in
+			let rec loop acc = match read () with
+				| Some s -> (try let _ = Str.search_forward (Str.regexp "Print") s 0 in
+					frame_list := s; loop (s :: acc)
+										 with _ -> (); loop (s :: acc))
+				| None -> close_in ic; List.rev acc in loop [];;
+
+ignore(read "HelloWorld.blox");;
+
+(* Function to save frames and values to amf file *)
+let write amf_file =						 	  				
+	let oc = open_out amf_file in    	(* create or truncate file, return channel *)
+		fprintf oc "%s\n" !frame_list;  (* write something *)   
+		close_out oc                		(* flush and close the channel *)
+(* normal exit: all channels are flushed and closed *);;
+
+write "HelloWorld.amf";;
 
