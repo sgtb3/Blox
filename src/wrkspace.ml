@@ -1,14 +1,4 @@
-type blck = {
-  faces : bool array;
-}
-
-type frame = {
-  x       : int;
-  y       : int;
-  z       : int;
-  blocks  : blck array array array;
-}
-
+(* Declaration examples
 let blck1 = {faces = [|true;true;true;true;true;true|]};;
 
 let arr = Array.init 3 (fun _ -> Array.init 3 (fun _ -> (Array.init 3 (fun _ -> {faces = [|true;true;true;true;true;true|]}))));;
@@ -18,7 +8,24 @@ let drr = Array.init 3 (fun i -> Array.init 3 (fun j -> (Array.init 3 (fun k -> 
 Array.set (Array.get (Array.get (Array.get drr 0) 0) 0).faces 0 false;;
 
 let frm = {x = 3; y = 3; z = 3; blocks = arr}
+*)
 
+
+exception Face_Taken of string;;
+exception Block_Overlap of string;;
+
+
+type blck = {
+  faces : bool array;
+}
+
+
+type frame = {
+  x       : int;
+  y       : int;
+  z       : int;
+  blocks  : blck array array array;
+}
 
 
 let faceCheck a = 
@@ -56,11 +63,11 @@ let faceCheck a =
       done;
     done;
   done;
-
 ;;
 
 
-let join frameA a b c d frameB e f g h = 
+let join frameA a b c d frameB e f g h =
+
   let aArray = Array.init frameA.x (fun i -> Array.init frameA.y (fun j -> (Array.init frameA.z (fun k -> {faces = Array.copy frameA.blocks.(i).(j).(k).faces})))) in
   let ax = a in 
   let ay = b in
@@ -102,13 +109,13 @@ let join frameA a b c d frameB e f g h =
     else (false, 0, 0, 0)) in
   
   (* check if frameA's block face is available *)
-  if not(aface) then 
-    prerr_string "Error: Block face is not available for Join with"
+  if not(aface) then
+    raise (Face_Taken "Specified face of block in frame A is already taken")
   else ignore();
   
   (* check if frameB's block face is available *)
   if not(bface) then 
-    prerr_string "Error: Block face is not available for Join with"
+    raise (Face_Taken "Specified face of block in frame B is already taken")
   else ignore();
   
   (* check for opposite faces *)
@@ -174,9 +181,11 @@ let join frameA a b c d frameB e f g h =
 
       for k = 0 to frameB.z - 1 do
 
-        let b = (Array.get (Array.get (Array.get bArray i) j) k) in
-        if Array.length b.faces = 6 then
-          (Array.set (Array.get (Array.get c (i + bx_shift)) (j + by_shift)) (k + bz_shift) b)
+        let bb = (Array.get (Array.get (Array.get bArray i) j) k) in
+        if Array.length bb.faces = 6 then(
+          if Array.length (Array.get (Array.get (Array.get c (i + bx_shift)) (j + by_shift)) (k + bz_shift)).faces = 0 then
+            (Array.set (Array.get (Array.get c (i + ax_shift)) (j + ay_shift)) (k + az_shift) bb)
+          else raise(Block_Overlap "The specified join causes overlap"))
         else ignore();
 
       done;
@@ -197,5 +206,5 @@ let join frameA a b c d frameB e f g h =
   } in
 
   frameC
-
 ;;
+
