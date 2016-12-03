@@ -1,4 +1,4 @@
-type action = Usage | Ast | Compile | AMF
+type action = Usage | Ast | Compile
 
 let usage = 
   "\n USAGE: \n" ^

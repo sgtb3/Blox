@@ -1,26 +1,39 @@
-type primi_typ =
-    Int
-  | Void
 
-type expr =
-    Int of int
-  | Id of string
-  | Assign of string * expr
+type op = 
+  | And   | Or  | Mod
+  | Add   | Sub | Mult | Div 
+  | Equal | Neq | Less | Leq | Greater | Geq | FrameEq
 
-  
+type uop = Neg | Not 
+
+type typ = 
+  | Int | Bool | Float | String | Void
+  | Array of typ
+  | Set of typ
+  | Map of typ * typ
+
+(* Leave this as is *)
 type blck = {
   faces : bool array;
 }
 
+(* Leave this as is *)
 type frame = {
-  x       : int;
-  y       : int;
-  z       : int;
-  blocks  : blck array array array;
+  x : int;
+  y : int;
+  z : int;
+  blocks : blck array array array;
+}
+
+type fr_decl = {
+  x : int;
+  y : int;
+  z : int;
+  fr_name : string;
 }
 
 type face_id = {
-  dim  : int * int * int;
+  dim : int * int * int;
   face : string;
 }
 
@@ -34,31 +47,40 @@ type join = {
   fr_b : join_arg;
 }
 
-type fr_decl = {
-  x : int;
-  y : int;
-  z : int;
-  fr_name : string;
-}
+type bind = typ * string
 
-type fr_print = {
-  fr_id : string;
-}
+type expr =
+  | Id of string
+  | Lit_Int of int
+  | Lit_Bool of bool
+  | Assign of string * expr
+  | Null
 
 type stmt =
-    Block of stmt list
+  | Block of stmt list
   | Expr of expr
   | Join of join_arg * join_arg
   | Fr_decl of int * int * int * string
   | Fr_print of string
 
-type program = stmt list
+type func_decl = { 
+  typ : typ;
+  fname : string;
+  formals : bind list;
+  locals : bind list;
+  body : stmt list;
+}
+
+type program = bind list * func_decl list
 
 (* print expressions *)
 let rec string_of_expr = function         
-    Int(x) -> string_of_int x
-  | Id(x)  -> x
-  | Assign(x, y) -> "Frame " ^ x ^ " = " ^ string_of_expr y ^ ";"
+  | Lit_Int(x)      -> string_of_int x
+  | Id(x)           -> x
+  | Lit_Bool(true)  -> "true"
+  | Lit_Bool(false) -> "false"
+  | Assign(x, y)    -> "Frame " ^ x ^ " -> " ^ string_of_expr y ^ ";"
+  | Null            -> "null"
 
 (* print frame declarations *)
 let string_of_frdecl x y z name =         
@@ -87,12 +109,32 @@ let string_of_join_arg x =
 
 (* print statements *)
 let rec string_of_stmt = function 
-    Block(stmts) -> "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
+  | Block(stmts) -> "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
   | Expr(expr)   -> string_of_expr expr ^ "\n"
   | Join(x, y)   -> "Join(" ^ string_of_join_arg x ^ ", " ^ string_of_join_arg y ^ ")\n"
   | Fr_decl(x, y, z, name) -> string_of_frdecl x y z name
-  | Fr_print(name) -> "Print " ^ name ^ ";\n"
+  | Fr_print(name) -> "print " ^ name ^ ";\n"
+
+(* print types *)
+let rec string_of_typ = function
+  | Int      -> "int"
+  | Bool     -> "bool"
+  | String   -> "string"
+  | Void     -> "void"
+  | Float    -> "float"
+  | Array(x) -> string_of_typ x ^ "[]"
+
+(* print variable declarations *)
+let string_of_vdecl (t, id) = string_of_typ t ^ " " ^ id ^ ";\n"
+
+(* print function declarations *)
+let string_of_fdecl fdecl =
+  string_of_typ fdecl.typ ^ " " ^
+  fdecl.fname ^ "(" ^ String.concat ", " (List.map snd fdecl.formals) ^ ")\n{\n" ^
+  String.concat "" (List.map string_of_vdecl fdecl.locals) ^
+  String.concat "" (List.map string_of_stmt fdecl.body) ^ "}\n"
 
 (* print program *)
-let string_of_program stmts =  (* print program (a list of frame declarations) *)
-  String.concat "" (List.rev (List.map string_of_stmt stmts))
+let string_of_program (vars, funcs) =
+  String.concat "" (List.map string_of_vdecl vars) ^ "\n" ^
+  String.concat "\n" (List.map string_of_fdecl funcs)
