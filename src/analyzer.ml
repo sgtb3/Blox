@@ -5,6 +5,7 @@ open Sast
 (* NOT SURE IF THESE GO HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! *)
 exception Face_Taken of string;;
 exception Block_Overlap of string;;
+exception Not_Opposite_Faces of string;;
 
 
 (* Facecheck algorithm marks faces that are unavailable *)
@@ -98,17 +99,17 @@ let join frameA a b c d frameB e f g h =
   (* check for opposite faces *)
   if (((afacetr = "E") && not(bfacetr = "W")) ||
       ((afacetr = "W") && not(bfacetr = "E"))) then 
-    prerr_string "Error: Illegal face option."
+    raise(Not_Opposite_Faces "Faces specified are not opposites")
   else ignore();
 
   if (((afacetr = "N") && not(bfacetr = "S")) ||
       ((afacetr = "S") && not(bfacetr = "N"))) then 
-    prerr_string "Error: Illegal face option."
+    raise(Not_Opposite_Faces "Faces specified are not opposites")
   else ignore();
   
   if (((afacetr = "F") && not(bfacetr = "B")) ||
       ((afacetr = "B") && not(bfacetr = "F"))) then 
-    prerr_string "Error: Illegal face option."
+    raise(Not_Opposite_Faces "Faces specified are not opposites")
   else ignore();
 
   (*  ========== ALL CHECKS PASSED. BEGIN JOIN PROCESS ========== *)
