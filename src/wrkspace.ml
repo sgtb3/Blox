@@ -13,6 +13,10 @@ let frm = {x = 3; y = 3; z = 3; blocks = arr}
 
 exception Face_Taken of string;;
 exception Block_Overlap of string;;
+exception Invalid_Face of string;;
+exception Opposite_Face of string;;
+exception Invalid_Block of string;;
+exception Block_Out_Of_Bounds of string;;
 
 
 type blck = {
@@ -66,7 +70,8 @@ let faceCheck a =
 ;;
 
 
-let join frameA a b c d frameB e f g h =
+
+let argCheck frameA a b c d frameB e f g h =
 
   let aArray = Array.init frameA.x (fun i -> Array.init frameA.y (fun j -> (Array.init frameA.z (fun k -> {faces = Array.copy frameA.blocks.(i).(j).(k).faces})))) in
   let ax = a in 
@@ -79,11 +84,31 @@ let join frameA a b c d frameB e f g h =
   let by = f in
   let bz = g in
   let bfacetr = h in
-  
-(*)
-  if frameA = frameB then prerr_string "Error: Attempting to join blocks from the same Frame."
-  else ignore(); *)
-      
+
+  (* Check specified blocks are within array boundaries *)
+  if (ax >= frameA.x) || (ay >= frameA.y) || (az >= frameA.z)
+    then raise (Block_Out_Of_Bounds "Specified block for first frame is outside array boundaries")
+  else ignore();
+  if (bx >= frameB.x) || (by >= frameB.y) || (bz >= frameB.z)
+    then raise (Block_Out_Of_Bounds "Specified block for second frame is outside array boundaries")
+  else ignore();
+
+  (* Check given block exists *)
+  if not (Array.length frameA.blocks.(a).(b).(c).faces = 6)
+    then raise (Invalid_Block "Specified Block for first frame does not exist")
+  else ignore();
+  if not (Array.length frameB.blocks.(e).(f).(g).faces = 6)
+    then raise (Invalid_Block "Specified Block for second frame does not exist")
+  else ignore();
+
+  (* Check for valid faces *)
+  if (afacetr = "E") || (afacetr = "W") || (afacetr = "N") || (afacetr = "S") || (afacetr = "F") || (afacetr = "B")
+    then ignore()
+  else raise (Invalid_Face "Specified face for first frame must be E, W, N, S, F, or B");
+  if (bfacetr = "E") || (bfacetr = "W") || (bfacetr = "N") || (bfacetr = "S") || (bfacetr = "F") || (bfacetr = "B")
+    then ignore()
+  else raise (Invalid_Face "Specified face for second frame must be E, W, N, S, F, or B");
+
   let aface =
     (if afacetr = "E" then
       aArray.(ax).(ay).(az).faces.(0)
@@ -110,31 +135,29 @@ let join frameA a b c d frameB e f g h =
   
   (* check if frameA's block face is available *)
   if not(aface) then
-    raise (Face_Taken "Specified face of block in frame A is already taken")
+    raise (Face_Taken "Specified face of block in first frame is unavailable")
   else ignore();
   
   (* check if frameB's block face is available *)
   if not(bface) then 
-    raise (Face_Taken "Specified face of block in frame B is already taken")
+    raise (Face_Taken "Specified face of block in second frame is unavailable")
   else ignore();
   
   (* check for opposite faces *)
   if (((afacetr = "E") && not(bfacetr = "W")) ||
       ((afacetr = "W") && not(bfacetr = "E"))) then 
-    prerr_string "Error: Illegal face option."
+    raise (Opposite_Face "Must specify opposite faces")
   else ignore();
 
   if (((afacetr = "N") && not(bfacetr = "S")) ||
       ((afacetr = "S") && not(bfacetr = "N"))) then 
-    prerr_string "Error: Illegal face option."
+    raise (Opposite_Face "Must specify opposite faces")
   else ignore();
   
   if (((afacetr = "F") && not(bfacetr = "B")) ||
       ((afacetr = "B") && not(bfacetr = "F"))) then 
-    prerr_string "Error: Illegal face option."
+    raise (Opposite_Face "Must specify opposite faces")
   else ignore();
-
-  (*  ========== ALL CHECKS PASSED. BEGIN JOIN PROCESS ========== *)
 
   (* Determine shift values for A and B *)
   let (ax_shift, bx_shift) =
@@ -146,7 +169,20 @@ let join frameA a b c d frameB e f g h =
   let (az_shift, bz_shift) =
     (if bz_shift < 0 then (-bz_shift, 0) else (0, bz_shift)) in
 
+  (* Return shift values *)
+  (ax_shift, ay_shift, az_shift, bx_shift, by_shift, bz_shift)
+;;
+
+
+
+let join frameA a b c d frameB e f g h =
+
+  let (ax_shift, ay_shift, az_shift, bx_shift, by_shift, bz_shift) = argCheck frameA a b c d frameB e f g h in
+
+  let aArray = Array.init frameA.x (fun i -> Array.init frameA.y (fun j -> (Array.init frameA.z (fun k -> {faces = Array.copy frameA.blocks.(i).(j).(k).faces})))) in
   
+  let bArray = Array.init frameB.x (fun i -> Array.init frameB.y (fun j -> (Array.init frameB.z (fun k -> {faces = Array.copy frameB.blocks.(i).(j).(k).faces})))) in
+
   (* Determine size of new array *)
   let cx_max = (max (frameA.x + ax_shift) (frameB.x + bx_shift)) in
   let cy_max = (max (frameA.y + ay_shift) (frameB.y + by_shift)) in
@@ -184,7 +220,7 @@ let join frameA a b c d frameB e f g h =
         let bb = (Array.get (Array.get (Array.get bArray i) j) k) in
         if Array.length bb.faces = 6 then(
           if Array.length (Array.get (Array.get (Array.get c (i + bx_shift)) (j + by_shift)) (k + bz_shift)).faces = 0 then
-            (Array.set (Array.get (Array.get c (i + ax_shift)) (j + ay_shift)) (k + az_shift) bb)
+            (Array.set (Array.get (Array.get c (i + bx_shift)) (j + by_shift)) (k + bz_shift) bb)
           else raise(Block_Overlap "The specified join causes overlap"))
         else ignore();
 
@@ -207,4 +243,3 @@ let join frameA a b c d frameB e f g h =
 
   frameC
 ;;
-
