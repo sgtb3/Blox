@@ -22,7 +22,6 @@ rule token = parse
   | '.'                  { DOT      }
   | '<'                  { LT       }
   | '>'                  { GT       }
-  | "->"                 { FRASSIGN }
   | "<="                 { LEQ      }
   | ">="                 { GEQ      }
   | ".="                 { FRAMEEQ  }

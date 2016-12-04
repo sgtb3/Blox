@@ -62,6 +62,8 @@ type stmt =
   | Join of join_arg * join_arg
   | Fr_decl of int * int * int * string
   | Fr_print of string
+  | Break
+  | Continue
 
 type func_decl = { 
   typ : typ;
@@ -71,7 +73,30 @@ type func_decl = {
   body : stmt list;
 }
 
+(* 'bind list' is the global variables, then the functions *)
 type program = bind list * func_decl list
+
+(* print operators *)
+let string_of_op = function
+  | Add     -> "+"
+  | Sub     -> "-"
+  | Mult    -> "*"
+  | Div     -> "/"
+  | Equal   -> "=="
+  | Neq     -> "!="
+  | Less    -> "<"
+  | Leq     -> "<="
+  | Greater -> ">"
+  | Geq     -> ">="
+  | And     -> "&&"
+  | Or      -> "||"
+  | FrameEq -> ".="
+  | Mod     -> "%"
+
+(* print unary operators *)
+let string_of_uop = function
+  | Neg -> "-"
+  | Not -> "!"
 
 (* print expressions *)
 let rec string_of_expr = function         
@@ -79,7 +104,7 @@ let rec string_of_expr = function
   | Id(x)           -> x
   | Lit_Bool(true)  -> "true"
   | Lit_Bool(false) -> "false"
-  | Assign(x, y)    -> "Frame " ^ x ^ " -> " ^ string_of_expr y ^ ";"
+  | Assign(x, y)    -> "Frame " ^ x ^ " = " ^ string_of_expr y ^ ";"
   | Null            -> "null"
 
 (* print frame declarations *)
@@ -109,11 +134,14 @@ let string_of_join_arg x =
 
 (* print statements *)
 let rec string_of_stmt = function 
-  | Block(stmts) -> "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
-  | Expr(expr)   -> string_of_expr expr ^ "\n"
-  | Join(x, y)   -> "Join(" ^ string_of_join_arg x ^ ", " ^ string_of_join_arg y ^ ")\n"
-  | Fr_decl(x, y, z, name) -> string_of_frdecl x y z name
-  | Fr_print(name) -> "print " ^ name ^ ";\n"
+| Fr_decl(x, y, z, name) -> string_of_frdecl x y z name
+| Block(stmts) -> "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
+| Expr(expr)   -> string_of_expr expr ^ "\n"
+| Join(x, y)   -> "Join(" ^ string_of_join_arg x ^ ", " ^ string_of_join_arg y ^ ")\n"
+
+| Fr_print(name) -> "print " ^ name ^ ";\n"
+| Break          -> "break;\n"
+| Continue       -> "continue;\n"
 
 (* print types *)
 let rec string_of_typ = function
@@ -122,7 +150,10 @@ let rec string_of_typ = function
   | String   -> "string"
   | Void     -> "void"
   | Float    -> "float"
-  | Array(x) -> string_of_typ x ^ "[]"
+  | Array x    -> "Array_" ^ (string_of_typ x)
+  | Set x      -> "Set_"   ^ (string_of_typ x)
+  | Map (x, y) -> "Map_"   ^ (string_of_typ x) ^ "_" ^ (string_of_typ y)
+
 
 (* print variable declarations *)
 let string_of_vdecl (t, id) = string_of_typ t ^ " " ^ id ^ ";\n"

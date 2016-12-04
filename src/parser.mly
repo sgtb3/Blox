@@ -1,6 +1,6 @@
 %{ open Ast %}
   
-%token ASSIGN FRASSIGN COMMA SEMI COLON
+%token ASSIGN COMMA SEMI COLON
 %token LCURL RCURL LPAREN RPAREN LBRACK RBRACK
 %token PLUS MINUS TIMES DIVIDE MOD
 %token NOT DOT
@@ -29,6 +29,16 @@ decls:
  | decls vdecl { ($2 :: fst $1), snd $1 }
  | decls fdecl { fst $1, ($2 :: snd $1) }
 
+/* add arry of typ set of typ map of typ * typ from AST here */
+typ:
+  | INT    { Int    }
+  | BOOL   { Bool   }
+  | STRING { String }
+  | VOID   { Void   }
+
+vdecl:
+   typ ID SEMI { ($1, $2) }
+
 vdecl_list:
   |/* nothing */     { [] }
   | vdecl_list vdecl { $2 :: $1 }
@@ -49,15 +59,6 @@ formal_list:
   | typ ID                   { [($1,$2)] }
   | formal_list COMMA typ ID { ($3,$4) :: $1 }
 
-/* add arry of typ set of typ map of typ * typ from AST here */
-typ:
-  | INT    { Int    }
-  | BOOL   { Bool   }
-  | STRING { String }
-  | VOID   { Void   }
-
-vdecl:
-   typ ID SEMI { ($1, $2) }
 
 stmt_list:
   |/* nothing */   { [] }
@@ -69,13 +70,15 @@ stmt:
   | JOIN LPAREN join_arg COMMA join_arg RPAREN SEMI { Join($3,$5) }
   | FRAME LT LIT_INT COMMA LIT_INT COMMA LIT_INT GT ID SEMI { Fr_decl($3,$5,$7,$9) }
   | LCURL stmt_list RCURL { Block(List.rev $2) }
+  | BREAK SEMI    { Break    }
+  | CONTINUE SEMI { Continue }
 
 expr:
   | ID                     { Id($1)          }
   | LIT_INT                { Lit_Int($1)     }
   | TRUE                   { Lit_Bool(true)  }
   | FALSE                  { Lit_Bool(false) }
-  | FRAME ID FRASSIGN expr { Assign($2, $4)  }
+  | FRAME ID ASSIGN expr   { Assign($2, $4)  }
   | ID ASSIGN expr         { Assign($1, $3)  }
 
 join_arg:

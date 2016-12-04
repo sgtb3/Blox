@@ -16,7 +16,7 @@ TESTSH = testAll
 # lexer (scanner) and parser generators
 # -v : verbose output option for ocamlyacc
 LEXGEN = ocamllex
-PARSGEN = ocamlyacc
+PARSGEN = ocamlyacc -v 
 
 # ocaml compiler and flags
 # -c : compile without producing executable files
@@ -59,8 +59,8 @@ Create-Parser:
 	@$(PARSGEN) $(SRC)/parser.mly
 	@mv $(SRC)/parser.ml $(GEN)/parser.ml
 	@mv $(SRC)/parser.mli $(GEN)/parser.mli
-	@#mv $(SRC)/parser.output $(GEN)/parser.output
-	@#cat $(GEN)/parser.output
+	@mv $(SRC)/parser.output $(GEN)/parser.output
+	@cat $(GEN)/parser.output
 	@sleep .12
 	@$(PRINT_OK)
 

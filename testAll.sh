@@ -36,8 +36,8 @@ Compare() {
     generatedfiles="$generatedfiles $3"
     echo diff -b $1 $2 ">" $3 1>&2
     diff -b "$1" "$2" > "$3" 2>&1 || {
-	SignalError "$1 $2 differs"
-	echo "FAILED $1 differs from $2" 1>&2
+	   SignalError "$1 $2 differs"
+	   echo "FAILED $1 differs from $2" 1>&2
     }
 }
 
@@ -46,8 +46,8 @@ Compare() {
 Run() {
     echo $* 1>&2
     eval $* || {
-	SignalError "$1 failed on $*"
-	return 1
+	   SignalError "$1 failed on $*"
+	   return 1
     }
 }
 
@@ -69,7 +69,7 @@ Check() {
     reffile=`echo $1 | sed 's/.blox$//'`
     basedir="`echo $1 | sed 's/\/[^\/]*$//'`/."
 
-    echo -n "$basename..."
+    echo "$basename..."
 
     echo 1>&2
     echo "###### Testing $basename" 1>&2
@@ -78,7 +78,7 @@ Check() {
 
 # Not sure about how to do this part
 #    generatedfiles="$generatedfiles ${basename}.i.out" &&
-#    Run "$MICROC"  "<" $1 ">" ${basename}.i.out &&
+#    Run "$.blox"  "<" $1 ">" ${basename}.i.out &&
 #    Compare ${basename}.i.out ${reffile}.out ${basename}.i.diff
 
 #    generatedfiles="$generatedfiles ${basename}.ll ${basename}.out" &&
