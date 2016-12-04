@@ -1,0 +1,9 @@
+void foo(int a)
+{
+  print(a + 3);
+}
+
+void main()
+{
+  foo(40);
+}

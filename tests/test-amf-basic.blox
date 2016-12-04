@@ -1,0 +1,4 @@
+void main() {
+	Frame<1,1,1> one;
+	Build(one);
+}
