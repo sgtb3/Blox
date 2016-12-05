@@ -83,10 +83,10 @@ type func_decl = {
   body    : stmt list;
 }
 
-(* assignment of one type to another *)
+(* variable assignment  *)
 type var_assign = string * expr
 
-(* assignment of one frame to another *)
+(* frame assignment - might need to be frame * frame *)
 type fr_assign = string * string
 
 (* gloabls is a combination of var & frame declarations and assignments *)
@@ -158,53 +158,54 @@ let string_of_join_arg x =
 
 (* print statements *)
 let rec string_of_stmt = function 
-| Fr_decl(fr)     -> string_of_frdecl fr
-| Block(stmts)   -> "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
-| Expr(expr)     -> string_of_expr expr ^ "\n"
-| Join(x, y)     -> "Join(" ^ string_of_join_arg x ^ ", " ^ string_of_join_arg y ^ ")\n"
-| Fr_print(name) -> "print " ^ name ^ ";\n"
-| Break          -> "break;\n"
-| Continue       -> "continue;\n"
+  | Fr_decl(fr)    -> string_of_frdecl fr
+  | Block(stmts)   -> "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
+  | Expr(expr)     -> string_of_expr expr ^ "\n"
+  | Join(x,y)     -> "Join(" ^ string_of_join_arg x ^ ", " ^ string_of_join_arg y ^ ")\n"
+  | Fr_print(name) -> "print " ^ name ^ ";\n"
+  | Break          -> "break;\n"
+  | Continue       -> "continue;\n"
 
 (* print types *)
 let rec string_of_typ = function
-  | Int        -> "int"
-  | Bool       -> "bool"
-  | String     -> "string"
-  | Void       -> "void"
-  | Float      -> "float"
-  | Array x    -> "Array_" ^ (string_of_typ x)
-  | Set x      -> "Set_"   ^ (string_of_typ x)
-  | Map (x, y) -> "Map_"   ^ (string_of_typ x) ^ "_" ^ (string_of_typ y)
+  | Int      -> "int"
+  | Bool     -> "bool"
+  | String   -> "string"
+  | Void     -> "void"
+  | Float    -> "float"
+  | Array x  -> "Array_" ^ (string_of_typ x)
+  | Set x    -> "Set<"   ^ (string_of_typ x) ^ ">"
+  | Map(x,y) -> "Map<"   ^ (string_of_typ x) ^ ", " ^ (string_of_typ y) ^ ">"
 
 (* print variable declarations *)
-let string_of_var_decl (t, id) = string_of_typ t ^ " " ^ id ^ ";\n"
+let string_of_var_decl (t,id) = string_of_typ t ^ " " ^ id ^ ";\n"
+
+(* print variable assignment type var_assign = string * expr *) 
+let string_of_vassign (id,exp) = id ^ " = " ^ string_of_expr exp ^ ";\n"
 
 (* print function declarations *)
 let string_of_func_decl fd =
-  string_of_typ fd.typ ^ " " ^
-  fd.fname ^ "(" ^ String.concat ", " (List.map snd fd.formals) ^ ")\n{\n" ^
-  String.concat "" (List.map string_of_var_decl fd.locals) ^
-  String.concat "" (List.map string_of_stmt fd.body) ^ "}\n"
+  string_of_typ fd.typ ^ " " ^ fd.fname ^ "(" ^ 
+  String.concat ", " (List.map snd               fd.formals) ^ ")\n{\n" ^
+  String.concat ""   (List.map string_of_var_decl fd.locals) ^
+  String.concat ""   (List.map string_of_stmt       fd.body) ^ "}\n"
 
+(* print frame assignments - type fr_assign = string * string - there probably needs to be a new_frame_assign, and regular fr_assign *)
+let string_of_frassign (frname1,frname2) = frname1 ^ " = " ^ frname2 ^ ";\n"
 
-(* let string_of_vassign vass = 
-(* type var_assign = string * expr *)
-
-let string_of_frassign fass = 
-(* type fr_assign = string * string *)
-
-let string_o *)
+(* print variable declarations *)
+(* let string_of_glob_var_decl (t,id) = string_of_typ t ^ " " ^ vdecls.id ^ ";\n" *)
 
 let string_of_globals g = 
-  String.concat "" (List.map string_of_var_decl (g.var_decl.typ, g.var_decl.id)) ^
-  (* String.concat "" (List.map string_of_vassign g) *)
-  String.concat "" (List.map string_of_frdecl g.fr_decl) ^"\n"
-  (* String.concat "" (List.map string_of_frassign g) *)
-(* var_decls  : var_decl list;
+  String.concat "" (List.map snd                  g.var_decls) ^
+  String.concat "" (List.map string_of_vassign   g.var_assgns) ^
+  String.concat "" (List.map string_of_frdecl     g.fr_decls)   ^
+  String.concat "" (List.map string_of_frassign g.fr_assgns)   ^"\n"
+
+(*var_decls  : var_decl list;
   var_assgns : var_assign list;
   fr_decls   : fr_decl list;
-  fr_assgns  : fr_assign list; *)
+  fr_assgns  : fr_assign list;*)
 
 (* print blox program *)
 let string_of_program (globals, funcs) =
