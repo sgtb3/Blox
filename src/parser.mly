@@ -16,8 +16,6 @@
 
 /* the start symbol of the grammar */
 %start program                 
-
-/* the type of the start symbol - this is 'type program' from the AST */
 %type <Ast.program> program    
 
 %%
@@ -25,40 +23,73 @@ program:
   decls EOF { $1 }
 
 decls:
- |/* nothing */{ [], [] }
- | decls vdecl { ($2 :: fst $1), snd $1 }
- | decls fdecl { fst $1, ($2 :: snd $1) }
+ |/* nothing */    { [], [] }
+ | decls globals   { ($2 :: fst $1), snd $1 }
+ | decls func_decl { fst $1, ($2 :: snd $1) }
 
-/* add arry of typ set of typ map of typ * typ from AST here */
+/* add (Array of typ), (Set of typ), (Map of typ * typ) from AST here */
 typ:
-  | INT    { Int    }
-  | BOOL   { Bool   }
-  | STRING { String }
-  | VOID   { Void   }
+  | INT    { Int      }
+  | BOOL   { Bool     }
+  | STRING { String   }
+  | VOID   { Void     }
+
+globals:
+  |                                /* no globals */ 
+    { { var_decls  = []; 
+        var_assgns = []; 
+        fr_decls   = []; 
+        fr_assgns  = []; } }
+  | typ ID SEMI                    /* var decls [($2, $3) :: 1]; */
+    { { var_decls  = [($1, $2)]; 
+        var_assgns = []; 
+        fr_decls   = []; 
+        fr_assgns  = []; } }
+  | typ ID ASSIGN expr SEMI        /* var assigns */
+    { { var_decls  = []; 
+        var_assgns = [($2, $4)]; 
+        fr_decls   = []; 
+        fr_assgns  = []; } }
+  | fr_decl SEMI                   /* fr decls  ($2 :: $1) */    
+    { { var_decls  = []; 
+        var_assgns = []; 
+        fr_decls   = [$1]; 
+        fr_assgns  = []; } }
+  | FRAME ID ASSIGN ID SEMI        /* fr assigns  */
+    { { var_decls  = []; 
+        var_assgns = []; 
+        fr_decls   = []; 
+        fr_assgns  = [($2, $4)]; } }
 
 vdecl:
    typ ID SEMI { ($1, $2) }
 
 vdecl_list:
-  |/* nothing */     { [] }
+  |/* nothing */       { [] }
   | vdecl_list vdecl { $2 :: $1 }
 
-fdecl:
+func_decl:
   typ ID LPAREN formals_opt RPAREN LCURL vdecl_list stmt_list RCURL
-  { { typ     = $1;
-      fname   = $2;
-      formals = $4;
-      locals  = List.rev $7;
-      body    = List.rev $8 } }
+    { { typ     = $1;
+        fname   = $2;
+        formals = $4;
+        locals  = List.rev $7;
+        body    = List.rev $8 } }
 
 formals_opt:
   |/* nothing */{ [] }
   | formal_list { List.rev $1 }
 
 formal_list:
-  | typ ID                   { [($1,$2)] }
+  | typ ID  { [($1,$2)] }
   | formal_list COMMA typ ID { ($3,$4) :: $1 }
 
+fr_decl:
+  FRAME LT LIT_INT COMMA LIT_INT COMMA LIT_INT GT ID 
+    { { x = $3; 
+        y = $5; 
+        z = $7; 
+        fr_name = $9 } }
 
 stmt_list:
   |/* nothing */   { [] }
@@ -68,10 +99,10 @@ stmt:
   | expr SEMI     { Expr($1) }
   | PRINT ID SEMI { Fr_print($2) }
   | JOIN LPAREN join_arg COMMA join_arg RPAREN SEMI { Join($3,$5) }
-  | FRAME LT LIT_INT COMMA LIT_INT COMMA LIT_INT GT ID SEMI { Fr_decl($3,$5,$7,$9) }
   | LCURL stmt_list RCURL { Block(List.rev $2) }
   | BREAK SEMI    { Break    }
   | CONTINUE SEMI { Continue }
+  | fr_decl SEMI  { Fr_decl($1) }
 
 expr:
   | ID                     { Id($1)          }
@@ -83,13 +114,15 @@ expr:
 
 join_arg:
   ID COMMA LCURL face_set RCURL
-  { { frname = $1; blck_face = $4; } }
+    { { frname    = $1; 
+        blck_face = $4; } }
 
 face_set:
-  | face_id                  { [$1] }
-  | face_set COMMA face_id   { $3 :: $1 }
+  | face_id                { [$1] }
+  | face_set COMMA face_id { $3 :: $1 }
 
 face_id:
   LPAREN LIT_INT COMMA LIT_INT COMMA LIT_INT COMMA ID RPAREN
-  { { dim = ($2,$4,$6); face = $8; } }
+    { { dim  = ($2, $4, $6); 
+        face = $8; } }
   
