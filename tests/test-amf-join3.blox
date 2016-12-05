@@ -1,0 +1,12 @@
+void main() {
+	Frame<2,1,1> a;
+	Frame<1,2,1> b;
+	Frame<2,4,1> c;
+
+	Frame d = Join(a, 0, 0, 0, "N", b, 0, 0, 0, "S");
+	d = Join(d, 0, 2, 0, "N", a, 0, 0, 0, "S");
+	d = Join(d, 1, 3, 0, "B", c, 1, 3, 0, "F");
+	d = Join(d, 1, 1, 1, "F", b, 0, 0, 0, "B");
+
+	Convert(d);
+}

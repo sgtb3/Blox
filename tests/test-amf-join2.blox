@@ -1,0 +1,6 @@
+void main() {
+	Frame<1,1,1> a;
+	Frame<1,4,1> b;
+	b = Join(a, 0, 0, 0, "W", a, 0, 0, 0, "E");
+	Convert(b);
+}

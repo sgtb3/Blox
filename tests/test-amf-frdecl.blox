@@ -1,4 +1,6 @@
 void main() {
 	Frame<1,1,1> one;
+	Frame<2,1,1> two;
+	one = two;
 	Convert(one);
 }

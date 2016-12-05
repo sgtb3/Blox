@@ -1,0 +1,4 @@
+void main() {
+	Frame<1,1,1> one;
+	Frame<2,2,2> one; /* Can't declare same frame id twice */
+}
