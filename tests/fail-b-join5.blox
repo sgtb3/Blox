@@ -1,0 +1,6 @@
+void main() {
+	Frame<1,1,1> a;
+	Frame<1,1,1> b;
+	Frame ab = Join(a, 0, 0, 0, "E", b, 0, 0, 0, "N");   /* Must specify opposite faces */
+	Convert(ab);
+}

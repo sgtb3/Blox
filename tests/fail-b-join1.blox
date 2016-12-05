@@ -1,6 +1,5 @@
 void main() {
 	Frame<2,1,1> two;
-	Frame two = Join(two, 4, 0, 0, "E", two)
-
-	/* Can't declare same frame id twice */
+	Frame two = Join(two, 4, 0, 0, "E", two, 0, 0, 0, "W");   /* Index out of bounds */
+	Convert(two);
 }

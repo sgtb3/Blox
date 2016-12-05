@@ -1,0 +1,9 @@
+void main() {
+	Frame<2,1,1> a;
+	Frame<1,2,1> b;
+
+	Frame c = Join(a, 0, 0, 0, "N", b, 0, 0, 0, "S");
+	Frame d = Join(c, 0, 1, 0, "E", b, 0, 1, 0, "W");   /* Join causes overlap */
+
+	Convert(d);
+}
