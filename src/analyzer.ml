@@ -3,8 +3,8 @@ open Sast
 
 module StringMap = Map.Make(String)
 
-let run (globals, functions) =              
-  print_endline "Skipping Analyzer...\n"
+let analyze (globals, functions) =              
+  print_endline "Add Analyzer code here ...\n"
 (* 
   let report_duplicate exceptf list = (* Raise an exception if the given list has a duplicate frames *)
     let rec helper = function

@@ -1,5 +1,9 @@
+open Ast
+open Sast
 
-
+let generate (globals, functions) =   
+  print_endline "Add generator code here ...\n"
+(* 
 (* faceCheck function *)
 let faceCheck a = 
 
@@ -195,4 +199,4 @@ let write amf_file =
 (* normal exit: all channels are flushed and closed *);;
 
 write "HelloWorld.amf";;
-
+ *)

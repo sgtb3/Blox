@@ -1,8 +1,9 @@
 .PHONY: Create-Scanner Create-Parser Create-AST \
 		Create-SAST Compile-Scanner \
 		Compile-Parser Compile-Analyzer Compile-Generator Compile-Executor \ 
-		Compile-Blox-Top-Level Link-Objects \
-		Run-Menhir-Test Test-Hello-World Blox.tar.gz all 
+		Compile-Blox Link-Objects \
+		AST-Test Executor-Test Compile-Test \
+		Run-Menhir-Test Blox.tar.gz compiler
 
 # name of blox binary file
 EXEC = blox
@@ -45,9 +46,9 @@ AWK_CMD    = awk '{ printf "\n%-50s %-10s\n",$$1, $$2; }'
 PRINT_OK   = printf "$@ $(OK_STR)"  | $(AWK_CMD)
 BUILD_OK   = printf "$@ $(SUC_STR)" | $(AWK_CMD)
 
-all:	Clean Create-Scanner Create-AST Create-Parser Create-SAST \
+compiler:	Clean Create-Scanner Create-AST Create-Parser Create-SAST \
 		Compile-Scanner Compile-Parser Compile-Analyzer Compile-Executor \
-		Compile-Blox-Top-Level Link-Objects Test-Hello-World
+		Compile-Generator Compile-Blox Link-Objects  
 
 Create-Scanner:
 	@$(LEXGEN) $(SRC)/scanner.mll
@@ -107,10 +108,11 @@ Compile-Executor:
 Compile-Generator:
 	@$(OCC1) -I $(GEN) $(SRC)/generator.ml
 	@mv $(SRC)/generator.cmo $(OBJ)/generator.cmo
+	@mv $(SRC)/generator.cmi $(GEN)/generator.cmi
 	@sleep .12
 	@$(PRINT_OK)
 
-Compile-Blox-Top-Level:
+Compile-Blox:
 	@$(OCC1) -I $(GEN) $(SRC)/blox.ml
 	@mv $(SRC)/blox.cmo $(OBJ)/blox.cmo
 	@mv $(SRC)/blox.cmi $(GEN)/blox.cmi
@@ -118,16 +120,27 @@ Compile-Blox-Top-Level:
 	@$(PRINT_OK)
 
 Link-Objects:
-	@$(OCC2) $(EXEC) $(OBJ)/parser.cmo $(OBJ)/scanner.cmo $(OBJ)/ast.cmo \
-	$(OBJ)/sast.cmo $(OBJ)/analyzer.cmo $(OBJ)/blox.cmo $(OBJ)/executor.cmo
-	@# $(OBJ)/generator.cmo \ # uncomment this when generator works
+	@$(OCC2) $(EXEC) $(OBJ)/parser.cmo $(OBJ)/scanner.cmo $(OBJ)/ast.cmo $(OBJ)/sast.cmo \
+	$(OBJ)/analyzer.cmo $(OBJ)/executor.cmo $(OBJ)/generator.cmo $(OBJ)/blox.cmo 
 	@$(BUILD_OK)
 	@echo "\n-------------------------------------------------------\n"
 	@sleep .8
 
-Test-Hello-World:
+AST-Test: compiler
 	@echo "[$(HELLO).blox:]\n"
 	@./$(EXEC) -e $(SRC)/$(HELLO).blox
+	@sleep .12
+	@$(PRINT_OK)
+
+Executor-Test: compiler
+	@echo "[$(HELLO).blox:]\n"
+	@./$(EXEC) -e $(SRC)/$(HELLO).blox
+	@sleep .12
+	@$(PRINT_OK)
+
+Compile-Test: compiler
+	@echo "[$(HELLO).blox:]\n"
+	@./$(EXEC) -c $(SRC)/$(HELLO).blox
 	@sleep .12
 	@$(PRINT_OK)
 
