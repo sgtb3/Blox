@@ -3,6 +3,18 @@
 int y;
 int z;
 
+/* testing global frame declaration */
+Frame<1,1,1> one;
+Frame<1,1,1> two;
+
+/* testing global var assignment */
+int z1 = y;
+
+/* z1 = y     doesn't work - but it should */
+
+/* testing global frame assignment */
+Frame C = one;
+
 int main()
 {
 	/* test local var declar */

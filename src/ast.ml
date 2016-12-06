@@ -158,13 +158,13 @@ let string_of_join_arg x =
 
 (* print statements *)
 let rec string_of_stmt = function 
-  | Fr_decl(fr)    -> string_of_frdecl fr
-  | Block(stmts)   -> "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
-  | Expr(expr)     -> string_of_expr expr ^ "\n"
-  | Join(x,y)     -> "Join(" ^ string_of_join_arg x ^ ", " ^ string_of_join_arg y ^ ")\n"
-  | Fr_print(name) -> "print " ^ name ^ ";\n"
-  | Break          -> "break;\n"
-  | Continue       -> "continue;\n"
+  | Fr_decl(fr)     -> string_of_frdecl fr
+  | Block(stmts)    -> "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
+  | Expr(expr)      -> string_of_expr expr ^ "\n"
+  | Join(x,y)       -> "Join(" ^ string_of_join_arg x ^ ", " ^ string_of_join_arg y ^ ")\n"
+  | Fr_print(fname) -> "print " ^ fname ^ ";\n"
+  | Break           -> "break;\n"
+  | Continue        -> "continue;\n"
 
 (* print types *)
 let rec string_of_typ = function
@@ -186,28 +186,21 @@ let string_of_vassign (id,exp) = id ^ " = " ^ string_of_expr exp ^ ";\n"
 (* print function declarations *)
 let string_of_func_decl fd =
   string_of_typ fd.typ ^ " " ^ fd.fname ^ "(" ^ 
-  String.concat ", " (List.map snd               fd.formals) ^ ")\n{\n" ^
+  String.concat ", " (List.map snd fd.formals)               ^ ")\n{\n" ^
   String.concat ""   (List.map string_of_var_decl fd.locals) ^
-  String.concat ""   (List.map string_of_stmt       fd.body) ^ "}\n"
+  String.concat ""   (List.map string_of_stmt fd.body)       ^ "}\n"
 
-(* print frame assignments - type fr_assign = string * string - there probably needs to be a new_frame_assign, and regular fr_assign *)
+(* print frame assignments - there probably needs to be a new_frame_assign, and regular fr_assign *)
 let string_of_frassign (frname1,frname2) = frname1 ^ " = " ^ frname2 ^ ";\n"
 
-(* print variable declarations *)
-(* let string_of_glob_var_decl (t,id) = string_of_typ t ^ " " ^ vdecls.id ^ ";\n" *)
-
-let string_of_globals g = 
-  String.concat "" (List.map snd                  g.var_decls) ^
-  String.concat "" (List.map string_of_vassign   g.var_assgns) ^
-  String.concat "" (List.map string_of_frdecl     g.fr_decls)   ^
-  String.concat "" (List.map string_of_frassign g.fr_assgns)   ^"\n"
-
-(*var_decls  : var_decl list;
-  var_assgns : var_assign list;
-  fr_decls   : fr_decl list;
-  fr_assgns  : fr_assign list;*)
+(* print globals *)
+let string_of_globals glob = 
+  String.concat "" (List.map snd glob.var_decls)                ^
+  String.concat "" (List.map string_of_vassign glob.var_assgns) ^
+  String.concat "" (List.map string_of_frdecl glob.fr_decls)    ^
+  String.concat "" (List.map string_of_frassign glob.fr_assgns) ^"\n"
 
 (* print blox program *)
-let string_of_program (globals, funcs) =
-  String.concat ""    (List.map string_of_globals globals) ^ "\n" ^
-  String.concat "\n"  (List.map string_of_func_decl funcs)
+let string_of_program (globals,funcs) =
+  String.concat "\n"  (List.rev (List.map string_of_globals globals)) ^ "\n" ^
+  String.concat "\n"  (List.rev (List.map string_of_func_decl funcs))
