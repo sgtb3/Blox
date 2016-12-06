@@ -128,7 +128,7 @@ Link-Objects:
 
 AST-Test: compiler
 	@echo "[$(HELLO).blox:]\n"
-	@./$(EXEC) -e $(SRC)/$(HELLO).blox
+	@./$(EXEC) -a $(SRC)/$(HELLO).blox
 	@sleep .12
 	@$(PRINT_OK)
 
