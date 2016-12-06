@@ -1,11 +1,11 @@
+(* 1D ARAY CODE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! *)
+
 (* Declaration examples
 let blck1 = {faces = [|true;true;true;true;true;true|]};;
 
-let arr = Array.init 3 (fun _ -> Array.init 3 (fun _ -> (Array.init 3 (fun _ -> {faces = [|true;true;true;true;true;true|]}))));;
+let arr = Array.init 3 (fun _ -> {faces = [|true;true;true;true;true;true|]});;
 
-let drr = Array.init 3 (fun i -> Array.init 3 (fun j -> (Array.init 3 (fun k -> {faces = Array.copy arr.(i).(j).(k).faces}))));;
-
-Array.set (Array.get (Array.get (Array.get drr 0) 0) 0).faces 0 false;;
+let drr = Array.init 3 (fun i -> {faces = Array.copy arr.(i).(j).(k).faces});;
 
 let frm = {x = 3; y = 3; z = 3; blocks = arr}
 *)
@@ -28,62 +28,53 @@ type frame = {
   x       : int;
   y       : int;
   z       : int;
-  blocks  : blck array array array;
+  blocks  : blck array;
 }
 
 
-let faceCheck a = 
+(* faceCheck takes a 1D array and it's 3D dimensions *)
+let faceCheck a x y z=
 
-  for i = 0 to Array.length a - 1 do
+  let gx elx =
+    if Array.length elx.faces = 6 then(
+      Array.set elx.faces 1 false;
+      false)
+    else true in
+  let gy ely =
+    if Array.length ely.faces = 6 then(
+      Array.set ely.faces 3 false;
+      false)
+    else true in
+  let gz elz =
+    if Array.length elz.faces = 6 then(
+      Array.set elz.faces 5 false;
+      false)
+    else true in
 
-    for j = 0 to Array.length a.(i) - 1 do
+  let f i el =
+    if Array.length el.faces = 6 then(
+      Array.set el.faces 0 (if ((i + (y*z)) < (x*y*z)) then(
+        gx(a.(i + y*z)))
+      else true;);
+      Array.set el.faces 2 (if (((i mod (y*z)) + z) < (y*z)) then(
+        gy(a.(i + z)))
+      else true;);
+      Array.set el.faces 4 (if (((i mod z) + 1) < z) then(
+        gz(a.(i + 1)))
+      else true))
+  else ignore() in
 
-      for k = 0 to Array.length a.(i).(j) - 1 do
-        let b = a.(i).(j).(k) in
-
-        if Array.length b.faces = 6 then(
-
-          let xblck = (if i < Array.length a - 1 then a.(i + 1).(j).(k) else {faces = [||]}) in
-          let yblck = (if j < Array.length a.(i) - 1 then a.(i).(j + 1).(k) else {faces = [||]}) in
-          let zblck = (if k < Array.length a.(i).(j) - 1 then a.(i).(j).(k + 1) else {faces = [||]}) in
-
-          if Array.length xblck.faces = 6 then(
-            Array.set b.faces 0 false;
-            Array.set xblck.faces 1 false)
-          else ignore();
-
-          if Array.length yblck.faces = 6 then(
-            Array.set b.faces 2 false;
-            Array.set yblck.faces 3 false)
-          else ignore();
-
-          if Array.length zblck.faces = 6 then(
-            Array.set b.faces 4 false;
-            Array.set zblck.faces 5 false)
-          else ignore())
-
-        else ignore();
-
-      done;
-    done;
-  done;
+  Array.iteri f a
 ;;
 
 
+let argCheck frameA ax ay az af frameB bx by bz bf =
 
-let argCheck frameA a b c d frameB e f g h =
+  let aArray = Array.init (Array.length frameA.blocks) (fun i -> {faces = Array.copy frameA.blocks.(i).faces}) in
+  let ai = ((((ax * frameA.y) + ay) * frameA.z) + az) in
 
-  let aArray = Array.init frameA.x (fun i -> Array.init frameA.y (fun j -> (Array.init frameA.z (fun k -> {faces = Array.copy frameA.blocks.(i).(j).(k).faces})))) in
-  let ax = a in 
-  let ay = b in
-  let az = c in
-  let afacetr = d in
-  
-  let bArray = Array.init frameB.x (fun i -> Array.init frameB.y (fun j -> (Array.init frameB.z (fun k -> {faces = Array.copy frameB.blocks.(i).(j).(k).faces})))) in
-  let bx = e in
-  let by = f in
-  let bz = g in
-  let bfacetr = h in
+  let bArray = Array.init (Array.length frameB.blocks) (fun i -> {faces = Array.copy frameB.blocks.(i).faces}) in
+  let bi = ((((bx * frameB.y) + by) * frameB.z) + bz) in
 
   (* Check specified blocks are within array boundaries *)
   if (ax >= frameA.x) || (ay >= frameA.y) || (az >= frameA.z)
@@ -94,43 +85,43 @@ let argCheck frameA a b c d frameB e f g h =
   else ignore();
 
   (* Check given block exists *)
-  if not (Array.length frameA.blocks.(a).(b).(c).faces = 6)
+  if not (Array.length frameA.blocks.(ai).faces = 6)
     then raise (Invalid_Block "Specified Block for first frame does not exist")
   else ignore();
-  if not (Array.length frameB.blocks.(e).(f).(g).faces = 6)
+  if not (Array.length frameB.blocks.(bi).faces = 6)
     then raise (Invalid_Block "Specified Block for second frame does not exist")
   else ignore();
 
   (* Check for valid faces *)
-  if (afacetr = "E") || (afacetr = "W") || (afacetr = "N") || (afacetr = "S") || (afacetr = "F") || (afacetr = "B")
+  if (af = "E") || (af = "W") || (af = "N") || (af = "S") || (af = "F") || (af = "B")
     then ignore()
   else raise (Invalid_Face "Specified face for first frame must be E, W, N, S, F, or B");
-  if (bfacetr = "E") || (bfacetr = "W") || (bfacetr = "N") || (bfacetr = "S") || (bfacetr = "F") || (bfacetr = "B")
+  if (bf = "E") || (bf = "W") || (bf = "N") || (bf = "S") || (bf = "F") || (bf = "B")
     then ignore()
   else raise (Invalid_Face "Specified face for second frame must be E, W, N, S, F, or B");
 
   let aface =
-    (if afacetr = "E" then
-      aArray.(ax).(ay).(az).faces.(0)
-    else if afacetr = "W" then
-      aArray.(ax).(ay).(az).faces.(1)
-    else if afacetr = "N" then 
-      aArray.(ax).(ay).(az).faces.(2)
-    else if afacetr = "S" then 
-      aArray.(ax).(ay).(az).faces.(3)
-    else if afacetr = "F" then 
-      aArray.(ax).(ay).(az).faces.(4)
-    else if afacetr = "B" then 
-      aArray.(ax).(ay).(az).faces.(5)
+    (if af = "E" then
+      aArray.(ai).faces.(0)
+    else if af = "W" then
+      aArray.(ai).faces.(1)
+    else if af = "N" then 
+      aArray.(ai).faces.(2)
+    else if af = "S" then 
+      aArray.(ai).faces.(3)
+    else if af = "F" then 
+      aArray.(ai).faces.(4)
+    else if af = "B" then 
+      aArray.(ai).faces.(5)
     else false) in
 
   let (bface, bx_shift, by_shift, bz_shift) =
-    (if bfacetr = "E" then (bArray.(bx).(by).(bz).faces.(0), (ax - 1) - bx, ay - by, az - bz)
-    else if bfacetr = "W" then(bArray.(bx).(by).(bz).faces.(1), (ax + 1) - bx, ay - by, az - bz)
-    else if bfacetr = "N" then(bArray.(bx).(by).(bz).faces.(2), ax - bx, (ay - 1) - by, az - bz)
-    else if bfacetr = "S" then(bArray.(bx).(by).(bz).faces.(3), ax - bx, (ay + 1) - by, az - bz) 
-    else if bfacetr = "F" then(bArray.(bx).(by).(bz).faces.(4), ax - bx, ay - by, (az - 1) - bz)
-    else if bfacetr = "B" then(bArray.(bx).(by).(bz).faces.(5), ax - bx, ay - by, (az + 1) - bz)
+    (if bf = "E" then (bArray.(bi).faces.(0), (ax - 1) - bx, ay - by, az - bz)
+    else if bf = "W" then(bArray.(bi).faces.(1), (ax + 1) - bx, ay - by, az - bz)
+    else if bf = "N" then(bArray.(bi).faces.(2), ax - bx, (ay - 1) - by, az - bz)
+    else if bf = "S" then(bArray.(bi).faces.(3), ax - bx, (ay + 1) - by, az - bz) 
+    else if bf = "F" then(bArray.(bi).faces.(4), ax - bx, ay - by, (az - 1) - bz)
+    else if bf = "B" then(bArray.(bi).faces.(5), ax - bx, ay - by, (az + 1) - bz)
     else (false, 0, 0, 0)) in
   
   (* check if frameA's block face is available *)
@@ -144,18 +135,18 @@ let argCheck frameA a b c d frameB e f g h =
   else ignore();
   
   (* check for opposite faces *)
-  if (((afacetr = "E") && not(bfacetr = "W")) ||
-      ((afacetr = "W") && not(bfacetr = "E"))) then 
+  if (((af = "E") && not(bf = "W")) ||
+      ((af = "W") && not(bf = "E"))) then 
     raise (Opposite_Face "Must specify opposite faces")
   else ignore();
 
-  if (((afacetr = "N") && not(bfacetr = "S")) ||
-      ((afacetr = "S") && not(bfacetr = "N"))) then 
+  if (((af = "N") && not(bf = "S")) ||
+      ((af = "S") && not(bf = "N"))) then 
     raise (Opposite_Face "Must specify opposite faces")
   else ignore();
   
-  if (((afacetr = "F") && not(bfacetr = "B")) ||
-      ((afacetr = "B") && not(bfacetr = "F"))) then 
+  if (((af = "F") && not(bf = "B")) ||
+      ((af = "B") && not(bf = "F"))) then 
     raise (Opposite_Face "Must specify opposite faces")
   else ignore();
 
@@ -169,75 +160,62 @@ let argCheck frameA a b c d frameB e f g h =
   let (az_shift, bz_shift) =
     (if bz_shift < 0 then (-bz_shift, 0) else (0, bz_shift)) in
 
-  (* Return shift values *)
-  (ax_shift, ay_shift, az_shift, bx_shift, by_shift, bz_shift)
+  (* Return shift values and copied arrays *)
+  (ax_shift, ay_shift, az_shift, bx_shift, by_shift, bz_shift, aArray, bArray)
 ;;
 
 
 
-let join frameA a b c d frameB e f g h =
+let join frameA ax ay az af frameB bx by bz bf =
 
-  let (ax_shift, ay_shift, az_shift, bx_shift, by_shift, bz_shift) = argCheck frameA a b c d frameB e f g h in
-
-  let aArray = Array.init frameA.x (fun i -> Array.init frameA.y (fun j -> (Array.init frameA.z (fun k -> {faces = Array.copy frameA.blocks.(i).(j).(k).faces})))) in
-  
-  let bArray = Array.init frameB.x (fun i -> Array.init frameB.y (fun j -> (Array.init frameB.z (fun k -> {faces = Array.copy frameB.blocks.(i).(j).(k).faces})))) in
+  let (ax_shift, ay_shift, az_shift, bx_shift, by_shift, bz_shift, aArray, bArray) = argCheck frameA ax ay az af frameB bx by bz bf in
 
   (* Determine size of new array *)
-  let cx_max = (max (frameA.x + ax_shift) (frameB.x + bx_shift)) in
-  let cy_max = (max (frameA.y + ay_shift) (frameB.y + by_shift)) in
-  let cz_max = (max (frameA.z + az_shift) (frameB.z + bz_shift)) in
-
+  let cx = (max (frameA.x + ax_shift) (frameB.x + bx_shift)) in
+  let cy = (max (frameA.y + ay_shift) (frameB.y + by_shift)) in
+  let cz = (max (frameA.z + az_shift) (frameB.z + bz_shift)) in
 
   (* Create new array of blocks *)
-  let c = Array.init cx_max (fun _ -> Array.init cy_max (fun _ -> (Array.init cz_max 
-    (fun _ -> let b = {faces = [||] } in b )))) in
+  let c = Array.init (cx * cy * cz) (fun _ -> let b = {faces = [||] } in b ) in
 
   (* Fill c with blocks from array A *)
-  for i = 0 to frameA.x - 1 do
-
-    for j = 0 to frameA.y- 1 do
-
-      for k = 0 to frameA.z - 1 do
-
-        let b = (Array.get (Array.get (Array.get aArray i) j) k) in
-        if Array.length b.faces = 6 then
-          (Array.set (Array.get (Array.get c (i + ax_shift)) (j + ay_shift)) (k + az_shift) b)
-        else ignore();
-
-      done;
-    done;
-  done;
-
+  let f i el =
+    if Array.length el.faces = 6 then(
+      let z_val = (i mod frameA.z) in
+      let y_val = (((i - z_val) / frameA.z) mod frameA.y) in
+      let x_val = ((((i - z_val) / frameA.z) - y_val) / frameA.y) in
+      let cz_val = z_val + az_shift in
+      let cy_val = y_val + ay_shift in
+      let cx_val = x_val + ax_shift in
+      let ci = ((((cx_val * cy) + cy_val) * cz) + cz_val) in
+      Array.set c ci el)
+    else ignore() in
+  Array.iteri f aArray;
 
   (* Fill c with blocks from array B *)
-  for i = 0 to frameB.x - 1 do
-
-    for j = 0 to frameB.y - 1 do
-
-      for k = 0 to frameB.z - 1 do
-
-        let bb = (Array.get (Array.get (Array.get bArray i) j) k) in
-        if Array.length bb.faces = 6 then(
-          if Array.length (Array.get (Array.get (Array.get c (i + bx_shift)) (j + by_shift)) (k + bz_shift)).faces = 0 then
-            (Array.set (Array.get (Array.get c (i + bx_shift)) (j + by_shift)) (k + bz_shift) bb)
-          else raise(Block_Overlap "The specified join causes overlap"))
-        else ignore();
-
-      done;
-    done;
-  done;
-
+  let g i el =
+    if Array.length el.faces = 6 then(
+      let z_val = (i mod frameB.z) in
+      let y_val = (((i - z_val) / frameB.z) mod frameB.y) in
+      let x_val = ((((i - z_val) / frameB.z) - y_val) / frameB.y) in
+      let cz_val = z_val + bz_shift in
+      let cy_val = y_val + by_shift in
+      let cx_val = x_val + bx_shift in
+      let ci = ((((cx_val * cy) + cy_val) * cz) + cz_val) in
+      if (Array.length c.(ci).faces = 0) then(
+        Array.set c ci el)
+      else raise (Block_Overlap "The specified join causes overlap"))
+    else ignore() in
+  Array.iteri g bArray;
 
   (* Run faceCheck *)
-  faceCheck c;
-
+  faceCheck c cx cy cz;
 
   (* Update Frame A with Cblocks array to finish merge of B into A *)
   let frameC = {
-  x = cx_max;
-  y = cy_max;
-  z = cz_max; 
+  x = cx;
+  y = cy;
+  z = cz; 
   blocks = c;
   } in
 
