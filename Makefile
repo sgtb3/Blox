@@ -1,6 +1,6 @@
 .PHONY: Create-Scanner Create-Parser Create-AST \
 		Create-SAST Compile-Scanner \
-		Compile-Parser Compile-Analyzer Compile-Generator \
+		Compile-Parser Compile-Analyzer Compile-Generator Compile-Executor \ 
 		Compile-Blox-Top-Level Link-Objects \
 		Run-Menhir-Test Test-Hello-World Blox.tar.gz all 
 
@@ -46,8 +46,8 @@ PRINT_OK   = printf "$@ $(OK_STR)"  | $(AWK_CMD)
 BUILD_OK   = printf "$@ $(SUC_STR)" | $(AWK_CMD)
 
 all:	Clean Create-Scanner Create-AST Create-Parser Create-SAST \
-		Compile-Scanner Compile-Parser Compile-Analyzer Compile-Blox-Top-Level \
-		Link-Objects Test-Hello-World
+		Compile-Scanner Compile-Parser Compile-Analyzer Compile-Executor \
+		Compile-Blox-Top-Level Link-Objects Test-Hello-World
 
 Create-Scanner:
 	@$(LEXGEN) $(SRC)/scanner.mll
@@ -97,6 +97,13 @@ Compile-Analyzer:
 	@sleep .12
 	@$(PRINT_OK)
 
+Compile-Executor:
+	@$(OCC1) -I $(GEN) $(SRC)/executor.ml
+	@mv $(SRC)/executor.cmo $(OBJ)/executor.cmo
+	@mv $(SRC)/executor.cmi $(GEN)/executor.cmi
+	@sleep .12
+	@$(PRINT_OK)
+
 Compile-Generator:
 	@$(OCC1) -I $(GEN) $(SRC)/generator.ml
 	@mv $(SRC)/generator.cmo $(OBJ)/generator.cmo
@@ -112,7 +119,7 @@ Compile-Blox-Top-Level:
 
 Link-Objects:
 	@$(OCC2) $(EXEC) $(OBJ)/parser.cmo $(OBJ)/scanner.cmo $(OBJ)/ast.cmo \
-	$(OBJ)/sast.cmo $(OBJ)/analyzer.cmo $(OBJ)/blox.cmo
+	$(OBJ)/sast.cmo $(OBJ)/analyzer.cmo $(OBJ)/blox.cmo $(OBJ)/executor.cmo
 	@# $(OBJ)/generator.cmo \ # uncomment this when generator works
 	@$(BUILD_OK)
 	@echo "\n-------------------------------------------------------\n"
@@ -120,7 +127,7 @@ Link-Objects:
 
 Test-Hello-World:
 	@echo "[$(HELLO).blox:]\n"
-	@./$(EXEC) -a $(SRC)/$(HELLO).blox
+	@./$(EXEC) -e $(SRC)/$(HELLO).blox
 	@sleep .12
 	@$(PRINT_OK)
 

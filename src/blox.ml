@@ -1,4 +1,4 @@
-type action = Usage | Ast | Compile
+type action = Usage | Ast | Compile | Execute
 
 let usage = 
   "\n USAGE: \n" ^
@@ -11,7 +11,7 @@ let usage =
 let _ =
   let action = 
     if Array.length Sys.argv > 1 then
-      List.assoc Sys.argv.(1) [ ("-a", Ast); ("-c", Compile); ("-h", Usage)] 
+      List.assoc Sys.argv.(1) [ ("-a", Ast); ("-c", Compile); ("-h", Usage); ("-e", Execute)] 
     else 
       Compile
   in
@@ -27,6 +27,8 @@ let _ =
     | Usage   ->  print_endline usage
     | Ast     ->  print_string (Ast.string_of_program ast)
     | Compile ->  print_endline "compile not implemented yet"
+    | Execute ->  Executor.execute ast
+    (* | Execute ->  Generator.translate Executor.execute ast *)
     (* | Compile ->  let m = Generator.translate ast 
                   in
                   print_string (Generator.string_of_module m) *)
