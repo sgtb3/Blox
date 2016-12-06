@@ -16,7 +16,7 @@ type frame = {
   x       : int;
   y       : int;
   z       : int;
-  blocks  : blck array array array;
+  blocks  : blck array;
 }
 
 type face_id = {
