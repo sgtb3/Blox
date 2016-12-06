@@ -1,61 +1,56 @@
 
-/* Create basic frames to construct letters with */
+/* testing global var declar */
+int y;
+int z;
+
+/* testing global frame declaration */
 Frame<1,1,1> one;
-Frame<2,1,1> twox;
-Frame<1,2,1> twoy;
-Frame<3,1,1> threex;
-Frame<1,3,1> threey;
-Frame<1,5,1> fivey;
-Frame<46,5,1> base;
+Frame<1,1,1> two;
 
+/* testing global var assignment */
+int z1 = y;
 
-/* Create an H */
-Frame H = fivey;
-H = Join(H, {(1,3,1,E)}, twox, {(1,1,1,W)});
-H = Join(H, {(3,3,1,E)}, fivey, {(1,3,1,W)});
+/* z1 = y     doesn't work - but it should */
 
-/* Create an E */
-Frame E = fivey;
-E = Join(E, {(1,1,1,E)}, twox, {(1,1,1,W)});
-E = Join(E, {(1,3,1,E)}, twox, {(1,1,1,W)});
-E = Join(E, {(1,5,1,E)}, twox, {(1,1,1,W)});
+/* testing global frame assignment */
+Frame C = one;
 
-/* Create an L */
-Frame L = fivey;
-L = Join(L, {(1,1,1,E)}, twox, {(1,1,1,W)});
+int main()
+{
+	/* test local var declar */
+	int x;
+	bool t;
 
-/* Create an O */
-Frame O = fivey;
-O = Join(O, {(1,1,1,E)}, twox, {(1,1,1,W)});
-O = Join(O, {(1,5,1,E)}, twox, {(1,1,1,W)});
-O = Join(O, {(3,1,1,E)}, fivey, {(1,1,1,W)});
+	/* this should not be accepted, but it is*/ 
+	void i; 
 
-/* Create a W */
-Frame W = fivey;
-W = Join(W, {(1,1,1,E)}, threex, {(1,1,1,W)});
-W = Join(W, {(4,1,1,E)}, fivey, {(1,1,1,W)});
-W = Join(W, {(3,1,1,N)}, twoy, {(1,1,1,S)});
+	/* test declaration and assignment */
+	/* bool t = true; */
+	/* bool f = false; */
 
-/* Create an R */
-Frame R = threey;
-R = Join(R, {(1,3,1,E)}, twox, {(1,1,1,W)});
+	/* test Map creation */
+	/* Map<Frame, Frame> map; */
+	
+	/* test continue */
+	continue;
+	
+	/* test break */
+	break;
 
-/* Create an D */
-Frame D = threey;
-D = Join(D, {(1,1,1,E)}, one, {(1,1,1,W)});
-D = Join(D, {(1,3,1,E)}, one, {(1,1,1,W)});
-D = Join(D, {(2,1,1,E)}, fivey, {(1,1,1,W)});
+	/* Create basic frames to construct letters with */
+	Frame<1,1,1> one;
+	Frame<2,1,1> twox;
+	Frame<1,5,1> fivey;
+	Frame<46,5,1> base;
 
-/* Join letters to the base */
-base = Join(base, {(1,1,1,F)}, H, {(1,1,1,B)});
-base = Join(base, {(6,1,1,F)}, E, {(1,1,1,B)});
-base = Join(base, {(10,1,1,F)}, L, {(1,1,1,B)});
-base = Join(base, {(14,1,1,F)}, L, {(1,1,1,B)});
-base = Join(base, {(18,1,1,F)}, O, {(1,1,1,B)});
-base = Join(base, {(25,1,1,F)}, W, {(1,1,1,B)});
-base = Join(base, {(31,1,1,F)}, O, {(1,1,1,B)});
-base = Join(base, {(36,1,1,F)}, R, {(1,1,1,B)});
-base = Join(base, {(40,1,1,F)}, L, {(1,1,1,B)});
-base = Join(base, {(44,1,1,F)}, D, {(1,1,1,B)});
+	/* testing frame assign and frame assign list */
+	Frame H = fivey;
+	Frame I = one;
 
-Print base;
+	/* testing joins and joins list */
+	Join(H, {(1,3,1,E)}, twox, {(1,1,1,W)});
+	Join(H, {(3,3,1,E)}, fivey, {(1,3,1,W)});
+	
+	/* testing print */
+	print base;	
+}

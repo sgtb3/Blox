@@ -1,4 +1,8 @@
 
+open Ast
+open Sast
+
+
 exception Face_Taken of string;;
 exception Block_Overlap of string;;
 exception Invalid_Face of string;;
@@ -6,7 +10,10 @@ exception Opposite_Face of string;;
 exception Invalid_Block of string;;
 exception Block_Out_Of_Bounds of string;;
 
-open Ast
+
+let execute (globals, functions) =
+	print_endline "Add executor code here ...\n"
+
 
 (* faceCheck takes a 1D array and its 3D dimensions *)
 let faceCheck a x y z=

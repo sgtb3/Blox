@@ -1,11 +1,14 @@
 
+open Ast
+open Sast
+
 exception Face_Taken of string;;
 exception Block_Overlap of string;;
 exception Invalid_Face of string;;
 exception Opposite_Face of string;;
 exception Invalid_Block of string;;
 exception Block_Out_Of_Bounds of string;;
-
+(* 
 
 type blck = {
   faces : bool array;
@@ -17,8 +20,10 @@ type frame = {
   y       : int;
   z       : int;
   blocks  : blck array array array;
-}
+} *)
 
+let generate (globals, functions) =
+  print_endline "Add generator code here ...\n"
 
 let faceCheck a = 
 
@@ -57,7 +62,7 @@ let faceCheck a =
   done;
 ;;
 
-
+(* sorry - had to comment the code out to make this compile - just uncomment it and check the warning
 
 let argCheck frameA a b c d frameB e f g h =
 
@@ -232,7 +237,6 @@ let join frameA a b c d frameB e f g h =
   frameC
 ;;
 
-
 	
 (* GENERATE AMF FILE CODE BELOW*)
 (* Read in .blox file into a list *)
@@ -302,6 +306,10 @@ let write amf_file =
 		(* normal exit: all channels are flushed and closed *);;
 
 write "HelloWorld.amf";;
+
+
+
+*)
 
 					(*~~~~~~~~~~~~~~~~ STOP ~~~~~~~~~~~~~~~~*)
 (*~~~~~~~~~~~~~~~~  PRIOR ITERATIONS BELOW ~~~~~~~~~~~~~~~~*)	

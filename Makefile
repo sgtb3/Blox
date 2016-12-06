@@ -1,5 +1,9 @@
-# phony targets
-.PHONY: all clean scanner parser ast sast scancomp parscomp anlyzcomp gencomp bloxcomp build test menhirtest testHWAST 
+.PHONY: Create-Scanner Create-Parser Create-AST \
+		Create-SAST Compile-Scanner \
+		Compile-Parser Compile-Analyzer Compile-Generator Compile-Executor \ 
+		Compile-Blox Link-Objects \
+		AST-Test Executor-Test Compile-Test \
+		Run-Menhir-Test Blox.tar.gz compiler
 
 # name of blox binary file
 EXEC = blox
@@ -10,164 +14,157 @@ HELLO = HelloWorld
 # name of test shell script
 TESTSH = testAll
 
-# bytecode object file extension
-OBJEXT = .cmo
-
 # lexer (scanner) and parser generators
-# 	-v : verbose output option for ocamlyacc
+# -v : verbose output option for ocamlyacc
 LEXGEN = ocamllex
-PARSGEN = ocamlyacc
-PARSGENFLAG = -v
+PARSGEN = ocamlyacc -v 
 
 # ocaml compiler and flags
-# 	-c : compile without producing executable files
-# 	-o : specify name of output file produced by compiler
-OCC = ocamlc
-OCCFLAGS1 = -c
-OCCFLAGS2 = -o 
-OCCFLAGS3 = -absname
+# -c : compile without producing executable files
+# -o : specify name of output file produced by compiler
+OCC1 = ocamlc -c
+OCC2 = ocamlc -o
 
 # source files, generated files, testing, and AMF/output directories
-SRCDIR = src
-GENDIR = gen
-OBJDIR = obj
-TSTDIR = tests
-AMFDIR = amf
+SRC = src
+GEN = gen
+OBJ = obj
+TST = tests
+AMF = amf
+TARFILES = $(SRC) $(GEN) $(OBJ) $(TST) $(TESTSH).sh README.md Makefile \
+		   $(TESTFILES:%=tests/%)
 
 # add src, gen, and obj directories to Make path when looking for files
 VPATH = src:gen:obj
-testfiles := $(wildcard $(TSTDIR)/*)
+testfiles := $(wildcard $(TST)/*)
 
-# default makefile target
-# gencomp
-all: clean scanner ast parser sast scancomp parscomp anlyzcomp bloxcomp build testHWAST
+NO_COLOR   = \033[0m
+OK_COLOR   = \033[32;01m
+OK_STR     = $(OK_COLOR)[OK]$(NO_COLOR)
+SUC_STR    = $(OK_COLOR)[BUILD-SUCCESSFUL]$(NO_COLOR)
+AWK_CMD    = awk '{ printf "\n%-50s %-10s\n",$$1, $$2; }'
+PRINT_OK   = printf "$@ $(OK_STR)"  | $(AWK_CMD)
+BUILD_OK   = printf "$@ $(SUC_STR)" | $(AWK_CMD)
 
-# create the Scanner
-scanner:
-	@echo "\n========================================================="	
-	@echo "Using ocamllex to generate the Scanner ..."
-	@$(LEXGEN) $(SRCDIR)/scanner.mll
-	@mv $(SRCDIR)/scanner.ml $(GENDIR)/scanner.ml
-	@echo "=========================================================\n"	
+compiler:	Clean Create-Scanner Create-AST Create-Parser Create-SAST \
+		Compile-Scanner Compile-Parser Compile-Analyzer Compile-Executor \
+		Compile-Generator Compile-Blox Link-Objects  
 
-# create the Parser
-parser: 
-	@echo "\n========================================================="	
-	@echo "Using ocamlyacc to generate the Parser ..."
-	@$(PARSGEN) $(PARSGENFLAG) $(SRCDIR)/parser.mly
-	@mv $(SRCDIR)/parser.ml $(GENDIR)/parser.ml
-	@mv $(SRCDIR)/parser.mli $(GENDIR)/parser.mli
-	@mv $(SRCDIR)/parser.output $(GENDIR)/parser.output
-	@cat $(GENDIR)/parser.output
-	@echo "=========================================================\n"
+Create-Scanner:
+	@$(LEXGEN) $(SRC)/scanner.mll
+	@mv $(SRC)/scanner.ml $(GEN)/scanner.ml
+	@sleep .12
+	@$(PRINT_OK)
 
-# compile the Abstract Syntax Tree 
-ast:
-	@echo "\n========================================================="	
-	@echo "Compiling the Abstract Syntax Tree ..."
-	@$(OCC) $(OCCFLAGS1) $(SRCDIR)/ast.ml
-	@mv $(SRCDIR)/ast.cmi $(GENDIR)/ast.cmi
-	@mv $(SRCDIR)/ast.cmo $(OBJDIR)/ast.cmo
-	@echo "=========================================================\n"
+Create-Parser:
+	@$(PARSGEN) $(SRC)/parser.mly
+	@mv $(SRC)/parser.ml $(GEN)/parser.ml
+	@mv $(SRC)/parser.mli $(GEN)/parser.mli
+	@mv $(SRC)/parser.output $(GEN)/parser.output
+	@cat $(GEN)/parser.output
+	@sleep .12
+	@$(PRINT_OK)
 
+Create-AST:
+	@$(OCC1) $(SRC)/ast.ml 
+	@mv $(SRC)/ast.cmi $(GEN)/ast.cmi
+	@mv $(SRC)/ast.cmo $(OBJ)/ast.cmo
+	@sleep .12
+	@$(PRINT_OK)
 
-# creates the sematically checked AST (sast). 
-# scanner, ast, and parser should already before created making sast
-sast:
-	@echo "\n========================================================="	
-	@echo "Creating SAST ..."
-	@$(OCC) -I $(GENDIR) $(OCCFLAGS1) $(SRCDIR)/sast.ml
-	@$(OCC) -I $(GENDIR) $(OCCFLAGS1) $(GENDIR)/parser.mli
-	@$(OCC) -I $(GENDIR) $(OCCFLAGS1) $(GENDIR)/scanner.ml
-	@mv $(SRCDIR)/sast.cmi $(GENDIR)/sast.cmi
-	@mv $(SRCDIR)/sast.cmo $(OBJDIR)/sast.cmo
-	@echo "=========================================================\n"
+Create-SAST:
+	@$(OCC1) -I $(GEN) $(SRC)/sast.ml $(GEN)/parser.mli $(GEN)/scanner.ml
+	@mv $(SRC)/sast.cmi $(GEN)/sast.cmi
+	@mv $(SRC)/sast.cmo $(OBJ)/sast.cmo
+	@sleep .12
+	@$(PRINT_OK)
 
-# compile the Scanner
-scancomp:
-	@echo "\n========================================================="	
-	@echo "Compiling the Scanner ..."
-	@$(OCC) -I $(GENDIR) $(OCCFLAGS1) $(GENDIR)/scanner.ml
-	@mv $(GENDIR)/scanner.cmo $(OBJDIR)/scanner.cmo 
-	@echo "=========================================================\n"
+Compile-Scanner:
+	@$(OCC1) -I $(GEN) $(GEN)/scanner.ml
+	@mv $(GEN)/scanner.cmo $(OBJ)/scanner.cmo
+	@sleep .12
+	@$(PRINT_OK)
 
-# compile the Parser
-parscomp:
-	@echo "\n========================================================="	
-	@echo "Compiling the Parser ..."
-	@$(OCC) -I $(GENDIR) $(OCCFLAGS1) $(GENDIR)/parser.ml
-	@mv $(GENDIR)/parser.cmo $(OBJDIR)/parser.cmo 
-	@echo "=========================================================\n"
+Compile-Parser:
+	@$(OCC1) -I $(GEN) $(GEN)/parser.ml
+	@mv $(GEN)/parser.cmo $(OBJ)/parser.cmo
+	@sleep .12
+	@$(PRINT_OK)
 
-# compile the Semantic Analyzer
-anlyzcomp:
-	@echo "\n========================================================="	
-	@echo "Compiling the Semantic Analyzer ..."
-	@$(OCC) -I $(GENDIR) $(OCCFLAGS1) $(SRCDIR)/analyzer.ml
-	@mv $(SRCDIR)/analyzer.cmo $(OBJDIR)/analyzer.cmo 
-	@mv $(SRCDIR)/analyzer.cmi $(GENDIR)/analyzer.cmi
-	@echo "=========================================================\n"
+Compile-Analyzer:
+	@$(OCC1) -I $(GEN) $(SRC)/analyzer.ml
+	@mv $(SRC)/analyzer.cmo $(OBJ)/analyzer.cmo
+	@mv $(SRC)/analyzer.cmi $(GEN)/analyzer.cmi
+	@sleep .12
+	@$(PRINT_OK)
 
-# compile the Code Generator
-gencomp:
-	@echo "\n========================================================="	
-	@echo "Compiling the Code Generator ..."
-	@$(OCC) -I $(GENDIR) $(OCCFLAGS1) $(SRCDIR)/generator.ml
-	@mv $(SRCDIR)/generator.cmo $(OBJDIR)/generator.cmo 
-	@echo "=========================================================\n"
+Compile-Executor:
+	@$(OCC1) -I $(GEN) $(SRC)/executor.ml
+	@mv $(SRC)/executor.cmo $(OBJ)/executor.cmo
+	@mv $(SRC)/executor.cmi $(GEN)/executor.cmi
+	@sleep .12
+	@$(PRINT_OK)
 
-# not yet complete - compile Blox top-level interface
-bloxcomp: 
-	@echo "\n========================================================="	
-	@echo "Compiling the Blox top-level ..."
-	@$(OCC) -I $(GENDIR) $(OCCFLAGS1) $(SRCDIR)/blox.ml
-	@mv $(SRCDIR)/blox.cmo $(OBJDIR)/blox.cmo 
-	@mv $(SRCDIR)/blox.cmi $(GENDIR)/blox.cmi
-	@echo "=========================================================\n"
+Compile-Generator:
+	@$(OCC1) -I $(GEN) $(SRC)/generator.ml
+	@mv $(SRC)/generator.cmo $(OBJ)/generator.cmo
+	@mv $(SRC)/generator.cmi $(GEN)/generator.cmi
+	@sleep .12
+	@$(PRINT_OK)
 
-# create the Blox compiler from the object files
-build:
-	@echo "\n========================================================="	
-	@echo "Creating the Blox compiler ..."
-	@$(OCC) $(OCCFLAGS2) $(EXEC) \
-	$(OBJDIR)/parser.cmo \
-	$(OBJDIR)/scanner.cmo \
-	$(OBJDIR)/ast.cmo \
-	$(OBJDIR)/sast.cmo \
-	$(OBJDIR)/analyzer.cmo \
-	$(OBJDIR)/blox.cmo
-	@# $(OBJDIR)/generator.cmo \ # uncomment this when generator works
-	@echo "=========================================================\n"
+Compile-Blox:
+	@$(OCC1) -I $(GEN) $(SRC)/blox.ml
+	@mv $(SRC)/blox.cmo $(OBJ)/blox.cmo
+	@mv $(SRC)/blox.cmi $(GEN)/blox.cmi
+	@sleep .12
+	@$(PRINT_OK)
 
-testHWAST:
-	@echo "\n========================================================="	
-	@echo "Testing Blox compiler AST ..."
-	@echo "\n$(HELLO).blox:\n"
-	@./$(EXEC) -a $(SRCDIR)/$(HELLO).blox
-	@echo "=========================================================\n"
+Link-Objects:
+	@$(OCC2) $(EXEC) $(OBJ)/parser.cmo $(OBJ)/scanner.cmo $(OBJ)/ast.cmo $(OBJ)/sast.cmo \
+	$(OBJ)/analyzer.cmo $(OBJ)/executor.cmo $(OBJ)/generator.cmo $(OBJ)/blox.cmo 
+	@$(BUILD_OK)
+	@echo "\n-------------------------------------------------------\n"
+	@sleep .8
 
-# run the test script and display the test log
-test:
-	@echo "\n========================================================="	
-	@echo "Running test script ..."
+AST-Test: compiler
+	@echo "[$(HELLO).blox:]\n"
+	@./$(EXEC) -a $(SRC)/$(HELLO).blox
+	@sleep .12
+	@$(PRINT_OK)
+
+Executor-Test: compiler
+	@echo "[$(HELLO).blox:]\n"
+	@./$(EXEC) -e $(SRC)/$(HELLO).blox
+	@sleep .12
+	@$(PRINT_OK)
+
+Compile-Test: compiler
+	@echo "[$(HELLO).blox:]\n"
+	@./$(EXEC) -c $(SRC)/$(HELLO).blox
+	@sleep .12
+	@$(PRINT_OK)
+
+Run-Test-Script:
 	@./$(TESTSH).sh
-	@mv $(TESTSH).log $(GENDIR)/$(TESTSH).log
-	@echo "\n---------------------------------------------------------"
-	@echo "Opening $(TESTSH).sh log ..."
-	@cat $(GENDIR)/$(TESTSH).log
-	@echo "=========================================================\n"
+	@mv $(TESTSH).log $(GEN)/$(TESTSH).log
+	@sleep .12
+	@echo "[Opening $(TESTSH).sh log ...]"
+	@cat $(GEN)/$(TESTSH).log
+	@sleep .12
+	@$(PRINT_OK)
 
-# run menhir's interpreter to show concrete syntax tree
-# enter token identifiers to see if they're accepted or rejected
-# example of "Frame<1,1,3> A;" : ID LT INT COMMA INT COMMA INT GT ID SEMI EOF
-menhirtest:
-	menhir --interpret --interpret-show-cst $(SRCDIR)/parser.mly
-	
-# remove all files in gen/ and obj/
-clean:
-	@echo "\n========================================================="	
-	@echo "Cleaning up auxiliary files ..."
-	@rm -rf $(GENDIR)/*
-	@rm -rf $(OBJDIR)/*
+Run-Menhir-Test:
+	menhir --interpret --interpret-show-cst $(SRC)/parser.mly
+	@$(PRINT_OK)
+
+Clean:
+	@echo "\n-------------------------------------------------------\n"
+	@rm -rf $(GEN)/*
+	@rm -rf $(OBJ)/*
 	@rm -rf $(EXEC)
-	@echo "=========================================================\n"
+	@sleep .12
+	@$(PRINT_OK)
+
+Blox.tar.gz : $(TARFILES) Clean
+	@cd .. && tar czf Blox/Blox.tar.gz $(TARFILES:%=Blox/%)
+	@$(PRINT_OK)

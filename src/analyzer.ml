@@ -7,6 +7,10 @@ exception Face_Taken of string;;
 exception Block_Overlap of string;;
 exception Not_Opposite_Faces of string;;
 
+let analyze (globals, functions) = 
+  print_endline "Add analyzer code here ...\n"
+
+(* sorry - had to comment the code out to make this compile - just uncomment it and check the warning
 
 (* Facecheck algorithm marks faces that are unavailable *)
 let faceCheck a = 
@@ -212,6 +216,14 @@ let run (stmts) =                  (* let check (globals, functions) = (* *) *)
   in
 
   report_duplicate (fun n -> "duplicate frame " ^ n) (List.map fr_type stmts);
+
+
+
+
+*)
+
+
+
 
 
   (* let built_in_decls =            (* Function declaration for a named function *)

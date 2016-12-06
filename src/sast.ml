@@ -1,8 +1,8 @@
-open Ast
+(* open Ast
 
 type sexpr =
-    SIntLit of int
-  | SId of string * primi_typ
+    SInt of int
+  | SId of string * typ
 
 type sstmt =
     SBlock of stmt list
@@ -19,6 +19,5 @@ type sface_id = {
   dimS : int * int * int;
   faceS : string;
 }
-
-type program =
-  fr_decl list
+type program = bind list * func_decl list
+ *)

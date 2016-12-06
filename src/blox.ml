@@ -1,17 +1,18 @@
-type action = Usage | Ast | Compile | AMF
+type action = Usage | Ast | Execute | Compile 
 
 let usage = 
   "\n USAGE: \n" ^
-  " \t  blox.sh [-option] <input_file.blox> \n" ^
+  " \t  blox.sh [-option] <input_file.blox> \n"  ^
   " OPTIONS: \n" ^
   " \t  -a   Display the Abstract Syntax Tree\n" ^
-  " \t  -c   Compile input_file.blox to output_file.amf\n" ^
+  " \t  -c   Compile input_file.blox to AMF\n"   ^
   " \t  -h   Display the Blox compiler help menu\n"
 
 let _ =
   let action = 
     if Array.length Sys.argv > 1 then
-      List.assoc Sys.argv.(1) [ ("-a", Ast); ("-c", Compile); ("-h", Usage)] 
+      List.assoc Sys.argv.(1) 
+      [ ("-h", Usage); ("-a", Ast); ("-e", Execute); ("-c", Compile); ] 
     else 
       Compile
   in
@@ -21,15 +22,13 @@ let _ =
   in
   let ast = Parser.program Scanner.token lexbuf 
   in
-  Analyzer.run ast;
-  
+  Analyzer.analyze ast;
+
   match action with
     | Usage   ->  print_endline usage
     | Ast     ->  print_string (Ast.string_of_program ast)
-    | Compile ->  print_endline "compile not implemented yet"
-    (* | Compile ->  let m = Generator.translate ast 
+    | Execute ->  Executor.execute ast
+    | Compile ->  Generator.generate ast
+    (* | Compile ->  let e = Executor.execute ast 
                   in
-                  print_string (Generator.string_of_module m) *)
-
-(* Top-level of the Blox compiler: scan & parse the input, check the resulting 
-  AST, and generate the AMF file as output *)
+                  Generator.generate e *)
