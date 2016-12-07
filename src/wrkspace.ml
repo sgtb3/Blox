@@ -7,7 +7,7 @@ let arr = Array.init 3 (fun _ -> {faces = [|true;true;true;true;true;true|]});;
 
 let drr = Array.init 3 (fun i -> {faces = Array.copy arr.(i).(j).(k).faces});;
 
-let frm = {x = 3; y = 3; z = 3; blocks = arr}
+let frm = {x = 3; y = 1; z = 1; blocks = arr}
 *)
 
 
@@ -211,7 +211,7 @@ let join frameA ax ay az af frameB bx by bz bf =
   (* Run faceCheck *)
   faceCheck c cx cy cz;
 
-  (* Update Frame A with Cblocks array to finish merge of B into A *)
+  (* Create and return resulting frame C *)
   let frameC = {
   x = cx;
   y = cy;
