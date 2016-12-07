@@ -10,16 +10,29 @@ Frame<1,1,1> two;
 /* testing global var assignment */
 int z1 = y;
 
-/* z1 = y     doesn't work - but it should */
+/* z1 = y     (no type) variable assignment = doesn't work - but it should */
 
-/* testing global frame assignment */
+/* testing global frame assignment - printing correctly */
 Frame C = one;
+Frame D = C;
+
 
 int main()
 {
+	/* test function call - not working */
+	/* test_function(); */
+
+	/* test binary operator - not working */
+	/* int a = 1 + 2; */
+
 	/* test local var declar */
 	int x;
 	bool t;
+	/* bool t = true; */
+
+	/* int[] x; */
+	/* test map type */
+	/* Map<int, int> map; */
 
 	/* this should not be accepted, but it is*/ 
 	void i; 

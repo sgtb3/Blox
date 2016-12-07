@@ -25,12 +25,16 @@ type join = {
   fr_b : join_arg;
 }
 
-(* type constructors *)
+(* type constructors -  basic/primitive types hold literal values *)
 type typ = 
-  | Int | Bool | Float | String | Void (* basic/primitive types hold literal values *)
-  | Array of typ                       
-  | Set of typ
-  | Map of typ * typ
+  | Int | Bool | Float | String | Void 
+  | Array of typ * string                      
+  | Set of typ * string
+  | Map of typ * typ * string
+(* 
+type constructors - advanced types
+type dtype = 
+   *)
 
 (* actual block *)
 type blck = {
@@ -42,7 +46,7 @@ type frame = {
   x : int;
   y : int;
   z : int;
-  blocks : blck array array array;
+  blocks : blck;
 }
 
 (* frame declaration *)
@@ -59,7 +63,11 @@ type expr =
   | Lit_Int of int
   | Lit_Bool of bool
   | Assign of string * expr
+  | Binop of expr * op * expr
+  | Unop of uop * expr
+  | Call of string * expr list
   | Null
+  | Noexpr
 
 (* statements *)
 type stmt =
@@ -92,6 +100,7 @@ type fr_assign = string * string
 (* gloabls is a combination of var & frame declarations and assignments *)
 type globals = {
   var_decls  : var_decl list;
+  (* data_typs  : dtype list; *)
   var_assgns : var_assign list;
   fr_decls   : fr_decl list;
   fr_assgns  : fr_assign list;
@@ -128,8 +137,12 @@ let rec string_of_expr = function
   | Id(x)           -> x
   | Lit_Bool(true)  -> "true"
   | Lit_Bool(false) -> "false"
-  | Assign(x, y)    -> "Frame " ^ x ^ " = " ^ string_of_expr y ^ ";"
+  | Assign(x,y)     -> "Frame " ^ x ^ " = " ^ string_of_expr y ^ ";"
   | Null            -> "null"
+  | Binop(e1,o,e2)  -> string_of_expr e1 ^ " " ^ string_of_op o ^ " " ^ string_of_expr e2
+  | Unop(o,e)       -> string_of_uop o   ^ string_of_expr e
+  | Call(f,el)      -> f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
+  | Noexpr          -> ""
 
 (* print frame declarations *)
 let string_of_frdecl frd =         
@@ -168,14 +181,14 @@ let rec string_of_stmt = function
 
 (* print types *)
 let rec string_of_typ = function
-  | Int      -> "int"
-  | Bool     -> "bool"
-  | String   -> "string"
-  | Void     -> "void"
-  | Float    -> "float"
-  | Array x  -> "Array_" ^ (string_of_typ x)
-  | Set x    -> "Set<"   ^ (string_of_typ x) ^ ">"
-  | Map(x,y) -> "Map<"   ^ (string_of_typ x) ^ ", " ^ (string_of_typ y) ^ ">"
+  | Int           -> "int"
+  | Bool          -> "bool"
+  | String        -> "string"
+  | Void          -> "void"
+  | Float         -> "float"
+  | Array(t,id)   -> (string_of_typ t) ^ "[] " ^ id
+  | Set(t,id)     -> "Set<" ^ (string_of_typ t)  ^ "> " ^ id
+  | Map(t1,t2,id) -> "Map<" ^ (string_of_typ t1) ^ ", " ^ (string_of_typ t2) ^ "> " ^ id
 
 (* print variable declarations *)
 let string_of_var_decl (t,id) = string_of_typ t ^ " " ^ id ^ ";\n"
@@ -191,16 +204,22 @@ let string_of_func_decl fd =
   String.concat ""   (List.map string_of_stmt fd.body)       ^ "}\n"
 
 (* print frame assignments - there probably needs to be a new_frame_assign, and regular fr_assign *)
-let string_of_frassign (frname1,frname2) = frname1 ^ " = " ^ frname2 ^ ";\n"
+let string_of_frassign (frname1,frname2) = "Frame " ^ frname1 ^ " = " ^ frname2 ^ ";"
+
+(* let rec string_of_dtypes (dt) = function
+  | Array x  -> (string_of_typ dt) ^ "[] "
+  | Set x    -> "Set<"   ^ (string_of_typ dt) ^ ">"
+  | Map(x,y) -> "Map<"   ^ (string_of_typ dt) ^ ", " ^ (string_of_typ dt) ^ ">" *)
 
 (* print globals *)
 let string_of_globals glob = 
   String.concat "" (List.map snd glob.var_decls)                ^
+  (* String.concat "" (List.map string_of_vassign glob.data_typs)  ^ *)
   String.concat "" (List.map string_of_vassign glob.var_assgns) ^
   String.concat "" (List.map string_of_frdecl glob.fr_decls)    ^
   String.concat "" (List.map string_of_frassign glob.fr_assgns) ^"\n"
 
 (* print blox program *)
 let string_of_program (globals,funcs) =
-  String.concat "\n"  (List.rev (List.map string_of_globals globals)) ^ "\n" ^
-  String.concat "\n"  (List.rev (List.map string_of_func_decl funcs))
+  String.concat "" (List.rev (List.map string_of_globals globals)) ^ "\n" ^
+  String.concat "" (List.rev (List.map string_of_func_decl funcs))
