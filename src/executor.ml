@@ -159,7 +159,7 @@ let argCheck frameA fidA frameB fidB =
     (if bz_shift < 0 then (-bz_shift, 0) else (0, bz_shift)) in
 
   (* Return shift values and copied arrays *)
-  (ax_shift, ay_shift, az_shift, bx_shift, by_shift, bz_shift, aArray, bArray)
+  (ax_shift, ay_shift, az_shift, bx_shift, by_shift, bz_shift, aArray, bArray) in
 
 
 
@@ -211,74 +211,17 @@ let join frameA fidA frameB fidB =
   blocks = c;
   } in
 
-  frameC
-
-
-(* List Version *)
-let build frameA faceListA frameB faceListB =
-
-  let returnList = [] in
-
-  let fndFcsB el fLB = match el.face with
-    | "E" -> List.filter (fun x -> x.face = "W") fLB
-    | "W" -> List.filter (fun x -> x.face = "E") fLB
-    | "N" -> List.filter (fun x -> x.face = "S") fLB
-    | "S" -> List.filter (fun x -> x.face = "N") fLB
-    | "F" -> List.filter (fun x -> x.face = "B") fLB
-    | "B" -> List.filter (fun x -> x.face = "F") fLB
-    |  _  -> raise (Invalid_Face "A given face string for the first frame is not formated as one of: E, W, N, S, F, B") in
-
-  let allFc frm =
-    let allFaceList = [] in
-    let finder1 i el =
-      let finder2 j fel =
-        if fel then(
-          ignore(List.append allFaceList [{dim = (getCoord i frm); face = (getFcStr j)}])) in
-      if Array.length el.faces = 6 then(
-        Array.iteri finder2 el.faces) in
-    Array.iteri finder1 frm.blocks;
-    allFaceList in
-
-  let joinAB fLA fLB =
-    let joiner1 elA =
-      let joiner2 elB =
-        try
-          ignore(List.append returnList [join frameA (elA) frameB (elB)])
-        with
-        | Face_Taken x          -> ignore()
-        | Block_Overlap x       -> ignore()
-        | Invalid_Face x        -> ignore()
-        | Opposite_Face x       -> ignore()
-        | Invalid_Block x       -> ignore()
-        | Block_Out_Of_Bounds x -> ignore() in
-      List.iter joiner2 (fndFcsB elA fLB) in
-    List.iter joiner1 fLA in
-
-  (*
-  let joinAB fLA fLB =
-    let joiner1 elA =
-      let joiner2 elB =
-        ignore(List.append returnList [join frameA (elA) frameB (elB)]) in
-      List.iter joiner2 (fndFcsB elA fLB) in
-    List.iter joiner1 fLA in *)
-
-
-  let num fLA fLB = match (List.length fLA, List.length fLB) with
-    | (0, 0) -> joinAB (allFc frameA) (allFc frameB)
-    | (x, 0) -> joinAB fLA (allFc frameB)
-    | (0, y) -> joinAB (allFc frameA) fLB
-    | (x, y) -> joinAB fLA fLB in
-
-  num faceListA faceListB;
-
-  returnList
-
+  frameC in
 
 
 (* Array Version *)
-let build frameA faceListA frameB faceListB =
+let build frameA faceArrA frameB faceArrB =
 
-  let returnArr = Array.init ((Array.length frameA.blocks)*(Array.length frameB.blocks)*6) (fun _ -> {x = 0; y = 0; z = 0; blocks = [||]}) in
+  let returnArr = match (Array.length faceArrA, Array.length faceArrB) with
+      (0, 0)  ->  Array.init (6*(Array.length frameA.blocks)*(Array.length frameB.blocks)) (fun _ -> {x = 0; y = 0; z = 0; blocks = [||]})
+    | (a, 0)  ->  Array.init (a*(Array.length frameA.blocks)) (fun _ -> {x = 0; y = 0; z = 0; blocks = [||]})
+    | (0, b)  ->  Array.init (b*(Array.length frameB.blocks)) (fun _ -> {x = 0; y = 0; z = 0; blocks = [||]})
+    | (a, b)  ->  Array.init (a*b) (fun _ -> {x = 0; y = 0; z = 0; blocks = [||]}) in
 
   let fndFcsB el fLB = match el.face with
     | "E" -> Array.map (fun x -> if (x.face = "W") then x else {dim = (0,0,0); face = "Empty"}) fLB
@@ -306,27 +249,19 @@ let build frameA faceListA frameB faceListB =
     let count = ref 0 in
     let joiner1 elA =
       let joiner2 elB =
-        try(
-          Array.set returnArr !count (join frameA (elA) frameB (elB));
-          incr count)
-        with
-        | Face_Taken x          -> ignore()
-        | Block_Overlap x       -> ignore()
-        | Invalid_Face x        -> ignore()
-        | Opposite_Face x       -> ignore()
-        | Invalid_Block x       -> ignore()
-        | Block_Out_Of_Bounds x -> ignore() in
-      Array.iter joiner2 (fndFcsB elA fLB) in
+        if elB.face = "Empty" then ignore() else(
+          try(
+            Array.set returnArr !count (join frameA (elA) frameB (elB));
+            incr count)
+          with
+          | Face_Taken x          -> ignore()
+          | Block_Overlap x       -> ignore()
+          | Invalid_Face x        -> ignore()
+          | Opposite_Face x       -> ignore()
+          | Invalid_Block x       -> ignore()
+          | Block_Out_Of_Bounds x -> ignore())in
+      if elA.face = "Empty" then ignore() else(Array.iter joiner2 (fndFcsB elA fLB)) in
     Array.iter joiner1 fLA in
-
-  (*
-  let joinAB fLA fLB =
-    let joiner1 elA =
-      let joiner2 elB =
-        ignore(List.append returnList [join frameA (elA) frameB (elB)]) in
-      List.iter joiner2 (fndFcsB elA fLB) in
-    List.iter joiner1 fLA in *)
-
 
   let num fLA fLB = match (Array.length fLA, Array.length fLB) with
     | (0, 0) -> joinAB (allFc frameA) (allFc frameB)
@@ -334,8 +269,12 @@ let build frameA faceListA frameB faceListB =
     | (0, y) -> joinAB (allFc frameA) fLB
     | (x, y) -> joinAB fLA fLB in
 
-  num faceListA faceListB;
+  num faceArrA faceArrB;
+
+  let returnList = Array.to_list returnArr in
+  let returnList = List.sort_uniq compare returnList in
+  let returnList = if (List.hd returnList).x = 0 then List.tl returnList else returnList in
+  let returnArr = Array.of_list returnList in
 
   returnArr
-
 
