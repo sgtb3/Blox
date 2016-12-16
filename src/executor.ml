@@ -15,6 +15,10 @@ let execute (globals, functions) =
 	print_endline "Add executor code here ...\n"
 
 
+
+
+
+
 (* Takes 1D index and corresponding frame and returns 3D coordinates*)
 let getCoord i frm =
   let z_val = (i mod frm.z) in
@@ -34,7 +38,8 @@ let getFcStr i = match i with
 | _ -> raise (Invalid_Face "Face index out of bounds") in
 
 
-(* faceCheck takes a 1D array and its 3D dimensions *)
+(* faceCheck takes a 1D array of blocks and its 3D dimensions, it updates block
+  faces as taken if they are joined to another block *)
 let faceCheck a x y z=
 
   let gx elx =
@@ -65,8 +70,7 @@ let faceCheck a x y z=
         gz(a.(i + 1)))
       else true)) in
 
-  Array.iteri f a
-
+  Array.iteri f a in
 
 
 (* Checks arguments given to join function and returns coordinate shifts *)
@@ -76,10 +80,8 @@ let argCheck frameA fidA frameB fidB =
   let (bx, by, bz) = fidB.dim in
   let af = fidA.face in
   let bf = fidB.face in
-
   let aArray = Array.init (Array.length frameA.blocks) (fun i -> {faces = Array.copy frameA.blocks.(i).faces}) in
   let ai = ((((ax * frameA.y) + ay) * frameA.z) + az) in
-
   let bArray = Array.init (Array.length frameB.blocks) (fun i -> {faces = Array.copy frameB.blocks.(i).faces}) in
   let bi = ((((bx * frameB.y) + by) * frameB.z) + bz) in
 
@@ -139,11 +141,9 @@ let argCheck frameA fidA frameB fidB =
   if (((af = "E") && not(bf = "W")) ||
       ((af = "W") && not(bf = "E"))) then 
     raise (Opposite_Face "Must specify opposite faces");
-
   if (((af = "N") && not(bf = "S")) ||
       ((af = "S") && not(bf = "N"))) then 
     raise (Opposite_Face "Must specify opposite faces");
-  
   if (((af = "F") && not(bf = "B")) ||
       ((af = "B") && not(bf = "F"))) then 
     raise (Opposite_Face "Must specify opposite faces");
@@ -151,16 +151,13 @@ let argCheck frameA fidA frameB fidB =
   (* Determine shift values for A and B *)
   let (ax_shift, bx_shift) =
     (if bx_shift < 0 then (-bx_shift, 0) else (0, bx_shift)) in
-
   let (ay_shift, by_shift) =
     (if by_shift < 0 then (-by_shift, 0) else (0, by_shift)) in
-
   let (az_shift, bz_shift) =
     (if bz_shift < 0 then (-bz_shift, 0) else (0, bz_shift)) in
 
   (* Return shift values and copied arrays *)
   (ax_shift, ay_shift, az_shift, bx_shift, by_shift, bz_shift, aArray, bArray) in
-
 
 
 (* Joins two frames *)
@@ -214,15 +211,20 @@ let join frameA fidA frameB fidB =
   frameC in
 
 
-(* Array Version *)
+(* build takes two frames and an array of face ID's for each frame, returns
+   all possible frames made by joining the two original frames at the specified
+   faces. If the faceID array is empty for either frame the algorithm assumes
+   all open faces as possible join locations *)
 let build frameA faceArrA frameB faceArrB =
 
+  (* Create an array large enough to hold the maximum number of possible results *)
   let returnArr = match (Array.length faceArrA, Array.length faceArrB) with
       (0, 0)  ->  Array.init (6*(Array.length frameA.blocks)*(Array.length frameB.blocks)) (fun _ -> {x = 0; y = 0; z = 0; blocks = [||]})
     | (a, 0)  ->  Array.init (a*(Array.length frameA.blocks)) (fun _ -> {x = 0; y = 0; z = 0; blocks = [||]})
     | (0, b)  ->  Array.init (b*(Array.length frameB.blocks)) (fun _ -> {x = 0; y = 0; z = 0; blocks = [||]})
     | (a, b)  ->  Array.init (a*b) (fun _ -> {x = 0; y = 0; z = 0; blocks = [||]}) in
 
+  (* Return all faces in fLB that can be joined to face el *)
   let fndFcsB el fLB = match el.face with
     | "E" -> Array.map (fun x -> if (x.face = "W") then x else {dim = (0,0,0); face = "Empty"}) fLB
     | "W" -> Array.map (fun x -> if (x.face = "E") then x else {dim = (0,0,0); face = "Empty"}) fLB
@@ -232,6 +234,7 @@ let build frameA faceArrA frameB faceArrB =
     | "B" -> Array.map (fun x -> if (x.face = "F") then x else {dim = (0,0,0); face = "Empty"}) fLB
     |  _  -> raise (Invalid_Face "A given face string for the first frame is not formated as one of: E, W, N, S, F, B") in
 
+  (* Return all available faces in frm *)
   let allFc frm =
     let allFcArr = Array.init ((Array.length frm.blocks) * 6) (fun _ -> {dim = (0,0,0); face = "Empty"}) in
     let count = ref 0 in
@@ -245,6 +248,7 @@ let build frameA faceArrA frameB faceArrB =
     Array.iteri finder1 frm.blocks;
     allFcArr in
 
+  (* join frameA and frameB at every possible combination in flA and flB *)
   let joinAB fLA fLB =
     let count = ref 0 in
     let joiner1 elA =
@@ -263,6 +267,7 @@ let build frameA faceArrA frameB faceArrB =
       if elA.face = "Empty" then ignore() else(Array.iter joiner2 (fndFcsB elA fLB)) in
     Array.iter joiner1 fLA in
 
+  (* Call join on specified faces of frameA and frameB *)
   let num fLA fLB = match (Array.length fLA, Array.length fLB) with
     | (0, 0) -> joinAB (allFc frameA) (allFc frameB)
     | (x, 0) -> joinAB fLA (allFc frameB)
@@ -271,10 +276,11 @@ let build frameA faceArrA frameB faceArrB =
 
   num faceArrA faceArrB;
 
+  (* Remove duplicate and empty frames from results *)
   let returnList = Array.to_list returnArr in
   let returnList = List.sort_uniq compare returnList in
   let returnList = if (List.hd returnList).x = 0 then List.tl returnList else returnList in
   let returnArr = Array.of_list returnList in
 
-  returnArr
+  returnArr in
 
