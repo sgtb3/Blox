@@ -78,7 +78,7 @@ globals:
         fr_assgns  = []; } }
   | typ ID ASSIGN expr SEMI        /* var assigns */
     { { var_decls  = []; 
-        var_assgns = [($2, $4)]; 
+        var_assgns = [($1, $2, $4)]; 
         fr_decls   = []; 
         fr_assgns  = []; } }
   | fr_decl SEMI                   /* fr decls  ($2 :: $1) */    
