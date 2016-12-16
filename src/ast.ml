@@ -29,8 +29,8 @@ type build = string * string * string * string
 (* type constructors -  basic/primitive types hold literal values *)
 type typ = 
     Int | Bool | Float | String | Void
-  | Array of typ * string                      
-  | Set of typ * string
+  | Array of typ * int * string                               
+  (* | Set of typ * string *)
 
 (* actual block *)
 type blck = {
@@ -141,7 +141,7 @@ let rec string_of_typ = function
   | String        -> "string"
   | Void          -> "void"
   | Float         -> "float"
-  | Array(t,id)   -> (string_of_typ t) ^ "[] " ^ id
+  | Array(t,i,id) -> (string_of_typ t) ^ "[" ^ string_of_int i ^ "] " ^ id
   | Set(t,id)     -> "Set<" ^ (string_of_typ t)  ^ "> " ^ id
 
 (* print expressions *)

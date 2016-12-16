@@ -44,8 +44,15 @@ typ:
   | BOOL   { Bool   }
   | STRING { String }
   | VOID   { Void   }
-  
 
+arr:
+    typ LBRACK LIT_INT RBRACK ID SEMI  { Array($1, $3, $5) } 
+
+/*
+arr_list:
+    LBRACK LIT_INT RBRACK { [$2] }
+  | arr_list arr          { $2 :: $1 }
+*/
 /*
 set:
     SET LT expr_list_set RPAREN      { Set(List.rev $3)   }
