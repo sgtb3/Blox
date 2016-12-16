@@ -92,7 +92,7 @@ type func_decl = {
 }
 
 (* variable assignment  *)
-type var_assign = string * expr
+type var_assign = typ * string * expr
 
 (* frame assignment - might need to be frame * frame *)
 type fr_assign = string * string
@@ -194,7 +194,7 @@ let rec string_of_typ = function
 let string_of_var_decl (t,id) = string_of_typ t ^ " " ^ id ^ ";\n"
 
 (* print variable assignment type var_assign = string * expr *) 
-let string_of_vassign (id,exp) = id ^ " = " ^ string_of_expr exp ^ ";\n"
+let string_of_vassign (t,id,exp) = string_of_typ t ^ " " ^ id ^ " = " ^ string_of_expr exp ^ ";\n"
 
 (* print function declarations *)
 let string_of_func_decl fd =
