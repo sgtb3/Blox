@@ -69,21 +69,31 @@ globals:
     { { var_decls  = [($1, $2)]; 
         var_assgns = []; 
         fr_decls   = []; 
+        fc_decls   = [];
         fr_assgns  = []; } }
   | typ ID ASSIGN expr SEMI        /* var assigns */
     { { var_decls  = []; 
         var_assgns = [($1, $2, $4)]; 
         fr_decls   = []; 
+        fc_decls   = [];
         fr_assgns  = []; } }
   | fr_decl SEMI                   /* fr decls  ($2 :: $1) */    
     { { var_decls  = []; 
         var_assgns = []; 
         fr_decls   = [$1]; 
+        fc_decls   = [];
+        fr_assgns  = []; } }
+  | fc_decl SEMI                   /* fc decls  ($2 :: $1) */    
+    { { var_decls  = []; 
+        var_assgns = []; 
+        fr_decls   = []; 
+        fc_decls   = [$1];
         fr_assgns  = []; } }
   | FRAME ID ASSIGN ID SEMI        /* fr assigns  */
     { { var_decls  = []; 
         var_assgns = []; 
         fr_decls   = []; 
+        fc_decls   = [];
         fr_assgns  = [($2, $4)]; } }
 
 func_decl:
@@ -108,6 +118,12 @@ fr_decl:
         z = $7; 
         fr_name = $9; } }
 
+fc_decl:
+  FACE LT LIT_INT COMMA LIT_INT COMMA LIT_INT COMMA ID GT ID 
+    { { dim     = ($3, $5, $7); 
+        face    = $9; 
+        fc_name = $11; } }
+
 stmt_list:
    /* nothing */   { [] }
   | stmt_list stmt { $2 :: $1 }
@@ -130,6 +146,7 @@ stmt:
   | CONTINUE SEMI          { Continue           }
   | typ ID SEMI            { Var_decl($1,$2)    }
   | fr_decl SEMI           { Fr_decl($1)        }
+  | fc_decl SEMI           { Fc_decl($1)        }
   | LCURL stmt_list RCURL  { Block(List.rev $2) }
   | JOIN LPAREN ID COMMA ID COMMA ID COMMA ID RPAREN SEMI 
     { Join($3,$5,$7,$9) }
@@ -165,13 +182,5 @@ actuals_opt:
 actuals_list:
     expr                    { [$1] }
   | actuals_list COMMA expr { $3 :: $1 }
-
-/*
-join_arg:
-  ID COMMA face_set
-    { { frname    = $1; 
-        blck_face = $4; } }
-*/
-
 
   
