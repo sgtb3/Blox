@@ -197,6 +197,7 @@ let string_of_func_decl fd =
   string_of_typ fd.typ ^ " " ^ fd.fname ^ "(" ^ 
   String.concat ", " (List.map snd fd.formals)               ^ ")\n{\n" ^
   String.concat ""   (List.map string_of_var_decl fd.loc_var_decl) ^
+  String.concat ""   (List.map string_of_vassign fd.loc_var_assn) ^
   String.concat ""   (List.map string_of_stmt fd.body)       ^ "}\n"
 
 (* print frame assignments - there probably needs to be a new_frame_assign, and regular fr_assign *)
@@ -204,11 +205,11 @@ let string_of_frassign (frname1,frname2) = "Frame " ^ frname1 ^ " = " ^ frname2 
 
 (* print globals *)
 let string_of_globals glob = 
-  String.concat "" (List.map string_of_var_decl glob.var_decls)                ^
-  (* String.concat "" (List.map string_of_vassign glob.data_typs)  ^ *)
+  String.concat "" (List.map string_of_var_decl glob.var_decls)   ^
+  (* String.concat "" (List.map string_of_vassign glob.data_typs)   ^ *)
   String.concat "" (List.map string_of_vassign glob.var_assgns) ^
-  String.concat "" (List.map string_of_frdecl glob.fr_decls)    ^
-  String.concat "" (List.map string_of_frassign glob.fr_assgns) ^"\n"
+  String.concat "" (List.map string_of_frdecl glob.fr_decls)      ^
+  String.concat "" (List.map string_of_frassign glob.fr_assgns)   ^"\n"
 
 (* print blox program *)
 let string_of_program (globals,funcs) =
