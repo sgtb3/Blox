@@ -213,7 +213,7 @@ let string_of_frassign (frname1,frname2) = "Frame " ^ frname1 ^ " = " ^ frname2 
 
 (* print globals *)
 let string_of_globals glob = 
-  String.concat "" (List.map snd glob.var_decls)                ^
+  String.concat "" (List.map string_of_var_decl glob.var_decls)                ^
   (* String.concat "" (List.map string_of_vassign glob.data_typs)  ^ *)
   String.concat "" (List.map string_of_vassign glob.var_assgns) ^
   String.concat "" (List.map string_of_frdecl glob.fr_decls)    ^
