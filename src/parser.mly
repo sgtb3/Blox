@@ -8,7 +8,7 @@
 %token IF ELSE FOR WHILE RETURN BREAK CONTINUE 
 %token VOID INT BOOL STRING 
 %token TRUE FALSE NULL EOF
-%token PRINT BUILD JOIN FRAME SET MAP
+%token PRINT BUILD JOIN FRAME SET
 %token <string> ID
 %token <string> LIT_STR
 %token <float> LIT_FLT
@@ -34,20 +34,18 @@ program:
   decls EOF { $1 }
 
 decls:
- |/* nothing */    { [], [] }
+  /* nothing */    { [], [] }
  | decls globals   { ($2 :: fst $1), snd $1 }
  | decls func_decl { fst $1, ($2 :: snd $1) }
 
-/* add (Array of typ), (Set of typ), (Map of typ * typ) from AST here */
+/* add (Array of typ), (Set of typ) from AST here */
 typ:
-  | INT    { Int    }
+    INT    { Int    }
   | BOOL   { Bool   }
   | STRING { String }
   | VOID   { Void   }
-  | MAP LT typ COMMA typ GT ID { Map($3, $5, $7) }
 
-/*map:
-    MAP LT expr_pair_list RPAREN     { Map(List.rev $3)   }
+/*
 set:
     SET LT expr_list_set RPAREN      { Set(List.rev $3)   }
 arr:
@@ -66,7 +64,7 @@ expr_true_list_set:
   | expr_true_list_set COMMA expr { $3 :: $1 }*/
 
 globals:
-  |                                /* no globals */ 
+                                   /* no globals */ 
     { { var_decls  = []; 
         var_assgns = []; 
         fr_decls   = []; 
@@ -96,7 +94,7 @@ vdecl:
    typ ID SEMI { ($1, $2) }
 
 vdecl_list:
-  |/* nothing */     { [] }
+   /* nothing */     { [] }
   | vdecl_list vdecl { $2 :: $1 }
 
 func_decl:
@@ -108,11 +106,11 @@ func_decl:
         body    = List.rev $8 } }
 
 formals_opt:
-  |/* nothing */{ [] }
+   /* nothing */{ [] }
   | formal_list { List.rev $1 }
 
 formal_list:
-  | typ ID  { [($1,$2)] }
+    typ ID  { [($1,$2)] }
   | formal_list COMMA typ ID { ($3,$4) :: $1 }
 
 fr_decl:
@@ -123,11 +121,11 @@ fr_decl:
         fr_name = $9 } }
 
 stmt_list:
-  |/* nothing */   { [] }
+   /* nothing */   { [] }
   | stmt_list stmt { $2 :: $1 }
 
 stmt:
-  | expr SEMI              { Expr($1)           }
+    expr SEMI              { Expr($1)           }
   | PRINT ID SEMI          { Fr_print($2)       }
   | BREAK SEMI             { Break              }
   | CONTINUE SEMI          { Continue           }
@@ -136,7 +134,7 @@ stmt:
   | JOIN LPAREN join_arg COMMA join_arg RPAREN SEMI { Join($3,$5) }
 
 expr:
-  | ID                     { Id($1)                 }
+    ID                     { Id($1)                 }
   | LIT_INT                { Lit_Int($1)            }
   | TRUE                   { Lit_Bool(true)         }
   | FALSE                  { Lit_Bool(false)        }
@@ -159,11 +157,11 @@ expr:
   | LPAREN expr RPAREN           { $2               }
 
 actuals_opt:
-  | /* nothing */ { [] }
+    /* nothing */ { [] }
   | actuals_list  { List.rev $1 }
 
 actuals_list:
-  | expr                    { [$1] }
+    expr                    { [$1] }
   | actuals_list COMMA expr { $3 :: $1 }
 
 join_arg:
@@ -172,7 +170,7 @@ join_arg:
         blck_face = $4; } }
 
 face_set:
-  | face_id                { [$1] }
+    face_id                { [$1] }
   | face_set COMMA face_id { $3 :: $1 }
 
 face_id:
