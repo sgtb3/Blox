@@ -13,16 +13,12 @@ type face_id = {
   face : string;
 }
 
-(* join arguments *)
-type join_arg = {
-  frname    : string;
-  blck_face : face_id list;
-}
-
 (* join function *)
 type join = {
-  fr_a : join_arg;
-  fr_b : join_arg;
+  fr_a    : frame;
+  fc_id_a : face_id;
+  fr_b    : frame;
+  fc_id_b : face_id;
 }
 
 (* type constructors -  basic/primitive types hold literal values *)
@@ -75,7 +71,7 @@ type var_assign = typ * string * expr
 type stmt =
     Block of stmt list
   | Expr of expr
-  | Join of join_arg * join_arg
+  | Join of join
   | Fr_decl of fr_decl
   | Fr_print of string
   | Var_decl of var_decl
@@ -89,7 +85,6 @@ type func_decl = {
   formals      : var_decl list;
   body         : stmt list;
 }
-
 
 (* frame assignment - might need to be frame * frame *)
 type fr_assign = string * string
@@ -177,16 +172,23 @@ let string_of_face_id_list fid =
   String.concat "," (List.rev (List.map string_of_face_id fid))
 
 (* print list of join args *)
-let string_of_join_arg x =
+let string_of_join x =
+  "Join(" ^ x.fr_a. ^ ", " ^ 
   x.frname ^ ", {" ^ string_of_face_id_list x.blck_face ^ "}"
+
+
+  fr_a    : frame;
+  fc_id_a : face_id;
+  fr_b    : frame;
+  fc_id_b : face_id;
 
 (* print statements *)
 let rec string_of_stmt = function 
     Fr_decl(fr)     -> string_of_frdecl fr
-  | Var_decl(x,y)    -> string_of_var_decl (x,y)
+  | Var_decl(x,y)    -> string_of_var_decl (x,y) ^"\n"
   | Block(stmts)    -> "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
   | Expr(expr)      -> string_of_expr expr ^ "\n"
-  | Join(x,y)       -> "Join(" ^ string_of_join_arg x ^ ", " ^ string_of_join_arg y ^ ")\n"
+  | Join(x)         -> string_of_join x 
   | Fr_print(fname) -> "print " ^ fname ^ ";\n"
   | Break           -> "break;\n"
   | Continue        -> "continue;\n"
@@ -209,7 +211,6 @@ let string_of_frassign (frname1,frname2) = "Frame " ^ frname1 ^ " = " ^ frname2 
 (* print globals *)
 let string_of_globals glob = 
   String.concat "" (List.map string_of_var_decl glob.var_decls)                ^
-  (* String.concat "" (List.map string_of_vassign glob.data_typs)  ^ *)
   String.concat "" (List.map string_of_vassign glob.var_assgns) ^
   String.concat "" (List.map string_of_frdecl glob.fr_decls)    ^
   String.concat "" (List.map string_of_frassign glob.fr_assgns) ^"\n"

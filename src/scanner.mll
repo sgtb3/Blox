@@ -46,6 +46,7 @@ rule token = parse
   | "print"              { PRINT    }
   | "Build"              { BUILD    }
   | "Join"               { JOIN     }
+  | "Face"               { FACE     }
   | "Frame"              { FRAME    }
   | "Set"                { SET      }
   | ['0'-'9']+ as lxm    { LIT_INT(int_of_string lxm) }
