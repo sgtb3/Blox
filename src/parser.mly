@@ -150,6 +150,8 @@ stmt:
   | LCURL stmt_list RCURL  { Block(List.rev $2) }
   | JOIN LPAREN ID COMMA ID COMMA ID COMMA ID RPAREN SEMI 
     { Join($3,$5,$7,$9) }
+  | BUILD LPAREN ID COMMA ID COMMA ID COMMA ID RPAREN SEMI
+    { Build($3,$5,$7,$9) }
   | RETURN SEMI { Return Noexpr }
   | RETURN expr SEMI { Return $2 }
   | IF LPAREN expr RPAREN stmt %prec NOELSE { If($3, $5, Block([])) }
