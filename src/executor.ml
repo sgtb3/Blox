@@ -39,7 +39,7 @@ let getFcStr i = match i with
 
 
 (* faceCheck takes a 1D array of blocks and its 3D dimensions, it updates block
-  faces as taken if they are joined to another block *)
+  faces as unavailable if they are joined to another block *)
 let faceCheck a x y z=
 
   let gx elx =
@@ -284,3 +284,9 @@ let build frameA faceArrA frameB faceArrB =
 
   returnArr in
 
+(* Return a frame with the given dimensions *)
+let frameConstruct x y z =
+  let arr = Array.init (x*y*z) (fun _ -> {faces = [|true;true;true;true;true;true|]}) in
+  let frm = {x = x; y = y; z = z; blocks = arr} in
+  faceCheck frm.blocks x y z;
+  frm
