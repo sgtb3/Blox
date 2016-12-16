@@ -36,8 +36,8 @@ int main()
 	void i; 
 
 	/* test declaration and assignment */
-	/* bool t = true; */
-	/* bool f = false; */
+	bool trf = true; 
+	bool f = false;
 
 	/* test Map creation */
 	/* Map<Frame, Frame> map; */
