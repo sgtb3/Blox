@@ -8,18 +8,10 @@ type op =
 type uop = Neg | Not 
 
 (* block face identifier *)
-type face_id = {
-  dim  : int * int * int;
-  face : string;
-}
+type face_id = int * int * int * string
 
 (* join function *)
-type join = {
-  fr_a    : string;
-  fc_id_a : face_id;
-  fr_b    : string;
-  fc_id_b : face_id;
-}
+type join = string * string * string * string
 
 (* type constructors -  basic/primitive types hold literal values *)
 type typ = 
@@ -164,17 +156,20 @@ let string_of_dim (x,y,z) =
   string_of_int z
 
 (* print block face identifier *)
-let string_of_face_id f =
-  "(" ^  string_of_dim f.dim ^ f.face ^ ")"
+let string_of_face_id (w,x,y,z) =
+  "(" ^ string_of_int w ^ ", " ^ 
+        string_of_int x ^ ", " ^ 
+        string_of_int y ^ ", " ^ 
+        z ^ ")"
 
 (* print list of face_id's *)
 let string_of_face_id_list fid =
   String.concat "," (List.rev (List.map string_of_face_id fid))
 
 (* print list of join args *)
-let string_of_join x =
-  "Join(" ^ x.fr_a ^ ", " ^ string_of_face_id x.fc_id_a ^ ", " ^
-            x.fr_b ^ string_of_face_id x.fc_id_b ^ ");\n"
+let string_of_join (w,x,y,z) =
+  "Join(" ^ w ^ ", " ^ x ^ ", " ^
+            y ^ ", " ^ z ^ ");\n"
 
 (* print statements *)
 let rec string_of_stmt = function 
@@ -182,7 +177,7 @@ let rec string_of_stmt = function
   | Var_decl(x,y)    -> string_of_var_decl (x,y) ^"\n"
   | Block(stmts)    -> "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
   | Expr(expr)      -> string_of_expr expr ^ "\n"
-  | Join(x)         -> string_of_join x 
+  | Join(w,x,y,z)   -> string_of_join (w,x,y,z) ^"\n"
   | Fr_print(fname) -> "print " ^ fname ^ ";\n"
   | Break           -> "break;\n"
   | Continue        -> "continue;\n"

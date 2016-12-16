@@ -56,14 +56,14 @@ int main()
 	Frame H = fivey;
 	Frame I = one;
 
-	Face a = (1,2,3,"E");
-	Face b = (1,1,1,"W");
+	/* Face a = (1,2,3,"E"); */
+	/* Face b = (1,1,1,"W"); */
 
 	/* testing joins and joins list */
 	Join(H, a, twox, b);
 	Join(H, a, fivey, b);
 	
-	/*Build(H, [], I, []);*/
+	/* Build(H, [], I, []); */
 	/* testing print */
 	print base;	
 }

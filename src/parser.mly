@@ -112,14 +112,16 @@ stmt_list:
    /* nothing */   { [] }
   | stmt_list stmt { $2 :: $1 }
 
+/*
 face_set:
     face_id                { [$1] }
   | face_set COMMA face_id { $3 :: $1 }
 
 face_id:
   LPAREN LIT_INT COMMA LIT_INT COMMA LIT_INT COMMA LIT_STR RPAREN
-    { { dim  = ($2, $4, $6); 
-        face = $8; } }
+    { ($2, $4, $6, $8) }
+*/
+
 
 stmt:
     expr SEMI              { Expr($1)           }
@@ -129,7 +131,8 @@ stmt:
   | typ ID SEMI            { Var_decl($1,$2)    }
   | fr_decl SEMI           { Fr_decl($1)        }
   | LCURL stmt_list RCURL  { Block(List.rev $2) }
-  | JOIN LPAREN ID COMMA face_id COMMA ID COMMA face_id RPAREN SEMI { Join($3,$5,$7,$9) }
+  | JOIN LPAREN ID COMMA ID COMMA ID COMMA ID RPAREN SEMI 
+    { Join($3,$5,$7,$9) }
 
 expr:
     ID                     { Id($1)                 }
