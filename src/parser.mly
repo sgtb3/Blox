@@ -86,28 +86,12 @@ globals:
         fr_decls   = []; 
         fr_assgns  = [($2, $4)]; } }
 
-vdecl:
-   typ ID SEMI { ($1, $2) }
-
-vdecl_list:
-   /* nothing */     { [] }
-  | vdecl_list vdecl { $2 :: $1 }
-
-vassn:
-  typ ID ASSIGN expr SEMI {($1, $2, $4)}
-
-vassn_list:
-   /* nothing */     { [] }
-  | vassn_list vassn { $2 :: $1 }
-
 func_decl:
-  typ ID LPAREN formals_opt RPAREN LCURL vdecl_list vassn_list stmt_list RCURL
+  typ ID LPAREN formals_opt RPAREN LCURL stmt_list RCURL
     { { typ     = $1;
         fname   = $2;
         formals = $4;
-        loc_var_decl = List.rev $7;
-        loc_var_assn = List.rev $8;
-        body    = List.rev $9 } }
+        body    = List.rev $7 } }
 
 formals_opt:
    /* nothing */{ [] }
@@ -133,6 +117,7 @@ stmt:
   | PRINT ID SEMI          { Fr_print($2)       }
   | BREAK SEMI             { Break              }
   | CONTINUE SEMI          { Continue           }
+  | typ ID SEMI            { Var_decl($1,$2)    }
   | fr_decl SEMI           { Fr_decl($1)        }
   | LCURL stmt_list RCURL  { Block(List.rev $2) }
   | JOIN LPAREN join_arg COMMA join_arg RPAREN SEMI { Join($3,$5) }
@@ -142,8 +127,9 @@ expr:
   | LIT_INT                { Lit_Int($1)            }
   | TRUE                   { Lit_Bool(true)         }
   | FALSE                  { Lit_Bool(false)        }
-  | FRAME ID ASSIGN expr   { Assign($2, $4)         }
   | ID ASSIGN expr         { Assign($1, $3)         }
+  | FRAME ID ASSIGN expr   { Fr_assign($2, $4)      }
+  | typ ID ASSIGN expr     { Var_assign($1, $2, $4) }
   | expr PLUS   expr       { Binop($1, Add,   $3)   }
   | expr MINUS  expr       { Binop($1, Sub,   $3)   }
   | expr TIMES  expr       { Binop($1, Mult,  $3)   }
