@@ -78,6 +78,10 @@ type stmt =
   | Fc_decl of fc_decl
   | Fr_print of string
   | Var_decl of var_decl
+  | Return of expr
+  | If of expr * stmt * stmt
+  | For of expr * expr * expr * stmt
+  | While of expr * stmt
   | Break
   | Continue
 
@@ -191,15 +195,22 @@ let string_of_join (w,x,y,z) =
 
 (* print statements *)
 let rec string_of_stmt = function 
-    Fr_decl(fr)     -> string_of_frdecl fr
-  | Fc_decl(fc)     -> string_of_fcdecl fc 
-  | Var_decl(x,y)   -> string_of_var_decl (x,y) ^"\n"
-  | Block(stmts)    -> "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
-  | Expr(expr)      -> string_of_expr expr ^ "\n"
-  | Join(w,x,y,z)   -> string_of_join (w,x,y,z) ^"\n"
-  | Fr_print(fname) -> "print " ^ fname ^ ";\n"
-  | Break           -> "break;\n"
-  | Continue        -> "continue;\n"
+    Fr_decl(fr)       -> string_of_frdecl fr
+  | Fc_decl(fc)       -> string_of_fcdecl fc 
+  | Var_decl(x,y)     -> string_of_var_decl (x,y) ^"\n"
+  | Block(stmts)      -> "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
+  | Expr(expr)        -> string_of_expr expr ^ "\n"
+  | Join(w,x,y,z)     -> string_of_join (w,x,y,z) ^"\n"
+  | Fr_print(fname)   -> "print " ^ fname ^ ";\n"
+  | Break             -> "break;\n"
+  | Continue          -> "continue;\n"
+  | Return(expr)      -> "return " ^ string_of_expr expr ^ ";\n";
+  | If(e,s,Block([])) -> "if ("    ^ string_of_expr e    ^ ")\n" ^ string_of_stmt s
+  | If(e,s1,s2)       -> "if ("    ^ string_of_expr e    ^ ")\n" ^ string_of_stmt s1 ^ 
+                         "else\n"  ^ string_of_stmt s2
+  | For(e1,e2,e3,s)   -> "for ("   ^ string_of_expr e1   ^ " ; " ^ string_of_expr e2 ^ 
+                         " ; "     ^ string_of_expr e3   ^ ") "  ^ string_of_stmt s
+  | While(e,s)        -> "while (" ^ string_of_expr e    ^ ") "  ^ string_of_stmt s
 
 (* print variable declarations *)
 let string_of_var_decl (t,id) = string_of_typ t ^ " " ^ id ^ ";\n"
