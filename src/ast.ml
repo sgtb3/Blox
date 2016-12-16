@@ -1,6 +1,6 @@
 (* binary operators *)
 type op = 
-  | And   | Or  | Mod
+    And   | Or  | Mod
   | Add   | Sub | Mult | Div 
   | Equal | Neq | Less | Leq | Greater | Geq | FrameEq
 
@@ -27,10 +27,9 @@ type join = {
 
 (* type constructors -  basic/primitive types hold literal values *)
 type typ = 
-  | Int | Bool | Float | String | Void 
+    Int | Bool | Float | String | Void
   | Array of typ * string                      
   | Set of typ * string
-  | Map of typ * typ * string
 (* 
 type constructors - advanced types
 type dtype = 
@@ -59,7 +58,7 @@ type fr_decl = {
 
 (* expressions *)
 type expr =
-  | Id of string
+    Id of string
   | Lit_Int of int
   | Lit_Bool of bool
   | Assign of string * expr
@@ -71,7 +70,7 @@ type expr =
 
 (* statements *)
 type stmt =
-  | Block of stmt list
+    Block of stmt list
   | Expr of expr
   | Join of join_arg * join_arg
   | Fr_decl of fr_decl
@@ -111,7 +110,7 @@ type program = globals list * func_decl list
 
 (* print operators *)
 let string_of_op = function
-  | Add     -> "+"
+    Add     -> "+"
   | Sub     -> "-"
   | Mult    -> "*"
   | Div     -> "/"
@@ -128,12 +127,12 @@ let string_of_op = function
 
 (* print unary operators *)
 let string_of_uop = function
-  | Neg -> "-"
+    Neg -> "-"
   | Not -> "!"
 
 (* print expressions *)
 let rec string_of_expr = function         
-  | Lit_Int(x)      -> string_of_int x
+    Lit_Int(x)      -> string_of_int x
   | Id(x)           -> x
   | Lit_Bool(true)  -> "true"
   | Lit_Bool(false) -> "false"
@@ -171,7 +170,7 @@ let string_of_join_arg x =
 
 (* print statements *)
 let rec string_of_stmt = function 
-  | Fr_decl(fr)     -> string_of_frdecl fr
+    Fr_decl(fr)     -> string_of_frdecl fr
   | Block(stmts)    -> "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
   | Expr(expr)      -> string_of_expr expr ^ "\n"
   | Join(x,y)       -> "Join(" ^ string_of_join_arg x ^ ", " ^ string_of_join_arg y ^ ")\n"
@@ -181,14 +180,13 @@ let rec string_of_stmt = function
 
 (* print types *)
 let rec string_of_typ = function
-  | Int           -> "int"
+    Int           -> "int"
   | Bool          -> "bool"
   | String        -> "string"
   | Void          -> "void"
   | Float         -> "float"
   | Array(t,id)   -> (string_of_typ t) ^ "[] " ^ id
   | Set(t,id)     -> "Set<" ^ (string_of_typ t)  ^ "> " ^ id
-  | Map(t1,t2,id) -> "Map<" ^ (string_of_typ t1) ^ ", " ^ (string_of_typ t2) ^ "> " ^ id
 
 (* print variable declarations *)
 let string_of_var_decl (t,id) = string_of_typ t ^ " " ^ id ^ ";\n"
@@ -209,7 +207,7 @@ let string_of_frassign (frname1,frname2) = "Frame " ^ frname1 ^ " = " ^ frname2 
 (* let rec string_of_dtypes (dt) = function
   | Array x  -> (string_of_typ dt) ^ "[] "
   | Set x    -> "Set<"   ^ (string_of_typ dt) ^ ">"
-  | Map(x,y) -> "Map<"   ^ (string_of_typ dt) ^ ", " ^ (string_of_typ dt) ^ ">" *)
+*)
 
 (* print globals *)
 let string_of_globals glob = 
