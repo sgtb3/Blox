@@ -15,9 +15,9 @@ type face_id = {
 
 (* join function *)
 type join = {
-  fr_a    : frame;
+  fr_a    : string;
   fc_id_a : face_id;
-  fr_b    : frame;
+  fr_b    : string;
   fc_id_b : face_id;
 }
 
@@ -173,14 +173,8 @@ let string_of_face_id_list fid =
 
 (* print list of join args *)
 let string_of_join x =
-  "Join(" ^ x.fr_a. ^ ", " ^ 
-  x.frname ^ ", {" ^ string_of_face_id_list x.blck_face ^ "}"
-
-
-  fr_a    : frame;
-  fc_id_a : face_id;
-  fr_b    : frame;
-  fc_id_b : face_id;
+  "Join(" ^ x.fr_a ^ ", " ^ string_of_face_id x.fc_id_a ^ ", " ^
+            x.fr_b ^ string_of_face_id x.fc_id_b ^ ");\n"
 
 (* print statements *)
 let rec string_of_stmt = function 

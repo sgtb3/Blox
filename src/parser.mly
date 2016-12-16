@@ -8,7 +8,7 @@
 %token IF ELSE FOR WHILE RETURN BREAK CONTINUE 
 %token VOID INT BOOL STRING 
 %token TRUE FALSE NULL EOF
-%token PRINT BUILD JOIN FRAME SET
+%token PRINT BUILD JOIN FRAME SET FACE
 %token <string> ID
 %token <string> LIT_STR
 %token <float> LIT_FLT
@@ -106,11 +106,20 @@ fr_decl:
     { { x = $3; 
         y = $5; 
         z = $7; 
-        fr_name = $9 } }
+        fr_name = $9; } }
 
 stmt_list:
    /* nothing */   { [] }
   | stmt_list stmt { $2 :: $1 }
+
+face_set:
+    face_id                { [$1] }
+  | face_set COMMA face_id { $3 :: $1 }
+
+face_id:
+  LPAREN LIT_INT COMMA LIT_INT COMMA LIT_INT COMMA LIT_STR RPAREN
+    { { dim  = ($2, $4, $6); 
+        face = $8; } }
 
 stmt:
     expr SEMI              { Expr($1)           }
@@ -120,7 +129,7 @@ stmt:
   | typ ID SEMI            { Var_decl($1,$2)    }
   | fr_decl SEMI           { Fr_decl($1)        }
   | LCURL stmt_list RCURL  { Block(List.rev $2) }
-  | JOIN LPAREN join_arg COMMA join_arg RPAREN SEMI { Join($3,$5) }
+  | JOIN LPAREN ID COMMA face_id COMMA ID COMMA face_id RPAREN SEMI { Join($3,$5,$7,$9) }
 
 expr:
     ID                     { Id($1)                 }
@@ -154,17 +163,12 @@ actuals_list:
     expr                    { [$1] }
   | actuals_list COMMA expr { $3 :: $1 }
 
+/*
 join_arg:
-  ID COMMA LCURL face_set RCURL
+  ID COMMA face_set
     { { frname    = $1; 
         blck_face = $4; } }
+*/
 
-face_set:
-    face_id                { [$1] }
-  | face_set COMMA face_id { $3 :: $1 }
 
-face_id:
-  LPAREN LIT_INT COMMA LIT_INT COMMA LIT_INT COMMA ID RPAREN
-    { { dim  = ($2, $4, $6); 
-        face = $8; } }
   
