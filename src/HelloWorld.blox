@@ -46,6 +46,21 @@ int main()
 	/* test break */
 	break;
 
+	int i;
+	for (i = 0; i < 10; i = i + 1) {
+		if (a < b + 1) {
+			return;
+		}
+		return;
+	}
+
+	while (i < 10) {
+		if (a < b + 1) {
+			return;
+		}
+		return;
+	}
+
 	/* Create basic frames to construct letters with */
 	Frame<1,1,1> one;
 	Frame<2,1,1> twox;

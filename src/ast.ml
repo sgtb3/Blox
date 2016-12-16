@@ -23,6 +23,9 @@ type fc_decl = {
 (* join function *)
 type join = string * string * string * string
 
+(* build function *)
+type build = string * string * string * string
+
 (* type constructors -  basic/primitive types hold literal values *)
 type typ = 
     Int | Bool | Float | String | Void
@@ -74,6 +77,7 @@ type stmt =
     Block of stmt list
   | Expr of expr
   | Join of join
+  | Build of build
   | Fr_decl of fr_decl
   | Fc_decl of fc_decl
   | Fr_print of string
@@ -87,10 +91,10 @@ type stmt =
 
 (* function declaration *)
 type func_decl = { 
-  typ          : typ;
-  fname        : string;
-  formals      : var_decl list;
-  body         : stmt list;
+  typ     : typ;
+  fname   : string;
+  formals : var_decl list;
+  body    : stmt list;
 }
 
 (* frame assignment - might need to be frame * frame *)
@@ -188,6 +192,12 @@ let string_of_face_id (w,x,y,z) =
 let string_of_face_id_list fid =
   String.concat "," (List.rev (List.map string_of_face_id fid))
 
+
+(* print list of join args *)
+let string_of_build (w,x,y,z) =
+  "Build(" ^ w ^ ", " ^ x ^ ", " ^
+            y ^ ", " ^ z ^ ");\n"
+
 (* print list of join args *)
 let string_of_join (w,x,y,z) =
   "Join(" ^ w ^ ", " ^ x ^ ", " ^
@@ -200,7 +210,8 @@ let rec string_of_stmt = function
   | Var_decl(x,y)     -> string_of_var_decl (x,y) ^"\n"
   | Block(stmts)      -> "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
   | Expr(expr)        -> string_of_expr expr ^ "\n"
-  | Join(w,x,y,z)     -> string_of_join (w,x,y,z) ^"\n"
+  | Join(w,x,y,z)     -> string_of_join  (w,x,y,z) ^"\n"
+  | Build(w,x,y,z)    -> string_of_build (w,x,y,z) ^"\n"
   | Fr_print(fname)   -> "print " ^ fname ^ ";\n"
   | Break             -> "break;\n"
   | Continue          -> "continue;\n"
