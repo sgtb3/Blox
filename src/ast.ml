@@ -30,10 +30,6 @@ type typ =
     Int | Bool | Float | String | Void
   | Array of typ * string                      
   | Set of typ * string
-(* 
-type constructors - advanced types
-type dtype = 
-   *)
 
 (* actual block *)
 type blck = {
@@ -99,7 +95,6 @@ type fr_assign = string * string
 (* gloabls is a combination of var & frame declarations and assignments *)
 type globals = {
   var_decls  : var_decl list;
-  (* data_typs  : dtype list; *)
   var_assgns : var_assign list;
   fr_decls   : fr_decl list;
   fr_assgns  : fr_assign list;
@@ -203,11 +198,6 @@ let string_of_func_decl fd =
 
 (* print frame assignments - there probably needs to be a new_frame_assign, and regular fr_assign *)
 let string_of_frassign (frname1,frname2) = "Frame " ^ frname1 ^ " = " ^ frname2 ^ ";"
-
-(* let rec string_of_dtypes (dt) = function
-  | Array x  -> (string_of_typ dt) ^ "[] "
-  | Set x    -> "Set<"   ^ (string_of_typ dt) ^ ">"
-*)
 
 (* print globals *)
 let string_of_globals glob = 
