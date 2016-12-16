@@ -64,12 +64,7 @@ expr_true_list_set:
   | expr_true_list_set COMMA expr { $3 :: $1 }*/
 
 globals:
-                                   /* no globals */ 
-    { { var_decls  = []; 
-        var_assgns = []; 
-        fr_decls   = []; 
-        fr_assgns  = []; } }
-  | typ ID SEMI                    /* var decls [($2, $3) :: 1]; */
+    typ ID SEMI                    /* var decls [($2, $3) :: 1]; */
     { { var_decls  = [($1, $2)]; 
         var_assgns = []; 
         fr_decls   = []; 
