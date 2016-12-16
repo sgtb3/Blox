@@ -28,13 +28,11 @@ int main()
 	/* test local var declar */
 	int x;
 	bool t;
-	/* bool t = true; */
+	
 
 	/* int[] x; */
-	/* test map type */
-	/* Map<int, int> map; */
 
-	/* this should not be accepted, but it is*/ 
+	/* this should not be accepted - catch this in the analyzer */ 
 	void i; 
 
 	/* test declaration and assignment */

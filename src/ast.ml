@@ -77,17 +77,20 @@ type stmt =
 (* was "bind" *)
 type var_decl = typ * string
 
-(* function declaration *)
-type func_decl = { 
-  typ     : typ;
-  fname   : string;
-  formals : var_decl list;
-  locals  : var_decl list;
-  body    : stmt list;
-}
-
 (* variable assignment  *)
 type var_assign = typ * string * expr
+
+(* function declaration *)
+type func_decl = { 
+  typ          : typ;
+  fname        : string;
+  formals      : var_decl list;
+  loc_var_decl : var_decl list;
+  loc_var_assn : var_assign list;
+  body         : stmt list;
+}
+
+
 
 (* frame assignment - might need to be frame * frame *)
 type fr_assign = string * string
@@ -193,7 +196,7 @@ let string_of_vassign (t,id,exp) = string_of_typ t ^ " " ^ id ^ " = " ^ string_o
 let string_of_func_decl fd =
   string_of_typ fd.typ ^ " " ^ fd.fname ^ "(" ^ 
   String.concat ", " (List.map snd fd.formals)               ^ ")\n{\n" ^
-  String.concat ""   (List.map string_of_var_decl fd.locals) ^
+  String.concat ""   (List.map string_of_var_decl fd.loc_var_decl) ^
   String.concat ""   (List.map string_of_stmt fd.body)       ^ "}\n"
 
 (* print frame assignments - there probably needs to be a new_frame_assign, and regular fr_assign *)

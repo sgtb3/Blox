@@ -44,6 +44,7 @@ typ:
   | BOOL   { Bool   }
   | STRING { String }
   | VOID   { Void   }
+  
 
 /*
 set:
@@ -92,13 +93,21 @@ vdecl_list:
    /* nothing */     { [] }
   | vdecl_list vdecl { $2 :: $1 }
 
+vassn:
+  typ ID ASSIGN expr SEMI {($1, $2, $4)}
+
+vassn_list:
+   /* nothing */     { [] }
+  | vassn_list vassn { $2 :: $1 }
+
 func_decl:
-  typ ID LPAREN formals_opt RPAREN LCURL vdecl_list stmt_list RCURL
+  typ ID LPAREN formals_opt RPAREN LCURL vdecl_list vassn_list stmt_list RCURL
     { { typ     = $1;
         fname   = $2;
         formals = $4;
-        locals  = List.rev $7;
-        body    = List.rev $8 } }
+        loc_var_decl = List.rev $7;
+        loc_var_assn = List.rev $8;
+        body    = List.rev $9 } }
 
 formals_opt:
    /* nothing */{ [] }
