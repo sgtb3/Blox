@@ -13,7 +13,7 @@ exception Block_Out_Of_Bounds of string;;
 let generate (globals, functions) =
   print_endline "Add generator code here ...\n"
 
-
+(*
 (* GENERATE AMF FILE CODE BELOW*)
 (* Read in .blox file into a list *)
 #load "str.cma"

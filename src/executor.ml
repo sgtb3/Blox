@@ -12,7 +12,7 @@ exception Block_Out_Of_Bounds of string;;
 let execute (globals, functions) =
 	print_endline "Add executor code here ...\n"
 
-
+(*
 (* Takes 1D index and corresponding frame and returns 3D coordinates*)
 let getCoord i frm =
   let z_val = (i mod frm.z) in
@@ -284,3 +284,4 @@ let frameConstruct x y z =
   let frm = {x = x; y = y; z = z; blocks = arr} in
   faceCheck frm.blocks x y z;
   frm
+*)
