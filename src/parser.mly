@@ -1,6 +1,6 @@
 %{ open Ast %}
   
-%token ASSIGN COMMA SEMI COLON
+%token ASSIGN COMMA SEMI
 %token LCURL RCURL LPAREN RPAREN LBRACK RBRACK
 %token PLUS MINUS TIMES DIVIDE MOD
 %token NOT DOT
@@ -8,7 +8,7 @@
 %token IF ELSE FOR WHILE RETURN BREAK CONTINUE 
 %token VOID INT BOOL STRING 
 %token TRUE FALSE NULL EOF
-%token PRINT BUILD JOIN FRAME SET FACE
+%token PRINT BUILD JOIN FRAME FACE
 %token <string> ID
 %token <string> LIT_STR
 %token <float> LIT_FLT
@@ -43,38 +43,24 @@ typ:
   | BOOL   { Bool   }
   | STRING { String }
   | VOID   { Void   }
-  | typ LBRACK LIT_INT RBRACK ID { Array($1, $3, $5) }
+  | FRAME LT LIT_INT COMMA LIT_INT COMMA LIT_INT GT  
+    { Fr_decl($3, $5, $7) }
+  | FACE LT LIT_INT COMMA LIT_INT COMMA LIT_INT COMMA ID GT 
+    { Fc_decl($3, $5, $7, $9) }
+  | typ LBRACK LIT_INT RBRACK  { Array($1, $3) }
 
 globals:
     typ ID SEMI                    /* var decls [($2, $3) :: 1]; */
     { { var_decls  = [($1, $2)]; 
         var_assgns = []; 
-        fr_decls   = []; 
-        fc_decls   = [];
         fr_assgns  = []; } }
   | typ ID ASSIGN expr SEMI        /* var assigns */
     { { var_decls  = []; 
         var_assgns = [($1, $2, $4)]; 
-        fr_decls   = []; 
-        fc_decls   = [];
-        fr_assgns  = []; } }
-  | fr_decl SEMI                   /* fr decls  ($2 :: $1) */    
-    { { var_decls  = []; 
-        var_assgns = []; 
-        fr_decls   = [$1]; 
-        fc_decls   = [];
-        fr_assgns  = []; } }
-  | fc_decl SEMI                   /* fc decls  ($2 :: $1) */    
-    { { var_decls  = []; 
-        var_assgns = []; 
-        fr_decls   = []; 
-        fc_decls   = [$1];
         fr_assgns  = []; } }
   | FRAME ID ASSIGN ID SEMI        /* fr assigns  */
     { { var_decls  = []; 
         var_assgns = []; 
-        fr_decls   = []; 
-        fc_decls   = [];
         fr_assgns  = [($2, $4)]; } }
 
 func_decl:
@@ -94,30 +80,28 @@ formal_list:
 
 fr_decl:
   FRAME LT LIT_INT COMMA LIT_INT COMMA LIT_INT GT ID 
-    { { frx = $3; 
-        fry = $5; 
-        frz = $7; 
-        fr_name = $9; } }
+  { ($3, $5, $7) }
 
 fc_decl:
   FACE LT LIT_INT COMMA LIT_INT COMMA LIT_INT COMMA ID GT ID 
-    { { dim     = ($3, $5, $7); 
-        face    = $9; 
-        fc_name = $11; } }
+  { ($3, $5, $7, $9) }
 
 stmt_list:
    /* nothing */   { [] }
   | stmt_list stmt { $2 :: $1 }
+
+var_decl:
+  typ ID {($1, $2)}
 
 stmt:
     expr SEMI              { Expr($1)           }
   | PRINT ID SEMI          { Fr_print($2)       }
   | BREAK SEMI             { Break              }
   | CONTINUE SEMI          { Continue           }
-  | typ ID SEMI          { Var_decl($1,$2)    }
-  | typ LBRACK LIT_INT RBRACK ID SEMI { Array($1, $3, $5) }
-  | fr_decl SEMI           { Fr_decl($1)        }
-  | fc_decl SEMI           { Fc_decl($1)        }
+  | var_decl SEMI          { Var_decl($1,$2)    }
+  | typ     LBRACK LIT_INT RBRACK ID SEMI { Array($1, $3, $5) }
+ /* | fr_decl SEMI           { Fr_decl($1)        }
+  | fc_decl SEMI           { Fc_decl($1)        }*/
   | LCURL stmt_list RCURL  { Block(List.rev $2) }
   | RETURN SEMI            { Return Noexpr      }
   | RETURN expr SEMI       { Return $2          }
@@ -145,7 +129,7 @@ expr:
   | FALSE                  { Lit_Bool(false)        }
   | ID ASSIGN expr         { Assign($1, $3)         }
   | FRAME ID ASSIGN expr   { Fr_assign($2, $4)      }
-  | typ ID ASSIGN expr   { Var_assign($1, $2, $4) }
+  | typ ID ASSIGN expr     { Var_assign($1, $2, $4) }
   | expr PLUS   expr       { Binop($1, Add,   $3)   }
   | expr MINUS  expr       { Binop($1, Sub,   $3)   }
   | expr TIMES  expr       { Binop($1, Mult,  $3)   }

@@ -7,50 +7,21 @@ type op =
 (* unary operators *)
 type uop = Neg | Not 
 
-(* block face identifier *)
-type face_id = {
-  dim  : int * int * int;
-  face : string;
-}
-
-(* frame declaration *)
-type fc_decl = {
-  dim  : int * int * int;
-  face : string;
-  fc_name : string;
-}
-
-(* frame declaration *)
-type fr_decl = {
-  frx : int;
-  fry : int;
-  frz : int;
-  fr_name : string;
-}
-
-(* actual block *)
-type blck = {
-  faces : bool array;
-}
-
-(* actual frame *)
-type frame = {
-  x : int;
-  y : int;
-  z : int;
-  blocks : blck array;
-}
-
-type typ = 
-    Int | Bool | Float | String | Void 
-  | Frame of fr_decl| FaceId of fc_decl
-  | Array of typ * int * string
-
 (* built-in function calls *)
 type join  = string * string * string * string
 type build = string * string * string * string
 
-(* variable declarations - was "bind" *)
+(* actual block, frame, face id - created by analyzer *)
+type blck = bool array
+type frame = int * int * int * blck array
+type face_id = int * int * int * string
+
+type typ = 
+    Int | Bool | Float | String | Void
+  | Fr_decl of int * int * int
+  | Fc_decl of int * int * int * string 
+  | Array of typ * int
+
 type var_decl = typ * string
 
 (* expressions *)
@@ -58,17 +29,19 @@ type expr =
     Id of string
   | Lit_Int of int
   | Lit_Bool of bool
+  | Lit_Float of float
+  | Lit_String of string
+  (* | Lit_Void of unit *)
+  | Frame of frame
+  | FaceId of face_id
   | Assign of string * expr
-  | Fr_assign of string * expr
+  | Fr_assign of string * expr (* check if needed *)
   | Var_assign of typ * string * expr
   | Binop of expr * op * expr
   | Unop of uop * expr
   | Call of string * expr list
   | Null
   | Noexpr
-
-(* variable assignments *)
-type var_assign = typ * string * expr
 
 (* statements *)
 type stmt =
@@ -77,16 +50,20 @@ type stmt =
   | Join of join
   | Build of build
   | Array of typ * int * string
-  | Fr_decl of fr_decl
-  | Fc_decl of fc_decl
+  (* | Fr_decl of int * int * int
+  | Fc_decl of int * int * int * string  *)
   | Fr_print of string
-  | Var_decl of var_decl
+  | Var_decl of typ * string
   | Return of expr
   | If of expr * stmt * stmt
   | For of expr * expr * expr * stmt
   | While of expr * stmt
   | Break
   | Continue
+
+(* glob frame & var assigns, glob var decls *)
+type fr_assign_g  = string * string
+type var_assign_g = typ * string * expr
 
 (* function declaration *)
 type func_decl = { 
@@ -96,16 +73,11 @@ type func_decl = {
   body    : stmt list;
 }
 
-(* frame assignment - might need to be frame * frame *)
-type fr_assign = string * string
-
 (* gloabls is a combination of var & frame declarations and assignments *)
 type globals = {
   var_decls  : var_decl list;
-  var_assgns : var_assign list;
-  fr_decls   : fr_decl list;
-  fr_assgns  : fr_assign list;
-  fc_decls   : fc_decl list;
+  var_assgns : var_assign_g list;
+  fr_assgns  : fr_assign_g list;
 }
 
 (* a blox program is a tuple of globals and function declarations *)
@@ -133,6 +105,18 @@ let string_of_uop = function
     Neg     -> "-"
   | Not     -> "!"
 
+(* print frame declarations *)
+let string_of_frdecl (x,y,z) =         
+  "Frame<" ^ string_of_int x ^ "," ^
+             string_of_int y ^ "," ^
+             string_of_int z ^ "> "
+
+(* print face declarations *)
+let string_of_fcdecl (w,x,y,z) =         
+  "Face<" ^ string_of_int w ^ "," ^
+             string_of_int x ^ "," ^
+             string_of_int y ^ "," ^ z ^ "> "
+
 (* print types *)
 let rec string_of_typ = function
     Int       -> "int"
@@ -140,15 +124,9 @@ let rec string_of_typ = function
   | String    -> "string"
   | Void      -> "void"
   | Float     -> "float"
-  | Frame(x)  -> "Frame"
-  | FaceId(x) -> "Face"
-  | Array(x,y,z) -> string_of_typ x ^ "[" ^ string_of_int y ^ "] " ^ z
-(* 
-let rec string_of_dtype = function
-    Typ(x)       -> string_of_typ x
-  | Array(x,y,z) -> string_of_typ x ^ "[" ^ string_of_int y ^ "] " ^ z
-  (* | Frame(f)     -> "Frame" *)
-  | FaceId(i)    -> "Face" *)
+  | Fr_decl(x,y,z) -> string_of_frdecl (x,y,z)
+  | Fc_decl(w,x,y,z)-> string_of_fcdecl (w,x,y,z)
+  | Array(x,y) -> string_of_typ x ^ "[" ^ string_of_int y ^ "]"
 
 (* print expressions *)
 let rec string_of_expr = function         
@@ -156,6 +134,10 @@ let rec string_of_expr = function
   | Id(x)             -> x
   | Lit_Bool(true)    -> "true"
   | Lit_Bool(false)   -> "false"
+  | Lit_Float(f)      -> string_of_float f
+  | Lit_String(s)     -> s
+  | Frame(f)          -> "frame_lit" 
+  | FaceId(face_id)   -> "face_id_lit"
   | Assign(x,y)       -> x ^ " = " ^ string_of_expr y ^ ";"
   | Fr_assign(x,y)    -> "Frame " ^ x ^ " = " ^ string_of_expr y ^ ";"
   | Var_assign(x,y,z) -> string_of_typ x ^ " " ^ y ^ " = " ^ string_of_expr z ^ ";"
@@ -165,27 +147,8 @@ let rec string_of_expr = function
   | Call(f,el)        -> f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
   | Noexpr            -> ""
 
-(* print frame declarations *)
-let string_of_frdecl frd =         
-  "Frame<" ^ string_of_int frd.frx ^ "," ^
-             string_of_int frd.fry ^ "," ^
-             string_of_int frd.frz ^ "> " ^
-             frd.fr_name ^ ";\n"
-
-(* print dimensions *)
-let string_of_dim (x,y,z) =
-  string_of_int x ^ "," ^
-  string_of_int y ^ "," ^
-  string_of_int z
-
-(* print face declarations *)
-let string_of_fcdecl fcd =         
-  "Face<" ^ string_of_dim fcd.dim ^ "," ^
-            fcd.face ^ "> " ^
-            fcd.fc_name ^ ";\n"
-
 let string_of_var_decl (x,y) =
-  string_of_typ x ^ " " ^ y ^ ";"
+  string_of_typ x ^ " " ^ y ^ ";\n"
 
 (* print block face identifier *)
 let string_of_face_id (w,x,y,z) =
@@ -199,21 +162,21 @@ let string_of_face_id_list fid =
   String.concat "," (List.rev (List.map string_of_face_id fid))
 
 
-(* print list of join args *)
+(* print build function *)
 let string_of_build (w,x,y,z) =
   "Build(" ^ w ^ ", " ^ x ^ ", " ^
             y ^ ", " ^ z ^ ");\n"
 
-(* print list of join args *)
+(* print join function *)
 let string_of_join (w,x,y,z) =
   "Join(" ^ w ^ ", " ^ x ^ ", " ^
             y ^ ", " ^ z ^ ");\n"
 
 (* print statements *)
 let rec string_of_stmt = function 
-    Fr_decl(frd)      -> string_of_frdecl frd
-  | Fc_decl(fcd)      -> string_of_fcdecl fcd 
-  | Var_decl(x,y)     -> string_of_var_decl (x,y)  ^ "\n"
+    Fr_decl(x,y,z)    -> string_of_frdecl (x,y,z)
+  | Fc_decl(w,x,y,z)  -> string_of_fcdecl (w,x,y,z) 
+  | Var_decl(x,y)     -> string_of_typ x ^ " " ^ y ^ ";\n"
   | Block(stmts)      -> "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
   | Expr(expr)        -> string_of_expr  expr      ^ "\n"
   | Join(w,x,y,z)     -> string_of_join  (w,x,y,z) ^ "\n"
@@ -222,21 +185,18 @@ let rec string_of_stmt = function
   | Fr_print(fname)   -> "print " ^ fname ^ ";\n"
   | Break             -> "break;\n"
   | Continue          -> "continue;\n"
-  | Return(expr)      -> "return " ^ string_of_expr expr ^ ";\n";
-  | If(e,s,Block([])) -> "if ("    ^ string_of_expr e    ^ ")\n" ^ string_of_stmt s
-  | If(e,s1,s2)       -> "if ("    ^ string_of_expr e    ^ ")\n" ^ string_of_stmt s1 ^ 
+  | Return(e)         -> "return " ^ string_of_expr e  ^ ";\n";
+  | If(e,s,Block([])) -> "if ("    ^ string_of_expr e  ^ ")\n" ^ string_of_stmt s
+  | If(e,s1,s2)       -> "if ("    ^ string_of_expr e  ^ ")\n" ^ string_of_stmt s1 ^ 
                          "else\n"  ^ string_of_stmt s2
-  | For(e1,e2,e3,s)   -> "for ("   ^ string_of_expr e1   ^ " ; " ^ string_of_expr e2 ^ 
-                         " ; "     ^ string_of_expr e3   ^ ") "  ^ string_of_stmt s
-  | While(e,s)        -> "while (" ^ string_of_expr e    ^ ") "  ^ string_of_stmt s
-
-(* print variable declarations *)
-let string_of_var_decl (t,id) = 
-  string_of_typ t ^ " " ^ id ^ ";\n"
+  | For(e1,e2,e3,s)   -> "for ("   ^ string_of_expr e1 ^ " ; " ^ string_of_expr e2 ^ 
+                         " ; "     ^ string_of_expr e3 ^ ") "  ^ string_of_stmt s
+  | While(e,s)        -> "while (" ^ string_of_expr e  ^ ") "  ^ string_of_stmt s
 
 (* print variable assignment type var_assign = string * expr *) 
 let string_of_vassign (t,id,exp) = 
-  string_of_typ t ^ " " ^ id ^ " = " ^ string_of_expr exp ^ ";\n"
+  string_of_typ t    ^ " " ^ id ^ " = " ^ 
+  string_of_expr exp ^ ";\n"
 
 (* print frame assignments *)
 let string_of_frassign (fn1,fn2) = 
@@ -244,17 +204,15 @@ let string_of_frassign (fn1,fn2) =
 
 (* print function declarations *)
 let string_of_func_decl fd =
-  string_of_typ fd.typ ^ " " ^ fd.fname              ^ "(" ^ 
-  String.concat ", " (List.map snd fd.formals)         ^ ")\n{\n" ^
+  string_of_typ fd.typ ^ " " ^ fd.fname ^ "(" ^ 
+  String.concat ", " (List.map snd fd.formals) ^ ")\n{\n" ^
   String.concat ""   (List.map string_of_stmt fd.body) ^ "}\n"
 
 (* print globals *)
 let string_of_globals glob = 
   String.concat "" (List.map string_of_var_decl glob.var_decls) ^
   String.concat "" (List.map string_of_vassign glob.var_assgns) ^
-  String.concat "" (List.map string_of_fcdecl glob.fc_decls)    ^
-  String.concat "" (List.map string_of_frdecl glob.fr_decls)    ^
-  String.concat "" (List.map string_of_frassign glob.fr_assgns) ^"\n"
+  String.concat "" (List.map string_of_frassign glob.fr_assgns) ^ "\n"
 
 (* print blox program *)
 let string_of_program (globals,funcs) =

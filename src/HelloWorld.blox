@@ -27,6 +27,8 @@ int main()
 	void i; /* this should not be accepted - catch this in the analyzer */ 
 
 	int[5] x;
+	Frame[5] fr;
+	Face[5] fc;
 
 	bool[10] b1;
 	void[10] b1;

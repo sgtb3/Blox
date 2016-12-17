@@ -6,7 +6,6 @@ rule token = parse
   | '='                  { ASSIGN   }
   | ','                  { COMMA    }
   | ';'                  { SEMI     }
-  | ':'                  { COLON    }
   | '{'                  { LCURL    }
   | '}'                  { RCURL    }
   | '('                  { LPAREN   }
@@ -48,7 +47,6 @@ rule token = parse
   | "Join"               { JOIN     }
   | "Face"               { FACE     }
   | "Frame"              { FRAME    }
-  | "Set"                { SET      }
   | ['0'-'9']+ as lxm    { LIT_INT(int_of_string lxm) }
   | ['0'-'9']+ '.' ['0'-'9']+ as lxm { LIT_FLT(float_of_string lxm) }
   | ['\"'] [^'\"']* ['\"'] as lxm { LIT_STR(lxm) }
