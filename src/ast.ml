@@ -81,7 +81,7 @@ type stmt =
   | Array of typ * int * string
   | Fr_decl of fr_decl
   | Fc_decl of fc_decl
-  | Fr_print of string
+  | Convert of string
   | Var_decl of var_decl
   | Return of expr
   | If of expr * stmt * stmt
@@ -215,7 +215,7 @@ let rec string_of_stmt = function
   | Join(w,x,y,z)     -> string_of_join  (w,x,y,z) ^ "\n"
   | Build(w,x,y,z)    -> string_of_build (w,x,y,z) ^ "\n"
   | Array(x,y,z)      -> string_of_typ x ^ "[" ^ string_of_int y ^ "] " ^ z ^";\n"
-  | Fr_print(fname)   -> "print " ^ fname ^ ";\n"
+  | Convert(fname)   -> "Convert(" ^ fname ^ ");\n"
   | Break             -> "break;\n"
   | Continue          -> "continue;\n"
   | Return(expr)      -> "return " ^ string_of_expr expr ^ ";\n";
