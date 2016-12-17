@@ -9,7 +9,7 @@ exception Invalid_Face of string;;
 exception Opposite_Face of string;;
 exception Invalid_Block of string;;
 exception Block_Out_Of_Bounds of string;;
-
+(*
 
 
 (* Takes 1D index and corresponding frame and returns 3D coordinates*)
@@ -466,8 +466,8 @@ let frameConstruct x y z =
   let arr = Array.init (x*y*z) (fun _ -> {faces = [|true;true;true;true;true;true|]}) in
   let frm = {x = x; y = y; z = z; blocks = arr} in
   faceCheck frm.blocks x y z;
-  frm
-
+  frm in
+*)
 
 let execute (globals, functions) =
   print_endline "Add executor code here ...\n"
