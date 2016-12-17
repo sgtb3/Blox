@@ -28,6 +28,10 @@ int main()
 
 	int[5] x;
 
+	bool[10] b1;
+	void[10] b1;
+	/* Face[1] f; */
+
 	/* test declaration and assignment */
 	bool t = true; 
 	bool f = false;

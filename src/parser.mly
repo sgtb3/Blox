@@ -43,19 +43,16 @@ typ:
   | BOOL   { Bool   }
   | STRING { String }
   | VOID   { Void   }
-
-dtype:
-    typ    { Typ($1) }
   | typ LBRACK LIT_INT RBRACK ID { Array($1, $3, $5) }
 
 globals:
-    dtype ID SEMI                    /* var decls [($2, $3) :: 1]; */
+    typ ID SEMI                    /* var decls [($2, $3) :: 1]; */
     { { var_decls  = [($1, $2)]; 
         var_assgns = []; 
         fr_decls   = []; 
         fc_decls   = [];
         fr_assgns  = []; } }
-  | dtype ID ASSIGN expr SEMI        /* var assigns */
+  | typ ID ASSIGN expr SEMI        /* var assigns */
     { { var_decls  = []; 
         var_assgns = [($1, $2, $4)]; 
         fr_decls   = []; 
@@ -81,7 +78,7 @@ globals:
         fr_assgns  = [($2, $4)]; } }
 
 func_decl:
-  dtype ID LPAREN formals_opt RPAREN LCURL stmt_list RCURL
+  typ ID LPAREN formals_opt RPAREN LCURL stmt_list RCURL
     { { typ     = $1;
         fname   = $2;
         formals = $4;
@@ -92,8 +89,8 @@ formals_opt:
   | formal_list { List.rev $1 }
 
 formal_list:
-    dtype ID  { [($1,$2)] }
-  | formal_list COMMA dtype ID { ($3,$4) :: $1 }
+    typ ID  { [($1,$2)] }
+  | formal_list COMMA typ ID { ($3,$4) :: $1 }
 
 fr_decl:
   FRAME LT LIT_INT COMMA LIT_INT COMMA LIT_INT GT ID 
@@ -117,7 +114,7 @@ stmt:
   | PRINT ID SEMI          { Fr_print($2)       }
   | BREAK SEMI             { Break              }
   | CONTINUE SEMI          { Continue           }
-  | dtype ID SEMI          { Var_decl($1,$2)    }
+  | typ ID SEMI          { Var_decl($1,$2)    }
   | typ LBRACK LIT_INT RBRACK ID SEMI { Array($1, $3, $5) }
   | fr_decl SEMI           { Fr_decl($1)        }
   | fc_decl SEMI           { Fc_decl($1)        }
@@ -148,7 +145,7 @@ expr:
   | FALSE                  { Lit_Bool(false)        }
   | ID ASSIGN expr         { Assign($1, $3)         }
   | FRAME ID ASSIGN expr   { Fr_assign($2, $4)      }
-  | dtype ID ASSIGN expr   { Var_assign($1, $2, $4) }
+  | typ ID ASSIGN expr   { Var_assign($1, $2, $4) }
   | expr PLUS   expr       { Binop($1, Add,   $3)   }
   | expr MINUS  expr       { Binop($1, Sub,   $3)   }
   | expr TIMES  expr       { Binop($1, Mult,  $3)   }
