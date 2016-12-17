@@ -38,7 +38,7 @@ type frame = {
   x : int;
   y : int;
   z : int;
-  blocks : blck;
+  blocks : blck array;
 }
 
 type typ = Int | Bool | Float | String | Void | Frame of fr_decl| FaceId of fc_decl
@@ -46,7 +46,7 @@ type typ = Int | Bool | Float | String | Void | Frame of fr_decl| FaceId of fc_d
 (* All types *)
 type dtype = 
     Typ of typ
-  | Array of dtype * int * string
+  | Array of typ * int * string
 
 (* built-in function calls *)
 type join  = string * string * string * string
@@ -78,6 +78,7 @@ type stmt =
   | Expr of expr
   | Join of join
   | Build of build
+  | Array of typ * int * string
   | Fr_decl of fr_decl
   | Fc_decl of fc_decl
   | Fr_print of string
@@ -146,7 +147,7 @@ let rec string_of_typ = function
 
 let rec string_of_dtype = function
     Typ(x)       -> string_of_typ x
-  | Array(x,y,z) -> string_of_dtype x ^ "[" ^ string_of_int y ^ "] " ^ z
+  | Array(x,y,z) -> string_of_typ x ^ "[" ^ string_of_int y ^ "] " ^ z
   (* | Frame(f)     -> "Frame"
   | FaceId(i)    -> "Face" *)
 
@@ -218,6 +219,7 @@ let rec string_of_stmt = function
   | Expr(expr)        -> string_of_expr  expr      ^ "\n"
   | Join(w,x,y,z)     -> string_of_join  (w,x,y,z) ^ "\n"
   | Build(w,x,y,z)    -> string_of_build (w,x,y,z) ^ "\n"
+  | Array(x,y,z)      -> string_of_typ x ^ "[" ^ string_of_int y ^ "] " ^ z ^";\n"
   | Fr_print(fname)   -> "print " ^ fname ^ ";\n"
   | Break             -> "break;\n"
   | Continue          -> "continue;\n"
@@ -237,15 +239,15 @@ let string_of_var_decl (t,id) =
 let string_of_vassign (t,id,exp) = 
   string_of_dtype t ^ " " ^ id ^ " = " ^ string_of_expr exp ^ ";\n"
 
+(* print frame assignments *)
+let string_of_frassign (fn1,fn2) = 
+  "Frame " ^ fn1 ^ " = " ^ fn2 ^ ";"
+
 (* print function declarations *)
 let string_of_func_decl fd =
   string_of_dtype fd.typ ^ " " ^ fd.fname              ^ "(" ^ 
   String.concat ", " (List.map snd fd.formals)         ^ ")\n{\n" ^
   String.concat ""   (List.map string_of_stmt fd.body) ^ "}\n"
-
-
-(* print frame assignments *)
-let string_of_frassign (fn1,fn2) = "Frame " ^ fn1 ^ " = " ^ fn2 ^ ";"
 
 (* print globals *)
 let string_of_globals glob = 

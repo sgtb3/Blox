@@ -45,8 +45,8 @@ typ:
   | VOID   { Void   }
 
 dtype:
-    typ     { Typ($1) }
-  | dtype LBRACK LIT_INT RBRACK ID SEMI { Array($1, $3, $5) }
+    typ    { Typ($1) }
+  | typ LBRACK LIT_INT RBRACK ID { Array($1, $3, $5) }
 
 globals:
     dtype ID SEMI                    /* var decls [($2, $3) :: 1]; */
@@ -118,6 +118,7 @@ stmt:
   | BREAK SEMI             { Break              }
   | CONTINUE SEMI          { Continue           }
   | dtype ID SEMI          { Var_decl($1,$2)    }
+  | typ LBRACK LIT_INT RBRACK ID SEMI { Array($1, $3, $5) }
   | fr_decl SEMI           { Fr_decl($1)        }
   | fc_decl SEMI           { Fc_decl($1)        }
   | LCURL stmt_list RCURL  { Block(List.rev $2) }

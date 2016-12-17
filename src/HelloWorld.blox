@@ -3,19 +3,16 @@
 int y;
 int z;
 
+/* testing global var assignment */
+int z1 = y;
+
 /* testing global frame declaration */
 Frame<1,1,1> one;
 Frame<1,1,1> two;
 
-/* testing global var assignment */
-int z1 = y;
-
-/* z1 = y     (no type) variable assignment = doesn't work - but it should */
-
-/* testing global frame assignment - printing correctly */
+/* testing global frame assignment */
 Frame C = one;
 Frame D = C;
-
 
 int main()
 {
@@ -29,19 +26,14 @@ int main()
 	bool t;
 	void i; /* this should not be accepted - catch this in the analyzer */ 
 
-	/* int[] x; */
-
-	
+	int[5] x;
 
 	/* test declaration and assignment */
 	bool t = true; 
 	bool f = false;
-
 	
-	/* test continue */
+	/* test continue and break */
 	continue;
-	
-	/* test break */
 	break;
 
 	int i;
