@@ -43,6 +43,7 @@ rule token = parse
   | "false"              { FALSE    }
   | "string"             { STRING   }
   | "print"              { PRINT    }
+  | "Convert"            { CONVERT  }
   | "Build"              { BUILD    }
   | "Join"               { JOIN     }
   | "Face"               { FACE     }
