@@ -33,7 +33,7 @@ program:
   decls EOF { $1 }
 
 decls:
-  |/* nothing */    { [], [] }
+  |/* nothing */    { ([], [] )}
   | decls globals   { ($2 :: fst $1), snd $1 }
   | decls func_decl { fst $1, ($2 :: snd $1) }
 

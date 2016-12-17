@@ -18,7 +18,7 @@ Frame D = C;
 int main()
 {
 	/* test function call - not working */
-	/* test_function(); */
+	functioncall(1,2,3);
 
 	/* int a = 1 + 2; */
 
