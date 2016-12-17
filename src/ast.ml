@@ -20,17 +20,13 @@ type fc_decl = {
   fc_name : string;
 }
 
-(* join function *)
-type join = string * string * string * string
-
-(* build function *)
-type build = string * string * string * string
-
-(* type constructors -  basic/primitive types hold literal values *)
-type typ = 
-    Int | Bool | Float | String | Void
-  | Array of typ * int * string                               
-  (* | Set of typ * string *)
+(* frame declaration *)
+type fr_decl = {
+  frx : int;
+  fry : int;
+  frz : int;
+  fr_name : string;
+}
 
 (* actual block *)
 type blck = {
@@ -45,16 +41,19 @@ type frame = {
   blocks : blck;
 }
 
-(* frame declaration *)
-type fr_decl = {
-  x : int;
-  y : int;
-  z : int;
-  fr_name : string;
-}
+type typ = Int | Bool | Float | String | Void | Frame of fr_decl| FaceId of fc_decl
 
-(* was "bind" *)
-type var_decl = typ * string
+(* All types *)
+type dtype = 
+    Typ of typ
+  | Array of dtype * int * string
+
+(* built-in function calls *)
+type join  = string * string * string * string
+type build = string * string * string * string
+
+(* variable declarations - was "bind" *)
+type var_decl = dtype * string
 
 (* expressions *)
 type expr =
@@ -63,14 +62,15 @@ type expr =
   | Lit_Bool of bool
   | Assign of string * expr
   | Fr_assign of string * expr
-  | Var_assign of typ * string * expr
+  | Var_assign of dtype * string * expr
   | Binop of expr * op * expr
   | Unop of uop * expr
   | Call of string * expr list
   | Null
   | Noexpr
 
-type var_assign = typ * string * expr
+(* variable assignments *)
+type var_assign = dtype * string * expr
 
 (* statements *)
 type stmt =
@@ -91,7 +91,7 @@ type stmt =
 
 (* function declaration *)
 type func_decl = { 
-  typ     : typ;
+  typ     : dtype;
   fname   : string;
   formals : var_decl list;
   body    : stmt list;
@@ -131,18 +131,24 @@ let string_of_op = function
 
 (* print unary operators *)
 let string_of_uop = function
-    Neg -> "-"
-  | Not -> "!"
+    Neg     -> "-"
+  | Not     -> "!"
 
 (* print types *)
 let rec string_of_typ = function
-    Int           -> "int"
-  | Bool          -> "bool"
-  | String        -> "string"
-  | Void          -> "void"
-  | Float         -> "float"
-  | Array(t,i,id) -> (string_of_typ t) ^ "[" ^ string_of_int i ^ "] " ^ id
-  | Set(t,id)     -> "Set<" ^ (string_of_typ t)  ^ "> " ^ id
+    Int       -> "int"
+  | Bool      -> "bool"
+  | String    -> "string"
+  | Void      -> "void"
+  | Float     -> "float"
+  | Frame(x)  -> "Frame"
+  | FaceId(x) -> "Face"
+
+let rec string_of_dtype = function
+    Typ(x)       -> string_of_typ x
+  | Array(x,y,z) -> string_of_dtype x ^ "[" ^ string_of_int y ^ "] " ^ z
+  (* | Frame(f)     -> "Frame"
+  | FaceId(i)    -> "Face" *)
 
 (* print expressions *)
 let rec string_of_expr = function         
@@ -152,7 +158,7 @@ let rec string_of_expr = function
   | Lit_Bool(false)   -> "false"
   | Assign(x,y)       -> x ^ " = " ^ string_of_expr y ^ ";"
   | Fr_assign(x,y)    -> "Frame " ^ x ^ " = " ^ string_of_expr y ^ ";"
-  | Var_assign(x,y,z) -> string_of_typ x ^ " " ^ y ^ " = " ^ string_of_expr z ^ ";"
+  | Var_assign(x,y,z) -> string_of_dtype x ^ " " ^ y ^ " = " ^ string_of_expr z ^ ";"
   | Null              -> "null"
   | Binop(e1,o,e2)    -> string_of_expr e1 ^ " " ^ string_of_op o ^ " " ^ string_of_expr e2
   | Unop(o,e)         -> string_of_uop o   ^ string_of_expr e
@@ -161,9 +167,9 @@ let rec string_of_expr = function
 
 (* print frame declarations *)
 let string_of_frdecl frd =         
-  "Frame<" ^ string_of_int frd.x ^ "," ^
-             string_of_int frd.y ^ "," ^
-             string_of_int frd.z ^ "> " ^
+  "Frame<" ^ string_of_int frd.frx ^ "," ^
+             string_of_int frd.fry ^ "," ^
+             string_of_int frd.frz ^ "> " ^
              frd.fr_name ^ ";\n"
 
 (* print dimensions *)
@@ -172,14 +178,14 @@ let string_of_dim (x,y,z) =
   string_of_int y ^ "," ^
   string_of_int z
 
-(* print frame declarations *)
+(* print face declarations *)
 let string_of_fcdecl fcd =         
   "Face<" ^ string_of_dim fcd.dim ^ "," ^
             fcd.face ^ "> " ^
             fcd.fc_name ^ ";\n"
 
 let string_of_var_decl (x,y) =
-  string_of_typ x ^ " " ^ y ^ ";"
+  string_of_dtype x ^ " " ^ y ^ ";"
 
 (* print block face identifier *)
 let string_of_face_id (w,x,y,z) =
@@ -205,13 +211,13 @@ let string_of_join (w,x,y,z) =
 
 (* print statements *)
 let rec string_of_stmt = function 
-    Fr_decl(fr)       -> string_of_frdecl fr
-  | Fc_decl(fc)       -> string_of_fcdecl fc 
-  | Var_decl(x,y)     -> string_of_var_decl (x,y) ^"\n"
+    Fr_decl(frd)      -> string_of_frdecl frd
+  | Fc_decl(fcd)      -> string_of_fcdecl fcd 
+  | Var_decl(x,y)     -> string_of_var_decl (x,y)  ^ "\n"
   | Block(stmts)      -> "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
-  | Expr(expr)        -> string_of_expr expr ^ "\n"
-  | Join(w,x,y,z)     -> string_of_join  (w,x,y,z) ^"\n"
-  | Build(w,x,y,z)    -> string_of_build (w,x,y,z) ^"\n"
+  | Expr(expr)        -> string_of_expr  expr      ^ "\n"
+  | Join(w,x,y,z)     -> string_of_join  (w,x,y,z) ^ "\n"
+  | Build(w,x,y,z)    -> string_of_build (w,x,y,z) ^ "\n"
   | Fr_print(fname)   -> "print " ^ fname ^ ";\n"
   | Break             -> "break;\n"
   | Continue          -> "continue;\n"
@@ -224,26 +230,28 @@ let rec string_of_stmt = function
   | While(e,s)        -> "while (" ^ string_of_expr e    ^ ") "  ^ string_of_stmt s
 
 (* print variable declarations *)
-let string_of_var_decl (t,id) = string_of_typ t ^ " " ^ id ^ ";\n"
+let string_of_var_decl (t,id) = 
+  string_of_dtype t ^ " " ^ id ^ ";\n"
 
 (* print variable assignment type var_assign = string * expr *) 
-let string_of_vassign (t,id,exp) = string_of_typ t ^ " " ^ id ^ " = " ^ string_of_expr exp ^ ";\n"
+let string_of_vassign (t,id,exp) = 
+  string_of_dtype t ^ " " ^ id ^ " = " ^ string_of_expr exp ^ ";\n"
 
 (* print function declarations *)
 let string_of_func_decl fd =
-  string_of_typ fd.typ ^ " " ^ fd.fname ^ "(" ^ 
-  String.concat ", " (List.map snd fd.formals)               ^ ")\n{\n" ^
-  String.concat ""   (List.map string_of_stmt fd.body)       ^ "}\n"
+  string_of_dtype fd.typ ^ " " ^ fd.fname              ^ "(" ^ 
+  String.concat ", " (List.map snd fd.formals)         ^ ")\n{\n" ^
+  String.concat ""   (List.map string_of_stmt fd.body) ^ "}\n"
 
 
-(* print frame assignments - there probably needs to be a new_frame_assign, and regular fr_assign *)
-let string_of_frassign (frname1,frname2) = "Frame " ^ frname1 ^ " = " ^ frname2 ^ ";"
+(* print frame assignments *)
+let string_of_frassign (fn1,fn2) = "Frame " ^ fn1 ^ " = " ^ fn2 ^ ";"
 
 (* print globals *)
 let string_of_globals glob = 
   String.concat "" (List.map string_of_var_decl glob.var_decls) ^
   String.concat "" (List.map string_of_vassign glob.var_assgns) ^
-  String.concat "" (List.map string_of_fcdecl glob.fc_decls) ^
+  String.concat "" (List.map string_of_fcdecl glob.fc_decls)    ^
   String.concat "" (List.map string_of_frdecl glob.fr_decls)    ^
   String.concat "" (List.map string_of_frassign glob.fr_assgns) ^"\n"
 

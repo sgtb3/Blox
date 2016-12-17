@@ -38,47 +38,24 @@ decls:
  | decls globals   { ($2 :: fst $1), snd $1 }
  | decls func_decl { fst $1, ($2 :: snd $1) }
 
-/* add (Array of typ), (Set of typ) from AST here */
 typ:
     INT    { Int    }
   | BOOL   { Bool   }
   | STRING { String }
   | VOID   { Void   }
 
-arr:
-    typ LBRACK LIT_INT RBRACK ID SEMI  { Array($1, $3, $5) } 
-
-/*
-arr_list:
-    LBRACK LIT_INT RBRACK { [$2] }
-  | arr_list arr          { $2 :: $1 }
-*/
-/*
-set:
-    SET LT expr_list_set RPAREN      { Set(List.rev $3)   }
-arr:
-    typ LBRACK expr_list_set RBRACK  { Array(List.rev $2) }  
-expr_pair_list:
-  | { [] }
-  | expr_pair_true_list { $1 }
-expr_pair_true_list:
-  | expr COLON expr { [($1,$3)] }
-  | expr_pair_true_list COMMA expr COLON expr {($3,$5)::$1}
-expr_list_set:
-  | { [] }
-  | expr_true_list_set { $1 }
-expr_true_list_set:
-  | expr { [$1] }
-  | expr_true_list_set COMMA expr { $3 :: $1 }*/
+dtype:
+    typ     { Typ($1) }
+  | dtype LBRACK LIT_INT RBRACK ID SEMI { Array($1, $3, $5) }
 
 globals:
-    typ ID SEMI                    /* var decls [($2, $3) :: 1]; */
+    dtype ID SEMI                    /* var decls [($2, $3) :: 1]; */
     { { var_decls  = [($1, $2)]; 
         var_assgns = []; 
         fr_decls   = []; 
         fc_decls   = [];
         fr_assgns  = []; } }
-  | typ ID ASSIGN expr SEMI        /* var assigns */
+  | dtype ID ASSIGN expr SEMI        /* var assigns */
     { { var_decls  = []; 
         var_assgns = [($1, $2, $4)]; 
         fr_decls   = []; 
@@ -104,7 +81,7 @@ globals:
         fr_assgns  = [($2, $4)]; } }
 
 func_decl:
-  typ ID LPAREN formals_opt RPAREN LCURL stmt_list RCURL
+  dtype ID LPAREN formals_opt RPAREN LCURL stmt_list RCURL
     { { typ     = $1;
         fname   = $2;
         formals = $4;
@@ -115,14 +92,14 @@ formals_opt:
   | formal_list { List.rev $1 }
 
 formal_list:
-    typ ID  { [($1,$2)] }
-  | formal_list COMMA typ ID { ($3,$4) :: $1 }
+    dtype ID  { [($1,$2)] }
+  | formal_list COMMA dtype ID { ($3,$4) :: $1 }
 
 fr_decl:
   FRAME LT LIT_INT COMMA LIT_INT COMMA LIT_INT GT ID 
-    { { x = $3; 
-        y = $5; 
-        z = $7; 
+    { { frx = $3; 
+        fry = $5; 
+        frz = $7; 
         fr_name = $9; } }
 
 fc_decl:
@@ -135,37 +112,29 @@ stmt_list:
    /* nothing */   { [] }
   | stmt_list stmt { $2 :: $1 }
 
-/*
-face_set:
-    face_id                { [$1] }
-  | face_set COMMA face_id { $3 :: $1 }
-
-face_id:
-  LPAREN LIT_INT COMMA LIT_INT COMMA LIT_INT COMMA LIT_STR RPAREN
-    { ($2, $4, $6, $8) }
-*/
-
-
 stmt:
     expr SEMI              { Expr($1)           }
   | PRINT ID SEMI          { Fr_print($2)       }
   | BREAK SEMI             { Break              }
   | CONTINUE SEMI          { Continue           }
-  | typ ID SEMI            { Var_decl($1,$2)    }
+  | dtype ID SEMI          { Var_decl($1,$2)    }
   | fr_decl SEMI           { Fr_decl($1)        }
   | fc_decl SEMI           { Fc_decl($1)        }
   | LCURL stmt_list RCURL  { Block(List.rev $2) }
+  | RETURN SEMI            { Return Noexpr      }
+  | RETURN expr SEMI       { Return $2          }
   | JOIN LPAREN ID COMMA ID COMMA ID COMMA ID RPAREN SEMI 
     { Join($3,$5,$7,$9) }
   | BUILD LPAREN ID COMMA ID COMMA ID COMMA ID RPAREN SEMI
     { Build($3,$5,$7,$9) }
-  | RETURN SEMI { Return Noexpr }
-  | RETURN expr SEMI { Return $2 }
-  | IF LPAREN expr RPAREN stmt %prec NOELSE { If($3, $5, Block([])) }
-  | IF LPAREN expr RPAREN stmt ELSE stmt    { If($3, $5, $7) }
+  | IF LPAREN expr RPAREN stmt %prec NOELSE 
+    { If($3, $5, Block([])) }
+  | IF LPAREN expr RPAREN stmt ELSE stmt
+    { If($3, $5, $7) }
   | FOR LPAREN expr_opt SEMI expr SEMI expr_opt RPAREN stmt
-     { For($3, $5, $7, $9) }
-  | WHILE LPAREN expr RPAREN stmt { While($3, $5) }
+    { For($3, $5, $7, $9) }
+  | WHILE LPAREN expr RPAREN stmt 
+    { While($3, $5) }
 
 expr_opt:
     /* nothing */ { Noexpr }
@@ -178,7 +147,7 @@ expr:
   | FALSE                  { Lit_Bool(false)        }
   | ID ASSIGN expr         { Assign($1, $3)         }
   | FRAME ID ASSIGN expr   { Fr_assign($2, $4)      }
-  | typ ID ASSIGN expr     { Var_assign($1, $2, $4) }
+  | dtype ID ASSIGN expr   { Var_assign($1, $2, $4) }
   | expr PLUS   expr       { Binop($1, Add,   $3)   }
   | expr MINUS  expr       { Binop($1, Sub,   $3)   }
   | expr TIMES  expr       { Binop($1, Mult,  $3)   }
@@ -202,5 +171,3 @@ actuals_opt:
 actuals_list:
     expr                    { [$1] }
   | actuals_list COMMA expr { $3 :: $1 }
-
-  

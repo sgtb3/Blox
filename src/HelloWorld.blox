@@ -22,18 +22,16 @@ int main()
 	/* test function call - not working */
 	/* test_function(); */
 
-	/* test binary operator - not working */
 	/* int a = 1 + 2; */
 
 	/* test local var declar */
 	int x;
 	bool t;
-	
+	void i; /* this should not be accepted - catch this in the analyzer */ 
 
 	/* int[] x; */
 
-	/* this should not be accepted - catch this in the analyzer */ 
-	void i; 
+	
 
 	/* test declaration and assignment */
 	bool t = true; 
@@ -66,13 +64,14 @@ int main()
 	Frame<2,1,1> twox;
 	Frame<1,5,1> fivey;
 	Frame<46,5,1> base;
-
+	
 	/* testing frame assign and frame assign list */
 	Frame H = fivey;
 	Frame I = one;
 
 	Face<1,2,3,E> a;
 	Face<1,1,1,W> b;
+	/* Face c = b; */
 
 	/* testing joins and joins list */
 	Join(H, a, twox, b);
