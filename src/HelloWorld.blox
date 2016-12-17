@@ -3,16 +3,17 @@
 int y;
 int z;
 
-/* testing global var assignment */
-int z1 = y;
-
 /* testing global frame declaration */
 Frame<1,1,1> one;
 Frame<1,1,1> two;
 
-/* testing global frame assignment */
+/* testing global var assignment */
+int z1 = y;
+
+/* testing global frame assignment - printing correctly */
 Frame C = one;
 Frame D = C;
+
 
 int main()
 {
@@ -26,9 +27,10 @@ int main()
 	bool t;
 	void i; /* this should not be accepted - catch this in the analyzer */ 
 
+
 	int[5] x;
-	Frame[5] fr;
-	Face[5] fc;
+	/* Frame[5] fr; */
+	/* Face[5] fc; */
 
 	bool[10] b1;
 	void[10] b1;
@@ -37,9 +39,12 @@ int main()
 	/* test declaration and assignment */
 	bool t = true; 
 	bool f = false;
+
 	
-	/* test continue and break */
+	/* test continue */
 	continue;
+	
+	/* test break */
 	break;
 
 	int i;
