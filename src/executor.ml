@@ -1,7 +1,5 @@
-
 open Ast
 open Sast
-
 
 exception Face_Taken of string;;
 exception Block_Overlap of string;;
@@ -13,10 +11,6 @@ exception Block_Out_Of_Bounds of string;;
 
 let execute (globals, functions) =
 	print_endline "Add executor code here ...\n"
-
-
-
-
 
 
 (* Takes 1D index and corresponding frame and returns 3D coordinates*)

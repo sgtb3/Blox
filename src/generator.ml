@@ -351,4 +351,3 @@ let hash_of_stream stream =
   close_in in_channel
 ;;		
 *)
-

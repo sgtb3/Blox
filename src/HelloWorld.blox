@@ -3,39 +3,59 @@
 int y;
 int z;
 
+/* testing global var assignment */
+int z1 = y;
+
 /* testing global frame declaration */
 Frame<1,1,1> one;
 Frame<1,1,1> two;
 
-/* testing global var assignment */
-int z1 = y;
-
-/* z1 = y     doesn't work - but it should */
-
 /* testing global frame assignment */
 Frame C = one;
+Frame D = C;
 
 int main()
 {
+	/* test function call - not working */
+	/* test_function(); */
+
+	/* int a = 1 + 2; */
+
 	/* test local var declar */
 	int x;
 	bool t;
+	void i; /* this should not be accepted - catch this in the analyzer */ 
 
-	/* this should not be accepted, but it is*/ 
-	void i; 
+	int[5] x;
+	Frame[5] fr;
+	Face[5] fc;
+
+	bool[10] b1;
+	void[10] b1;
+	/* Face[1] f; */
 
 	/* test declaration and assignment */
-	/* bool t = true; */
-	/* bool f = false; */
-
-	/* test Map creation */
-	/* Map<Frame, Frame> map; */
+	bool t = true; 
+	bool f = false;
 	
-	/* test continue */
+	/* test continue and break */
 	continue;
-	
-	/* test break */
 	break;
+
+	int i;
+	for (i = 0; i < 10; i = i + 1) {
+		if (a < b + 1) {
+			return;
+		}
+		return;
+	}
+
+	while (i < 10) {
+		if (a < b + 1) {
+			return;
+		}
+		return;
+	}
 
 	/* Create basic frames to construct letters with */
 	Frame<1,1,1> one;
@@ -47,10 +67,15 @@ int main()
 	Frame H = fivey;
 	Frame I = one;
 
+	Face<1,2,3,E> a;
+	Face<1,1,1,W> b;
+	/* Face c = b; */
+
 	/* testing joins and joins list */
-	Join(H, {(1,3,1,E)}, twox, {(1,1,1,W)});
-	Join(H, {(3,3,1,E)}, fivey, {(1,3,1,W)});
+	Join(H, a, twox, b);
+	Join(H, a, fivey, b);
 	
+	Build(H, c, I, d);
 	/* testing print */
 	print base;	
 }

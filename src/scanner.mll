@@ -6,7 +6,6 @@ rule token = parse
   | '='                  { ASSIGN   }
   | ','                  { COMMA    }
   | ';'                  { SEMI     }
-  | ':'                  { COLON    }
   | '{'                  { LCURL    }
   | '}'                  { RCURL    }
   | '('                  { LPAREN   }
@@ -22,6 +21,8 @@ rule token = parse
   | '.'                  { DOT      }
   | '<'                  { LT       }
   | '>'                  { GT       }
+  | "!="                 { NEQ      }
+  | "=="                 { EQ       }
   | "<="                 { LEQ      }
   | ">="                 { GEQ      }
   | ".="                 { FRAMEEQ  }
@@ -44,9 +45,8 @@ rule token = parse
   | "print"              { PRINT    }
   | "Build"              { BUILD    }
   | "Join"               { JOIN     }
+  | "Face"               { FACE     }
   | "Frame"              { FRAME    }
-  | "Set"                { SET      }
-  | "Map"                { MAP      }
   | ['0'-'9']+ as lxm    { LIT_INT(int_of_string lxm) }
   | ['0'-'9']+ '.' ['0'-'9']+ as lxm { LIT_FLT(float_of_string lxm) }
   | ['\"'] [^'\"']* ['\"'] as lxm { LIT_STR(lxm) }
@@ -56,4 +56,4 @@ rule token = parse
 
 and comment = parse
   | " */" { token lexbuf   }
-  | _    { comment lexbuf }
+  | _     { comment lexbuf }

@@ -1,18 +1,29 @@
 %{ open Ast %}
-  
-%token ASSIGN COMMA SEMI COLON
+
+%token ASSIGN COMMA SEMI
 %token LCURL RCURL LPAREN RPAREN LBRACK RBRACK
 %token PLUS MINUS TIMES DIVIDE MOD
 %token NOT DOT
-%token LT GT LEQ GEQ FRAMEEQ AND OR
+%token LT GT EQ NEQ LEQ GEQ FRAMEEQ AND OR
 %token IF ELSE FOR WHILE RETURN BREAK CONTINUE 
 %token VOID INT BOOL STRING 
 %token TRUE FALSE NULL EOF
-%token PRINT BUILD JOIN FRAME SET MAP
+%token PRINT BUILD JOIN FRAME FACE
 %token <string> ID
 %token <string> LIT_STR
 %token <float> LIT_FLT
 %token <int> LIT_INT
+
+%nonassoc NOELSE
+%nonassoc ELSE
+%right ASSIGN
+%left OR
+%left AND
+%left EQ NEQ
+%left LT GT LEQ GEQ
+%left PLUS MINUS
+%left TIMES DIVIDE
+%right NOT NEG
 
 /* the start symbol of the grammar */
 %start program                 
@@ -27,54 +38,37 @@ decls:
  | decls globals   { ($2 :: fst $1), snd $1 }
  | decls func_decl { fst $1, ($2 :: snd $1) }
 
-/* add (Array of typ), (Set of typ), (Map of typ * typ) from AST here */
 typ:
-  | INT    { Int      }
-  | BOOL   { Bool     }
-  | STRING { String   }
-  | VOID   { Void     }
+  | INT    { Int    }
+  | BOOL   { Bool   }
+  | STRING { String }
+  | VOID   { Void   }
+  | FRAME LT LIT_INT COMMA LIT_INT COMMA LIT_INT GT  
+    { Fr_decl($3, $5, $7) }
+  | FACE LT LIT_INT COMMA LIT_INT COMMA LIT_INT COMMA ID GT 
+    { Fc_decl($3, $5, $7, $9) }
+  | typ LBRACK LIT_INT RBRACK  { Array($1, $3) }
 
 globals:
-  |                                /* no globals */ 
-    { { var_decls  = []; 
-        var_assgns = []; 
-        fr_decls   = []; 
-        fr_assgns  = []; } }
   | typ ID SEMI                    /* var decls [($2, $3) :: 1]; */
     { { var_decls  = [($1, $2)]; 
         var_assgns = []; 
-        fr_decls   = []; 
         fr_assgns  = []; } }
   | typ ID ASSIGN expr SEMI        /* var assigns */
     { { var_decls  = []; 
-        var_assgns = [($2, $4)]; 
-        fr_decls   = []; 
-        fr_assgns  = []; } }
-  | fr_decl SEMI                   /* fr decls  ($2 :: $1) */    
-    { { var_decls  = []; 
-        var_assgns = []; 
-        fr_decls   = [$1]; 
+        var_assgns = [($1, $2, $4)]; 
         fr_assgns  = []; } }
   | FRAME ID ASSIGN ID SEMI        /* fr assigns  */
     { { var_decls  = []; 
         var_assgns = []; 
-        fr_decls   = []; 
         fr_assgns  = [($2, $4)]; } }
 
-vdecl:
-   typ ID SEMI { ($1, $2) }
-
-vdecl_list:
-  |/* nothing */       { [] }
-  | vdecl_list vdecl { $2 :: $1 }
-
 func_decl:
-  typ ID LPAREN formals_opt RPAREN LCURL vdecl_list stmt_list RCURL
+  typ ID LPAREN formals_opt RPAREN LCURL stmt_list RCURL
     { { typ     = $1;
         fname   = $2;
         formals = $4;
-        locals  = List.rev $7;
-        body    = List.rev $8 } }
+        body    = List.rev $7 } }
 
 formals_opt:
   |/* nothing */{ [] }
@@ -86,43 +80,76 @@ formal_list:
 
 fr_decl:
   FRAME LT LIT_INT COMMA LIT_INT COMMA LIT_INT GT ID 
-    { { x = $3; 
-        y = $5; 
-        z = $7; 
-        fr_name = $9 } }
+  { ($3, $5, $7) }
+
+fc_decl:
+  FACE LT LIT_INT COMMA LIT_INT COMMA LIT_INT COMMA ID GT ID 
+  { ($3, $5, $7, $9) }
 
 stmt_list:
   |/* nothing */   { [] }
   | stmt_list stmt { $2 :: $1 }
 
+var_decl:
+  typ ID {($1, $2)}
+
 stmt:
-  | expr SEMI     { Expr($1) }
-  | PRINT ID SEMI { Fr_print($2) }
-  | JOIN LPAREN join_arg COMMA join_arg RPAREN SEMI { Join($3,$5) }
-  | LCURL stmt_list RCURL { Block(List.rev $2) }
-  | BREAK SEMI    { Break    }
-  | CONTINUE SEMI { Continue }
-  | fr_decl SEMI  { Fr_decl($1) }
+  | expr SEMI              { Expr($1)           }
+  | PRINT ID SEMI          { Fr_print($2)       }
+  | BREAK SEMI             { Break              }
+  | CONTINUE SEMI          { Continue           }
+  | var_decl SEMI          { Var_decl($1,$2)    }
+  | typ     LBRACK LIT_INT RBRACK ID SEMI { Array($1, $3, $5) }
+ /* | fr_decl SEMI           { Fr_decl($1)        }
+  | fc_decl SEMI           { Fc_decl($1)        }*/
+  | LCURL stmt_list RCURL  { Block(List.rev $2) }
+  | RETURN SEMI            { Return Noexpr      }
+  | RETURN expr SEMI       { Return $2          }
+  | JOIN LPAREN ID COMMA ID COMMA ID COMMA ID RPAREN SEMI 
+    { Join($3,$5,$7,$9) }
+  | BUILD LPAREN ID COMMA ID COMMA ID COMMA ID RPAREN SEMI
+    { Build($3,$5,$7,$9) }
+  | IF LPAREN expr RPAREN stmt %prec NOELSE 
+    { If($3, $5, Block([])) }
+  | IF LPAREN expr RPAREN stmt ELSE stmt
+    { If($3, $5, $7) }
+  | FOR LPAREN expr_opt SEMI expr SEMI expr_opt RPAREN stmt
+    { For($3, $5, $7, $9) }
+  | WHILE LPAREN expr RPAREN stmt 
+    { While($3, $5) }
+
+expr_opt:
+  |/* nothing */{ Noexpr }
+  | expr        { $1 }
 
 expr:
-  | ID                     { Id($1)          }
-  | LIT_INT                { Lit_Int($1)     }
-  | TRUE                   { Lit_Bool(true)  }
-  | FALSE                  { Lit_Bool(false) }
-  | FRAME ID ASSIGN expr   { Assign($2, $4)  }
-  | ID ASSIGN expr         { Assign($1, $3)  }
+  | ID                     { Id($1)                 }
+  | LIT_INT                { Lit_Int($1)            }
+  | TRUE                   { Lit_Bool(true)         }
+  | FALSE                  { Lit_Bool(false)        }
+  | ID ASSIGN expr         { Assign($1, $3)         }
+  | FRAME ID ASSIGN expr   { Fr_assign($2, $4)      }
+  | typ ID ASSIGN expr     { Var_assign($1, $2, $4) }
+  | expr PLUS   expr       { Binop($1, Add,   $3)   }
+  | expr MINUS  expr       { Binop($1, Sub,   $3)   }
+  | expr TIMES  expr       { Binop($1, Mult,  $3)   }
+  | expr DIVIDE expr       { Binop($1, Div,   $3)   }
+  | expr EQ     expr       { Binop($1, Equal, $3)   }
+  | expr NEQ    expr       { Binop($1, Neq,   $3)   }
+  | expr LT     expr       { Binop($1, Less,  $3)   }
+  | expr LEQ    expr       { Binop($1, Leq,   $3)   }
+  | expr GT     expr       { Binop($1, Greater, $3) }
+  | expr GEQ    expr       { Binop($1, Geq,   $3)   }
+  | expr AND    expr       { Binop($1, And,   $3)   }
+  | expr OR     expr       { Binop($1, Or,    $3)   }
+  | MINUS expr %prec NEG   { Unop(Neg, $2)          }
+  | ID LPAREN actuals_opt RPAREN { Call($1, $3)     }
+  | LPAREN expr RPAREN           { $2               }
 
-join_arg:
-  ID COMMA LCURL face_set RCURL
-    { { frname    = $1; 
-        blck_face = $4; } }
+actuals_opt:
+  |/* nothing */ { [] }
+  | actuals_list { List.rev $1 }
 
-face_set:
-  | face_id                { [$1] }
-  | face_set COMMA face_id { $3 :: $1 }
-
-face_id:
-  LPAREN LIT_INT COMMA LIT_INT COMMA LIT_INT COMMA ID RPAREN
-    { { dim  = ($2, $4, $6); 
-        face = $8; } }
-  
+actuals_list:
+  | expr                    { [$1] }
+  | actuals_list COMMA expr { $3 :: $1 }
