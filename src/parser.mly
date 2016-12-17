@@ -8,7 +8,7 @@
 %token IF ELSE FOR WHILE RETURN BREAK CONTINUE 
 %token VOID INT BOOL STRING 
 %token TRUE FALSE NULL EOF
-%token PRINT BUILD JOIN FRAME SET FACE
+%token PRINT BUILD JOIN FRAME SET FACE CONVERT
 %token <string> ID
 %token <string> LIT_STR
 %token <float> LIT_FLT
@@ -113,7 +113,7 @@ stmt_list:
 
 stmt:
   | expr SEMI              { Expr($1)           }
-  | PRINT ID SEMI          { Fr_print($2)       }
+  | CONVERT LPAREN ID RPAREN SEMI     { Convert($3)        }
   | BREAK SEMI             { Break              }
   | CONTINUE SEMI          { Continue           }
   | dtype ID SEMI          { Var_decl($1,$2)    }
