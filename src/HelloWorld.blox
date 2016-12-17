@@ -81,6 +81,6 @@ int main()
 	Join(H, a, fivey, b);
 	
 	Build(H, c, I, d);
-	/* testing print */
-	print base;	
+	/* testing Convert */
+	Convert(base);	
 }
