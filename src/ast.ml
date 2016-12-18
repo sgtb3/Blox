@@ -41,13 +41,11 @@ type frame = {
   blocks : blck array;
 }
 
-type typ = Int | Bool | Float | String | Frame of fr_decl | FaceId of fc_decl
-
 (* All types *)
 type dtype = 
+    Int | Bool | Float | String | Frame of fr_decl | FaceId of fc_decl
   | Void
-  | Typ of typ
-  | Array of typ * int * string
+  | Array of dtype * int * string
 
 (* built-in function calls *)
 type join  = string * string * string * string
@@ -79,7 +77,7 @@ type stmt =
   | Expr of expr
   | Join of join
   | Build of build
-  | Array of typ * int * string
+  | Array of dtype * int * string
   | Fr_decl of fr_decl
   | Fc_decl of fc_decl
   | Convert of string
@@ -136,19 +134,15 @@ let string_of_uop = function
   | Neg     -> "-"
   | Not     -> "!"
 
-(* print types *)
-let rec string_of_typ = function
+let rec string_of_dtype = function
   | Int       -> "int"
   | Bool      -> "bool"
   | String    -> "string"
   | Float     -> "float"
   | Frame(x)  -> "Frame"
   | FaceId(x) -> "Face"
-
-let rec string_of_dtype = function
   | Void         -> "void"
-  | Typ(x)       -> string_of_typ x
-  | Array(x,y,z) -> string_of_typ x ^ "[" ^ string_of_int y ^ "] " ^ z
+  | Array(x,y,z) -> string_of_dtype x ^ "[" ^ string_of_int y ^ "] " ^ z
 
 (* print expressions *)
 let rec string_of_expr = function         
@@ -215,7 +209,7 @@ let rec string_of_stmt = function
   | Expr(expr)        -> string_of_expr  expr      ^ "\n"
   | Join(w,x,y,z)     -> string_of_join  (w,x,y,z) ^ "\n"
   | Build(w,x,y,z)    -> string_of_build (w,x,y,z) ^ "\n"
-  | Array(x,y,z)      -> string_of_typ x ^ "[" ^ string_of_int y ^ "] " ^ z ^";\n"
+  | Array(x,y,z)      -> string_of_dtype x ^ "[" ^ string_of_int y ^ "] " ^ z ^";\n"
   | Convert(fname)   -> "Convert(" ^ fname ^ ");\n"
   | Break             -> "break;\n"
   | Continue          -> "continue;\n"
