@@ -13,21 +13,6 @@ type face_id = {
   face : string;
 }
 
-(* frame declaration 
-type fc_decl = {
-  fcd_dim  : int * int * int;
-  fcd_face : string;
-  fcd_name : string;
-}
-
- frame declaration 
-type fr_decl = {
-  fr_x : int;
-  fr_y : int;
-  fr_z : int;
-  fr_name : string;
-}
-*)
 (* actual block *)
 type blck = {
   faces : bool array;
@@ -83,8 +68,6 @@ type stmt =
   | Join of join
   | Build of build
   | Array of dtype * int * string
- (*  | Fr_decl of fr_decl
-  | Fc_decl of fc_decl *)
   | Convert of string
   | Var_decl of var_decl
   | Return of expr
@@ -112,10 +95,8 @@ type fc_assign = string * string
 type globals = {
   var_decls  : var_decl list;
   var_assgns : var_assign list;
-  (* fr_decls   : fr_decl list; *)
   fr_assgns  : fr_assign list;
   fc_assgns  : fc_assign list;
-   (* fc_decls   : fc_decl list; *)
 }
 
 (* a blox program is a tuple of globals and function declarations *)
@@ -144,14 +125,14 @@ let string_of_uop = function
   | Not     -> "!"
 
 let rec string_of_dtype = function
-  | Int       -> "int"
-  | Bool      -> "bool"
-  | String    -> "string"
-  | Float     -> "float"
-  | Frame(x,y,z)  -> "Frame"
-  | FaceId(w,x,y,z) -> "Face"
-  | Void         -> "void"
-  | Array(x,y,z) -> string_of_dtype x ^ "[" ^ string_of_int y ^ "] " ^ z
+  | Int             -> "int"
+  | Bool            -> "bool"
+  | String          -> "string"
+  | Float           -> "float"
+  | Frame(x,y,z)    -> "Frame" ^ "<" ^ string_of_int x ^ "," ^ string_of_int y ^ "," ^ string_of_int z ^ ">"
+  | FaceId(w,x,y,z) -> "Face" ^ "<" ^ string_of_int w ^ "," ^ string_of_int x ^ "," ^ string_of_int y ^ "," ^ z ^ ">"
+  | Void            -> "void"
+  | Array(x,y,z)    -> string_of_dtype x ^ "[" ^ string_of_int y ^ "] " ^ z
 
 (* print expressions *)
 let rec string_of_expr = function         
@@ -170,25 +151,6 @@ let rec string_of_expr = function
   | Unop(o,e)         -> string_of_uop o   ^ string_of_expr e
   | Call(f,el)        -> f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
   | Noexpr            -> ""
-
-(* print frame declarations 
-let string_of_frdecl frd =         
-  "Frame<" ^ string_of_int frd.fr_x ^ "," ^
-             string_of_int frd.fr_y ^ "," ^
-             string_of_int frd.fr_z ^ "> " ^
-             frd.fr_name ^ ";\n" *)
-
-(* print dimensions 
-let string_of_dim (x,y,z) =
-  string_of_int x ^ "," ^
-  string_of_int y ^ "," ^
-  string_of_int z
-
-(* print face declarations *)
-let string_of_fcdecl fcd =         
-  "Face<" ^ string_of_dim fcd.fcd_dim ^ "," ^
-            fcd.fcd_face ^ "> " ^
-            fcd.fcd_name ^ ";\n" *)
 
 let string_of_var_decl (x,y) =
   string_of_dtype x ^ " " ^ y ^ ";"
@@ -213,8 +175,6 @@ let string_of_join (w,x,y,z) =
   "Join(" ^ w ^ ", " ^ x ^ ", " ^ y ^ ", " ^ z ^ ");\n"
 
 (* print statements *)
- (*  | Fr_decl(frd)      -> string_of_frdecl frd
-  | Fc_decl(fcd)      -> string_of_fcdecl fcd *)
 let rec string_of_stmt = function 
   | Var_decl(x,y)     -> string_of_var_decl (x,y)  ^ "\n"
   | Block(stmts)      -> "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
@@ -252,8 +212,6 @@ let string_of_func_decl fd =
 let string_of_globals glob = 
   String.concat "" (List.map string_of_var_decl glob.var_decls) ^
   String.concat "" (List.map string_of_vassign glob.var_assgns) ^
-(* )  String.concat "" (List.map string_of_fcdecl    glob.fc_decls) ^
-  String.concat "" (List.map string_of_frdecl    glob.fr_decls) ^ *)
   String.concat "" (List.map string_of_frassign glob.fr_assgns) ^
   String.concat "" (List.map string_of_frassign glob.fc_assgns) ^"\n"
 
