@@ -38,14 +38,26 @@ decls:
   | decls func_decl { fst $1, ($2 :: snd $1) }
 
 dtype:
-  | INT    { Int    }
-  | FLOAT  { Float  }
-  | BOOL   { Bool   }
-  | STRING { String }
-  | VOID   { Void   }
-  | FRAME LT LIT_INT COMMA LIT_INT COMMA LIT_INT GT  { Frame($3,$5,$7) }
-  | FACE LT LIT_INT COMMA LIT_INT COMMA LIT_INT COMMA ID GT { FaceId($3,$5,$7,$9) }
+  | INT      { Int    }
+  | FLOAT    { Float  }
+  | BOOL     { Bool   }
+  | STRING   { String } 
+  | VOID     { Void   }
+  | FRAME frame_args { Frame($2)  }
+  | FACE face_args   { FaceId($2) }
   | dtype LBRACK LIT_INT RBRACK ID { Array($1, $3, $5) }
+
+face_args:
+  LT LIT_INT COMMA LIT_INT COMMA LIT_INT COMMA ID GT 
+    { { dim  = ($2,$4,$6); 
+        face = $8 } }
+
+frame_args:
+  LT LIT_INT COMMA LIT_INT COMMA LIT_INT GT 
+    { { x = $2; 
+        y = $4; 
+        z = $6; 
+        blocks = [||] } }
 
 globals:
   | dtype ID SEMI                    /* var decls [($2, $3) :: 1]; */

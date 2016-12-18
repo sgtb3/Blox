@@ -149,7 +149,7 @@ let analyze (globals, functions) =
   fc_assgns  : fc_assign list;
 } *)
 
-    (* Type of each variable (global, formal, or local *)
+    (* (* Type of each variable (global, formal, or local *)
      let symbols = List.fold_left (fun m (t, n) -> StringMap.add n t m)
       StringMap.empty (g @ g.var_decls @g.var_assgns @ g.fr_assgns @ g.fc_assgns)
     in
@@ -157,7 +157,7 @@ let analyze (globals, functions) =
     let type_of_identifier s =
       try StringMap.find s symbols
       with Not_found -> raise (Failure ("undeclared identifier " ^ s))
-    in
+    in *)
 
   (*
     let check_bool_expr e = 

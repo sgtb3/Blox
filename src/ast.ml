@@ -23,14 +23,14 @@ type frame = {
   x : int;
   y : int;
   z : int;
-  blocks : blck array;
+  blocks : blck array; 
 }
 
 (* All types *)
 type dtype = 
-    Int | Bool | Float | String
-  | Frame of int * int * int
-  | FaceId of int * int * int * string
+  | Int | Bool | Float | String
+  | Frame of frame
+  | FaceId of face_id
   | Void
   | Array of dtype * int * string
 
@@ -126,20 +126,29 @@ let string_of_uop = function
   | Neg     -> "-"
   | Not     -> "!"
 
+let string_of_frame fr = 
+  "Frame" ^ "<" ^ string_of_int fr.x ^ "," ^ 
+                  string_of_int fr.y ^ "," ^ 
+                  string_of_int fr.z ^ ">"
+
+let string_of_dim (x,y,z) = 
+  string_of_int x ^ "," ^ 
+  string_of_int y ^ "," ^ 
+  string_of_int z
+
+let string_of_face_id fc =
+  "Face" ^ "<" ^  string_of_dim fc.dim ^ "," ^ fc.face ^ ">"
+
 (* print datatypes *)
 let rec string_of_dtype = function
-  | Int             -> "int"
-  | Bool            -> "bool"
-  | String          -> "string"
-  | Float           -> "float"
-  | Frame(x,y,z)    -> "Frame" ^ "<" ^ string_of_int x ^ "," ^ 
-                                       string_of_int y ^ "," ^ 
-                                       string_of_int z ^ ">"
-  | FaceId(w,x,y,z) -> "Face" ^ "<" ^  string_of_int w ^ "," ^ 
-                                       string_of_int x ^ "," ^ 
-                                       string_of_int y ^ "," ^ z ^ ">"
-  | Void            -> "void"
-  | Array(x,y,z)    -> string_of_dtype x ^ "[" ^ string_of_int y ^ "] " ^ z
+  | Int          -> "int"
+  | Bool         -> "bool"
+  | String       -> "string"
+  | Float        -> "float"
+  | Frame(fr)    -> string_of_frame fr
+  | FaceId(fc)   -> string_of_face_id fc
+  | Void         -> "void"
+  | Array(x,y,z) -> string_of_dtype x ^ "[" ^ string_of_int y ^ "] " ^ z
 
 (* print expressions *)
 let rec string_of_expr = function         

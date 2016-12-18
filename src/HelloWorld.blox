@@ -47,6 +47,8 @@ int main()
 	Frame<1,1,1>[10] framarr;
 	Face<1,1,1,E>[2] fcarr;
 
+	Face g = facea;
+
 	float b;
 	float a = 1.5;
 	b = 2.3;
