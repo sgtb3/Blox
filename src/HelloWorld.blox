@@ -1,27 +1,25 @@
 
-/* testing global var declar - working */
+/* testing global var declar */
 int y;
 int z;
-int y; /* duplicate global var decl - should not be allowed */
+int y;
 
-/* testing global frame declaration - working */
+/* testing global frame declaration */
 Frame<1,1,1> one;
 Frame<1,1,1> two;
 
-/* testing global var assignment - working*/
+/* testing global var assignment */
 int z1 = y;
 
-/* testing global frame assignment - working */
+/* testing global frame assignment - printing correctly */
 Frame C = one;
 Frame D = C;
 
-/* check for duplicate functions - working */
-int main() { return 1; }
 
-int hello()
+int main()
 {
-	/* test function call - working */
-	functioncall();
+	/* test function call - not working */
+	/* functioncall(); */
 
 	/* int a = 1 + 2; */
 
@@ -30,10 +28,12 @@ int hello()
 	bool t;
 	void i; /* this should not be accepted - catch this in the analyzer */ 
 
-
 	int[5] x;
 	/* Frame[5] fr; */
 	/* Face[5] fc; */
+
+	Frame<1,1,1>[10] framarr;
+	Face<1,1,1,E>[2] fcarr;
 
 	bool[10] b1;
 	void[10] b1;
