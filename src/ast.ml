@@ -65,6 +65,7 @@ type expr =
   | Lit_Bool of bool
   | Assign of string * expr
   | Fr_assign of string * expr
+  | Fc_assign of string * expr
   | Var_assign of dtype * string * expr
   | Binop of expr * op * expr
   | Unop of uop * expr
@@ -104,12 +105,16 @@ type func_decl = {
 (* frame assignment - might need to be frame * frame *)
 type fr_assign = string * string
 
+(* face assignment - might need to be frame * frame *)
+type fc_assign = string * string
+
 (* gloabls is a combination of var & frame declarations and assignments *)
 type globals = {
   var_decls  : var_decl list;
   var_assgns : var_assign list;
   (* fr_decls   : fr_decl list; *)
   fr_assgns  : fr_assign list;
+  fc_assgns  : fc_assign list;
    (* fc_decls   : fc_decl list; *)
 }
 
@@ -152,12 +157,13 @@ let rec string_of_dtype = function
 let rec string_of_expr = function         
   | Lit_Int(x)        -> string_of_int x
   | Lit_Flt(x)        -> string_of_float x
-  | Lit_Str(x)        -> "\"" ^ x ^ "\""
+  | Lit_Str(x)        -> x
   | Id(x)             -> x
   | Lit_Bool(true)    -> "true"
   | Lit_Bool(false)   -> "false"
   | Assign(x,y)       -> x ^ " = " ^ string_of_expr y ^ ";"
   | Fr_assign(x,y)    -> "Frame " ^ x ^ " = " ^ string_of_expr y ^ ";"
+  | Fc_assign(x,y)    -> "Face " ^ x ^ " = " ^ string_of_expr y ^ ";"
   | Var_assign(x,y,z) -> string_of_dtype x ^ " " ^ y ^ " = " ^ string_of_expr z ^ ";"
   | Null              -> "null"
   | Binop(e1,o,e2)    -> string_of_expr e1 ^ " " ^ string_of_op o ^ " " ^ string_of_expr e2
@@ -248,7 +254,8 @@ let string_of_globals glob =
   String.concat "" (List.map string_of_vassign glob.var_assgns) ^
 (* )  String.concat "" (List.map string_of_fcdecl    glob.fc_decls) ^
   String.concat "" (List.map string_of_frdecl    glob.fr_decls) ^ *)
-  String.concat "" (List.map string_of_frassign glob.fr_assgns) ^"\n"
+  String.concat "" (List.map string_of_frassign glob.fr_assgns) ^
+  String.concat "" (List.map string_of_frassign glob.fc_assgns) ^"\n"
 
 (* print blox program *)
 let string_of_program (globals,funcs) =
