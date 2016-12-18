@@ -62,23 +62,53 @@ let analyze (globals, functions) =
 
   (* Function declarations for built-in functions *)
   let built_in_decls = 
+    (* NOT WORKING *)
+    (* StringMap.add "Join"
+      { typ     = Void; 
+        fname   = "Join";    
+        formals = [(Frame(Int,Int,Int), "A"); (Frame(Int,Int,Int), "B");]; 
+        body    = [] }; *)
+    (* NOT WORKING *)
+    (* StringMap.add "Build"
+      { typ     = Void; 
+        fname   = "Build";
+        (* this needs to be Build((Frame(Int,Int,Int), "A", Frame(Int,Int,Int), "B") *) 
+        formals = [(Build("frA","faceArrA","frB","faceArrB"), "f")];   
+        body    = [] }; *)
+    (* NOT WORKING *)
+   (*  StringMap.add "Convert"
+      { typ     = Void; 
+        fname   = "Convert"; 
+        formals = [(Frame(Int,Int,Int), "A")]; 
+        body    = [] }; *)
     StringMap.add "print"
       { typ     = Void; 
-        fname   = "print"; 
-        formals = [(Int, "x")];
-        body    = [] 
-      } 
-    (StringMap.singleton "printb"
+        fname   = "print";   
+        formals = [(String, "s")];  
+        body    = [] } 
+    (StringMap.singleton "print_bool"
       { typ     = Void; 
-        fname   = "printb"; 
-        formals = [(Bool, "x")];
-        body    = [] })
+        fname   = "print_bool";  
+        formals = [(Bool, "b")];    
+        body    = [] });
+    (StringMap.singleton "print_int"
+      { typ     = Void; 
+        fname   = "print_int";  
+        formals = [(Int, "i")];     
+        body    = [] });
+    (StringMap.singleton "print_flt"
+      { typ     = Void; 
+        fname   = "print_flt";  
+        formals = [(Float, "f")];     
+        body    = [] });
   in
   
   (* Add built-in function declarations to map *)
   let function_decls = 
     List.fold_left (fun m fd -> StringMap.add fd.fname fd m) built_in_decls functions
   in
+
+
 
   (* Unrecognized functions *)
   let function_decl s = try StringMap.find s function_decls

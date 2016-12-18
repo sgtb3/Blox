@@ -35,8 +35,9 @@ type dtype =
   | Array of dtype * int * string
 
 (* built-in function calls *)
-type join  = string * string * string * string
-type build = string * string * string * string
+type join    = string * string * string * string
+type build   = string * string * string * string
+type convert = string
 
 (* variable declarations - was "bind" *)
 type var_decl = dtype * string
@@ -67,8 +68,9 @@ type stmt =
   | Expr of expr
   | Join of join
   | Build of build
+  | Print of expr
   | Array of dtype * int * string
-  | Convert of string
+  | Convert of convert
   | Var_decl of var_decl
   | Return of expr
   | If of expr * stmt * stmt
@@ -102,7 +104,7 @@ type globals = {
 (* a blox program is a tuple of globals and function declarations *)
 type program = globals list * func_decl list
 
-(* print operators *)
+(* print binary operators *)
 let string_of_op = function
   | Add     -> "+"
   | Sub     -> "-"
@@ -124,13 +126,18 @@ let string_of_uop = function
   | Neg     -> "-"
   | Not     -> "!"
 
+(* print datatypes *)
 let rec string_of_dtype = function
   | Int             -> "int"
   | Bool            -> "bool"
   | String          -> "string"
   | Float           -> "float"
-  | Frame(x,y,z)    -> "Frame" ^ "<" ^ string_of_int x ^ "," ^ string_of_int y ^ "," ^ string_of_int z ^ ">"
-  | FaceId(w,x,y,z) -> "Face" ^ "<" ^ string_of_int w ^ "," ^ string_of_int x ^ "," ^ string_of_int y ^ "," ^ z ^ ">"
+  | Frame(x,y,z)    -> "Frame" ^ "<" ^ string_of_int x ^ "," ^ 
+                                       string_of_int y ^ "," ^ 
+                                       string_of_int z ^ ">"
+  | FaceId(w,x,y,z) -> "Face" ^ "<" ^  string_of_int w ^ "," ^ 
+                                       string_of_int x ^ "," ^ 
+                                       string_of_int y ^ "," ^ z ^ ">"
   | Void            -> "void"
   | Array(x,y,z)    -> string_of_dtype x ^ "[" ^ string_of_int y ^ "] " ^ z
 
@@ -152,10 +159,11 @@ let rec string_of_expr = function
   | Call(f,el)        -> f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
   | Noexpr            -> ""
 
+(* print variable declarations *)
 let string_of_var_decl (x,y) =
   string_of_dtype x ^ " " ^ y ^ ";"
 
-(* print block face identifier *)
+(* print block face identifiers *)
 let string_of_face_id (w,x,y,z) =
   "(" ^ string_of_int w ^ ", " ^ 
         string_of_int x ^ ", " ^ 
@@ -166,34 +174,35 @@ let string_of_face_id (w,x,y,z) =
 let string_of_face_id_list fid =
   String.concat "," (List.rev (List.map string_of_face_id fid))
 
-(* print list of join args *)
+(* print Build function calls *)
 let string_of_build (w,x,y,z) =
-  "Build(" ^ w ^ ", " ^ x ^ ", " ^ y ^ ", " ^ z ^ ");\n"
+  "Build(" ^ w ^ "," ^ x ^ "," ^ y ^ "," ^ z ^ ");\n"
 
-(* print list of join args *)
+(* print Join function calls  *)
 let string_of_join (w,x,y,z) =
-  "Join(" ^ w ^ ", " ^ x ^ ", " ^ y ^ ", " ^ z ^ ");\n"
+  "Join(" ^ w ^ "," ^ x ^ "," ^ y ^ "," ^ z ^ ");\n"
 
 (* print statements *)
 let rec string_of_stmt = function 
   | Var_decl(x,y)     -> string_of_var_decl (x,y)  ^ "\n"
   | Block(stmts)      -> "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
   | Expr(expr)        -> string_of_expr  expr      ^ "\n"
-  | Join(w,x,y,z)     -> string_of_join  (w,x,y,z) ^ "\n"
-  | Build(w,x,y,z)    -> string_of_build (w,x,y,z) ^ "\n"
+  | Join(w,x,y,z)     -> string_of_join  (w,x,y,z)
+  | Build(w,x,y,z)    -> string_of_build (w,x,y,z)
   | Array(x,y,z)      -> string_of_dtype x ^ "[" ^ string_of_int y ^ "] " ^ z ^";\n"
-  | Convert(fname)   -> "Convert(" ^ fname ^ ");\n"
+  | Print(e)          -> "print(" ^ string_of_expr e ^ ");\n"
+  | Convert(fname)    -> "Convert(" ^ fname ^ ");\n"
   | Break             -> "break;\n"
   | Continue          -> "continue;\n"
   | Return(expr)      -> "return " ^ string_of_expr expr ^ ";\n";
   | If(e,s,Block([])) -> "if ("    ^ string_of_expr e    ^ ")\n" ^ string_of_stmt s
   | If(e,s1,s2)       -> "if ("    ^ string_of_expr e    ^ ")\n" ^ string_of_stmt s1 ^ 
                          "else\n"  ^ string_of_stmt s2
-  | For(e1,e2,e3,s)   -> "for ("   ^ string_of_expr e1   ^ " ; " ^ string_of_expr e2 ^ 
-                         " ; "     ^ string_of_expr e3   ^ ") "  ^ string_of_stmt s
+  | For(e1,e2,e3,s)   -> "for ("   ^ string_of_expr e1   ^ "; " ^ string_of_expr e2 ^ 
+                         "; "      ^ string_of_expr e3   ^ ") "  ^ string_of_stmt s
   | While(e,s)        -> "while (" ^ string_of_expr e    ^ ") "  ^ string_of_stmt s
 
-(* print variable assignment type var_assign = string * expr *) 
+(* print variable assignments *) 
 let string_of_vassign (t,id,exp) = 
   string_of_dtype t ^ " " ^ id ^ " = " ^ 
   string_of_expr exp ^ ";\n"
@@ -204,7 +213,7 @@ let string_of_frassign (fn1,fn2) =
 
 (* print function declarations *)
 let string_of_func_decl fd =
-  string_of_dtype fd.typ ^ " " ^ fd.fname              ^ "(" ^ 
+  string_of_dtype fd.typ ^ " " ^ fd.fname ^ "(" ^ 
   String.concat ", " (List.map snd fd.formals)         ^ ")\n{\n" ^
   String.concat ""   (List.map string_of_stmt fd.body) ^ "}\n"
 
@@ -217,5 +226,5 @@ let string_of_globals glob =
 
 (* print blox program *)
 let string_of_program (globals,funcs) =
-  String.concat "" (List.rev (List.map string_of_globals globals)) ^ "\n" ^
-  String.concat "" (List.rev (List.map string_of_func_decl funcs))
+  String.concat ""   (List.rev (List.map string_of_globals globals)) ^ "\n" ^
+  String.concat "\n" (List.rev (List.map string_of_func_decl funcs))

@@ -26,7 +26,11 @@ Face faceb = facea;
 
 
 /* duplicate functions - working */
- /* int main() { return 1; } */
+/* int main() { return 1; } */
+
+
+/* multiple functions - working */
+int someFunction() { return 1; }
 
 
 int main()
@@ -44,6 +48,8 @@ int main()
 	Face<1,1,1,E>[2] fcarr;
 
 	float b;
+	float a = 1.5;
+	b = 2.3;
 	void i;  /* BAD this should NOT be accepted - catch this in the analyzer */ 
 
 	string s = "please work";
@@ -103,4 +109,12 @@ int main()
 	Join(H, a, fivey, b);
 	Build(H, c, I, d);
 	Convert(base);	
+	
+	/* Print string, int, float, bool - WORKING */ 
+	print("hello");
+	print(10);
+	print(10.5);
+	print(true);
+	print(false);
+
 }
