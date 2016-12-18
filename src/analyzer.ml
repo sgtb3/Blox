@@ -74,59 +74,54 @@ let analyze (globals, functions) =
         formals = [(Bool, "x")];
         body    = [] })
   in
-     
+  
+  (* Add built-in function declarations to map *)
   let function_decls = 
     List.fold_left (fun m fd -> StringMap.add fd.fname fd m) built_in_decls functions
   in
 
+  (* Unrecognized functions *)
   let function_decl s = try StringMap.find s function_decls
-       with Not_found -> raise (Failure ("unrecognized function " ^ s))
+    with Not_found -> raise (Failure ("unrecognized function " ^ s))
   in
 
-  let _ = function_decl "main" in (* Ensure "main" is defined *)
+  (* Missing main function *)
+  let check_main_decl s = try StringMap.find s function_decls
+    with Not_found -> raise (Failure ("missing main() entry point"))
+  in
 
-
-
-
-
-
+  (* Ensure "main" is defined *)
+  let _ = check_main_decl "main" 
+  in 
 
 
 
   (* Iterate over the list of globals *)
   let check_globals g =
 
-    (* Check for duplicate global variable declarations *)
+    (* Check for duplicate global variable declarations - NOT WORKING CORRECTLY *)
     report_duplicate 
       (fun n -> "duplicate global var decl" ^ n) 
         (List.rev (get_var_decl g)) 
 
-    (* Check for duplicate global frame declarations *)
+    (* Check for duplicate global frame declarations - NOT WORKING*)
     (* report_duplicate 
       (fun n -> "duplicate global frame decl" ^ n) 
         (List.rev (get_fr_decl g))  *)
 
-  in
-  List.iter check_globals globals
-    
+    (* Check for duplicate global face declarations - NOT WORKING*)
+    (* report_duplicate 
+      (fun n -> "duplicate global face decl" ^ n) 
+        (List.rev (get_fc_decl g))  *)
 
 
 
-    (* List.iter (check_not_void (fun n -> "illegal void formal " ^ n ^
-      " in " ^ func.fname)) func.formals;
 
-    report_duplicate (fun n -> "duplicate formal " ^ n ^ " in " ^ func.fname)
-      (List.map snd func.formals);
 
-    List.iter (check_not_void (fun n -> "illegal void local " ^ n ^
-      " in " ^ func.fname)) func.locals;
 
-    report_duplicate (fun n -> "duplicate local " ^ n ^ " in " ^ func.fname)
-      (List.map snd func.locals); *)
-
-   (*  (* Type of each variable (global, formal, or local *)
-    let symbols = List.fold_left (fun m (t, n) -> StringMap.add n t m)
-      StringMap.empty (globals @ func.formals @ func.locals )
+    (* Type of each variable (global, formal, or local *)
+   (*  let symbols = List.fold_left (fun m (t, n) -> StringMap.add n t m)
+      StringMap.empty (g @ func.formals @ func.locals)
     in
 
     let type_of_identifier s =
@@ -134,7 +129,10 @@ let analyze (globals, functions) =
       with Not_found -> raise (Failure ("undeclared identifier " ^ s))
     in
 
+
+ *)
     (* Return the type of an expression or throw an exception *)
+    (*
     let rec expr = function
       | Literal _ -> Int
       | BoolLit _ -> Bool
@@ -181,10 +179,10 @@ let analyze (globals, functions) =
                                                                                  string_of_expr e)))) 
     fd.formals actuals;
     fd.typ
-    in *)
+    in 
 
 
-(* 
+
     let check_bool_expr e = 
       if expr e != Bool then 
         raise (Failure ("expected Boolean expression in " ^ string_of_expr e))
@@ -213,11 +211,10 @@ let analyze (globals, functions) =
       | While(p, s)         -> check_bool_expr p; stmt s
     in
     stmt (Block func.body) 
+  *)
   in
   List.iter check_globals globals
-  *)
-
-  
+    
 
 
 
@@ -232,8 +229,10 @@ let analyze (globals, functions) =
 (*
 let check_function func =
 
-    List.iter (check_not_void (fun n -> "illegal void formal " ^ n ^
-      " in " ^ func.fname)) func.formals;
+    (* Check for void formal arguments *)
+    List.iter 
+      (check_not_void (fun n -> "illegal void argument" ^ n ^ " to function " ^ func.fname)) 
+          func.formals;
 
     report_duplicate (fun n -> "duplicate formal " ^ n ^ " in " ^ func.fname)
       (List.map snd func.formals);
