@@ -34,7 +34,8 @@ int hello()
 	float b;
 	void i; /* this should NOT be accepted - catch this in the analyzer */ 
 
-
+	string s = "please work";
+	
 	/* local arrays - working */
 	int[5] x;
 	bool[10] b1;

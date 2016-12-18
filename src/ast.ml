@@ -150,7 +150,7 @@ let rec string_of_dtype = function
 let rec string_of_expr = function         
   | Lit_Int(x)        -> string_of_int x
   | Lit_Flt(x)        -> string_of_float x
-  (* | Lit_Str(x)        -> String.concat "\"" ^ x "\""   this needs to be fixed *)
+  | Lit_Str(x)        -> "\"" ^ x ^ "\""
   | Id(x)             -> x
   | Lit_Bool(true)    -> "true"
   | Lit_Bool(false)   -> "false"
