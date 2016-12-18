@@ -66,7 +66,8 @@ let analyze (globals, functions) =
     (* StringMap.add "Join"
       { typ     = Void; 
         fname   = "Join";    
-        formals = [(Frame(Int,Int,Int), "A"); (Frame(Int,Int,Int), "B");]; 
+        formals = [ (Frame(Int,Int,Int), "A"); (FaceId(Int,Int,Int,String), "B"); 
+                    (Frame(Int,Int,Int), "C"); (FaceId(Int,Int,Int,String), "D"); ];
         body    = [] }; *)
     (* NOT WORKING *)
     (* StringMap.add "Build"
@@ -108,8 +109,6 @@ let analyze (globals, functions) =
     List.fold_left (fun m fd -> StringMap.add fd.fname fd m) built_in_decls functions
   in
 
-
-
   (* Unrecognized functions *)
   let function_decl s = try StringMap.find s function_decls
     with Not_found -> raise (Failure ("unrecognized function " ^ s))
@@ -123,7 +122,6 @@ let analyze (globals, functions) =
   (* Ensure "main" is defined *)
   let _ = check_main_decl "main" 
   in 
-
 
 
   (* Iterate over the list of globals *)
@@ -144,16 +142,22 @@ let analyze (globals, functions) =
       (fun n -> "duplicate global face decl" ^ n) 
         (List.rev (get_fc_decl g))  *)
 
+(* type globals = {
+  var_decls  : var_decl list;
+  var_assgns : var_assign list;
+  fr_assgns  : fr_assign list;
+  fc_assgns  : fc_assign list;
+} *)
 
     (* Type of each variable (global, formal, or local *)
-    (* let symbols = List.fold_left (fun m (t, n) -> StringMap.add n t m)
+     let symbols = List.fold_left (fun m (t, n) -> StringMap.add n t m)
       StringMap.empty (g @ g.var_decls @g.var_assgns @ g.fr_assgns @ g.fc_assgns)
     in
 
     let type_of_identifier s =
       try StringMap.find s symbols
       with Not_found -> raise (Failure ("undeclared identifier " ^ s))
-    in *)
+    in
 
   (*
     let check_bool_expr e = 
