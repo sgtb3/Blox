@@ -3,7 +3,9 @@
 /* global var declar - working */
 int y;
 int z;
-int y; /* duplicate global var decl - should NOT be allowed */
+int z; /* BAD */
+
+/* int y; duplicate global var decl - should NOT be allowed */
 float b;
 /* global frame declaration - working */
 Frame<1,1,1> one;
@@ -13,14 +15,18 @@ Frame<1,1,1> two;
 /* global var assignment - working*/
 int z1 = y;
 float a = 1.5;
-string s = "please work";
+/* string s = "please work"; */
 
 /* global frame assignment - working */
 Frame C = one;
 Frame D = C;
 
+Face<1,1,1,E> facea;
+Face faceb = facea;
+
+
 /* duplicate functions - working */
-int main() { return 1; }
+ /* int main() { return 1; } */
 
 
 int main()
@@ -29,33 +35,27 @@ int main()
 	/* function call - working */
 	functioncall();
 
-	/* int a = 1 + 2; */
+	int a = 1 + 2;
 
 	/* local var declar - working */
 	int x;
 	bool t;
-
 	Frame<1,1,1>[10] framarr;
 	Face<1,1,1,E>[2] fcarr;
 
 	float b;
-	void i; /* this should NOT be accepted - catch this in the analyzer */ 
+	void i;  /* BAD this should NOT be accepted - catch this in the analyzer */ 
 
 	string s = "please work";
 	
 	/* local arrays - working */
-	int[5] x;
+	int[5] x; /* BAD */
+
 	bool[10] b1;
 	void[10] b1;
 
-
-	/* face and frame arrays - NOT WORKING  */
-	/* Frame[5] fr; */
-	/* Face[5] fc; */
-	/* Face[1] f; */
-
 	/* local variable declaration and assignment - working */
-	bool t = true; 
+	bool t = true; /* BAD */
 	bool f = false;
 	
 
@@ -96,7 +96,7 @@ int main()
 	Face<1,1,1,W> b;
 
 	/* Face assignment - NOT WORKING */
-	/* Face c = b; */
+	Face c = b; 
 
 	/* Join, Build, Convert calls - working  */
 	Join(H, a, twox, b);
