@@ -42,6 +42,7 @@ rule token = parse
   | "true"               { TRUE     }
   | "false"              { FALSE    }
   | "string"             { STRING   }
+  | "float"              { FLOAT    }
   | "print"              { PRINT    }
   | "Convert"            { CONVERT  }
   | "Build"              { BUILD    }

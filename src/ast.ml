@@ -43,7 +43,7 @@ type frame = {
 
 (* All types *)
 type dtype = 
-    Int | Bool | Float | String | Frame of fr_decl | FaceId of fc_decl
+  | Int | Bool | Float | String | Frame of fr_decl | FaceId of fc_decl
   | Void
   | Array of dtype * int * string
 
@@ -58,6 +58,8 @@ type var_decl = dtype * string
 type expr =
   | Id of string
   | Lit_Int of int
+  | Lit_Flt of float
+  | Lit_Str of string
   | Lit_Bool of bool
   | Assign of string * expr
   | Fr_assign of string * expr
@@ -135,18 +137,20 @@ let string_of_uop = function
   | Not     -> "!"
 
 let rec string_of_dtype = function
-  | Int       -> "int"
-  | Bool      -> "bool"
-  | String    -> "string"
-  | Float     -> "float"
-  | Frame(x)  -> "Frame"
-  | FaceId(x) -> "Face"
+  | Int          -> "int"
+  | Bool         -> "bool"
+  | String       -> "string"
+  | Float        -> "float"
+  | Frame(x)     -> "Frame"
+  | FaceId(x)    -> "Face"
   | Void         -> "void"
   | Array(x,y,z) -> string_of_dtype x ^ "[" ^ string_of_int y ^ "] " ^ z
 
 (* print expressions *)
 let rec string_of_expr = function         
   | Lit_Int(x)        -> string_of_int x
+  | Lit_Flt(x)        -> string_of_float x
+  (* | Lit_Str(x)        -> String.concat "\"" ^ x "\""   this needs to be fixed *)
   | Id(x)             -> x
   | Lit_Bool(true)    -> "true"
   | Lit_Bool(false)   -> "false"
