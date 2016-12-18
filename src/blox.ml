@@ -6,6 +6,7 @@ let usage =
   " OPTIONS: \n" ^
   " \t  -a   Display the Abstract Syntax Tree\n" ^
   " \t  -c   Compile input_file.blox to AMF\n"   ^
+  " \t  -e   Run the executor\n"                 ^
   " \t  -h   Display the Blox compiler help menu\n"
 
 let _ =

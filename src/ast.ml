@@ -15,16 +15,16 @@ type face_id = {
 
 (* frame declaration *)
 type fc_decl = {
-  dim  : int * int * int;
-  face : string;
-  fc_name : string;
+  fcd_dim  : int * int * int;
+  fcd_face : string;
+  fcd_name : string;
 }
 
 (* frame declaration *)
 type fr_decl = {
-  frx : int;
-  fry : int;
-  frz : int;
+  fr_x : int;
+  fr_y : int;
+  fr_z : int;
   fr_name : string;
 }
 
@@ -166,9 +166,9 @@ let rec string_of_expr = function
 
 (* print frame declarations *)
 let string_of_frdecl frd =         
-  "Frame<" ^ string_of_int frd.frx ^ "," ^
-             string_of_int frd.fry ^ "," ^
-             string_of_int frd.frz ^ "> " ^
+  "Frame<" ^ string_of_int frd.fr_x ^ "," ^
+             string_of_int frd.fr_y ^ "," ^
+             string_of_int frd.fr_z ^ "> " ^
              frd.fr_name ^ ";\n"
 
 (* print dimensions *)
@@ -179,9 +179,9 @@ let string_of_dim (x,y,z) =
 
 (* print face declarations *)
 let string_of_fcdecl fcd =         
-  "Face<" ^ string_of_dim fcd.dim ^ "," ^
-            fcd.face ^ "> " ^
-            fcd.fc_name ^ ";\n"
+  "Face<" ^ string_of_dim fcd.fcd_dim ^ "," ^
+            fcd.fcd_face ^ "> " ^
+            fcd.fcd_name ^ ";\n"
 
 let string_of_var_decl (x,y) =
   string_of_dtype x ^ " " ^ y ^ ";"
@@ -245,8 +245,8 @@ let string_of_func_decl fd =
 let string_of_globals glob = 
   String.concat "" (List.map string_of_var_decl glob.var_decls) ^
   String.concat "" (List.map string_of_vassign glob.var_assgns) ^
-  String.concat "" (List.map string_of_fcdecl glob.fc_decls)    ^
-  String.concat "" (List.map string_of_frdecl glob.fr_decls)    ^
+  String.concat "" (List.map string_of_fcdecl    glob.fc_decls) ^
+  String.concat "" (List.map string_of_frdecl    glob.fr_decls) ^
   String.concat "" (List.map string_of_frassign glob.fr_assgns) ^"\n"
 
 (* print blox program *)

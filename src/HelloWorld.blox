@@ -2,6 +2,7 @@
 /* testing global var declar */
 int y;
 int z;
+int y;
 
 /* testing global frame declaration */
 Frame<1,1,1> one;
@@ -18,7 +19,7 @@ Frame D = C;
 int main()
 {
 	/* test function call - not working */
-	functioncall(1,2,3);
+	/* functioncall(); */
 
 	/* int a = 1 + 2; */
 

@@ -96,16 +96,16 @@ formal_list:
 
 fr_decl:
   FRAME LT LIT_INT COMMA LIT_INT COMMA LIT_INT GT ID 
-    { { frx = $3; 
-        fry = $5; 
-        frz = $7; 
+    { { fr_x = $3; 
+        fr_y = $5; 
+        fr_z = $7; 
         fr_name = $9; } }
 
 fc_decl:
   FACE LT LIT_INT COMMA LIT_INT COMMA LIT_INT COMMA ID GT ID 
-    { { dim     = ($3, $5, $7); 
-        face    = $9; 
-        fc_name = $11; } }
+    { { fcd_dim     = ($3, $5, $7); 
+        fcd_face    = $9; 
+        fcd_name = $11; } }
 
 stmt_list:
   |/* nothing */   { [] }
