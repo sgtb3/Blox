@@ -51,16 +51,24 @@ dtype:
 globals:
   | dtype ID SEMI                    /* var decls [($2, $3) :: 1]; */
     { { var_decls  = [($1, $2)]; 
-        var_assgns = []; 
-        fr_assgns  = []; } }
+        var_assgns = [];
+        fr_assgns  = [];
+        fc_assgns  = []; } }
   | dtype ID ASSIGN expr SEMI        /* var assigns */
     { { var_decls  = []; 
         var_assgns = [($1, $2, $4)]; 
-        fr_assgns  = []; } }
+        fr_assgns  = [];
+        fc_assgns  = []; } }
   | FRAME ID ASSIGN ID SEMI        /* fr assigns  */
     { { var_decls  = []; 
-        var_assgns = []; 
-        fr_assgns  = [($2, $4)]; } }
+        var_assgns = [];
+        fr_assgns  = [($2, $4)];
+        fc_assgns  = []; } }
+  | FACE ID ASSIGN ID SEMI        /* fr assigns  */
+    { { var_decls  = []; 
+        var_assgns = [];
+        fr_assgns  = []; 
+        fc_assgns  = [($2, $4)]; } }
 
 func_decl:
   dtype ID LPAREN formals_opt RPAREN LCURL stmt_list RCURL
@@ -132,6 +140,7 @@ expr:
   | FALSE                  { Lit_Bool(false)        }
   | ID ASSIGN expr         { Assign($1, $3)         }
   | FRAME ID ASSIGN expr   { Fr_assign($2, $4)      }
+  | FACE ID ASSIGN expr    { Fc_assign($2, $4)      }  
   | dtype ID ASSIGN expr   { Var_assign($1, $2, $4) }
   | expr PLUS   expr       { Binop($1, Add,   $3)   }
   | expr MINUS  expr       { Binop($1, Sub,   $3)   }
