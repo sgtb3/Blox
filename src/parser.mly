@@ -37,15 +37,12 @@ decls:
   | decls globals   { ($2 :: fst $1), snd $1 }
   | decls func_decl { fst $1, ($2 :: snd $1) }
 
-typ:
+dtype:
   | INT    { Int    }
   | BOOL   { Bool   }
   | STRING { String }
-
-dtype:
   | VOID   { Void   }
-  | typ    { Typ($1) }
-  | typ LBRACK LIT_INT RBRACK ID { Array($1, $3, $5) }
+  | dtype LBRACK LIT_INT RBRACK ID { Array($1, $3, $5) }
 
 globals:
   | dtype ID SEMI                    /* var decls [($2, $3) :: 1]; */
@@ -117,7 +114,7 @@ stmt:
   | CONTINUE SEMI          { Continue           }
   | dtype ID SEMI          { Var_decl($1,$2)    }
   | CONVERT LPAREN ID RPAREN SEMI     { Convert($3)       }
-  | typ LBRACK LIT_INT RBRACK ID SEMI { Array($1, $3, $5) }
+  | dtype LBRACK LIT_INT RBRACK ID SEMI { Array($1, $3, $5) }
   | fr_decl SEMI           { Fr_decl($1)        }
   | fc_decl SEMI           { Fc_decl($1)        }
   | LCURL stmt_list RCURL  { Block(List.rev $2) }
