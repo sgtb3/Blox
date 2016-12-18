@@ -28,10 +28,10 @@ let analyze (globals, functions) =
     else raise err
   in
 
-  (* Returns the frame name *)
+  (* Returns the frame name 
   let get_frname { fr_x=_; fr_y=_; fr_z=_; fr_name=_} = function 
     { fr_x=_; fr_y=_; fr_z=_; fr_name=fn } -> fn 
-  in 
+  in *)
 
   (* Returns the global var decl list version 2 *)
   let get_var_decl glob_vd = 
@@ -39,8 +39,8 @@ let analyze (globals, functions) =
   in 
 
   (* Returns the global var decl list *)
-  let get_var_decl_list { var_decls=_; var_assgns=_; fr_decls=_; fr_assgns=_; fc_decls=_ } = 
-    function { var_decls=vd_list; var_assgns=_; fr_decls=_; fr_assgns=_; fc_decls=_ } -> vd_list 
+  let get_var_decl_list { var_decls=_; var_assgns=_; fr_assgns=_} = 
+    function { var_decls=vd_list; var_assgns=_; fr_assgns=_ } -> vd_list 
   in 
 
   (* Check for restricted function names *)
