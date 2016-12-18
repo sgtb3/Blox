@@ -41,10 +41,11 @@ type frame = {
   blocks : blck array;
 }
 
-type typ = Int | Bool | Float | String | Void | Frame of fr_decl| FaceId of fc_decl
+type typ = Int | Bool | Float | String | Frame of fr_decl | FaceId of fc_decl
 
 (* All types *)
 type dtype = 
+  | Void
   | Typ of typ
   | Array of typ * int * string
 
@@ -140,12 +141,12 @@ let rec string_of_typ = function
   | Int       -> "int"
   | Bool      -> "bool"
   | String    -> "string"
-  | Void      -> "void"
   | Float     -> "float"
   | Frame(x)  -> "Frame"
   | FaceId(x) -> "Face"
 
 let rec string_of_dtype = function
+  | Void         -> "void"
   | Typ(x)       -> string_of_typ x
   | Array(x,y,z) -> string_of_typ x ^ "[" ^ string_of_int y ^ "] " ^ z
 

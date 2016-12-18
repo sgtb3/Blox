@@ -1,25 +1,27 @@
 
-/* testing global var declar */
+/* testing global var declar - working */
 int y;
 int z;
-int y;
+int y; /* duplicate global var decl - should not be allowed */
 
-/* testing global frame declaration */
+/* testing global frame declaration - working */
 Frame<1,1,1> one;
 Frame<1,1,1> two;
 
-/* testing global var assignment */
+/* testing global var assignment - working*/
 int z1 = y;
 
-/* testing global frame assignment - printing correctly */
+/* testing global frame assignment - working */
 Frame C = one;
 Frame D = C;
 
+/* check for duplicate functions - working */
+int main() { return 1; }
 
-int main()
+int hello()
 {
-	/* test function call - not working */
-	/* functioncall(); */
+	/* test function call - working */
+	functioncall();
 
 	/* int a = 1 + 2; */
 

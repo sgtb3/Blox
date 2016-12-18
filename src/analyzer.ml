@@ -33,13 +33,9 @@ let analyze (globals, functions) =
     { fr_x=_; fr_y=_; fr_z=_; fr_name=fn } -> fn 
   in 
 
-  (* Return the name of a variable *)
-  let get_var_name (x,y) = y 
-  in
-
   (* Returns the global var decl list version 2 *)
   let get_var_decl glob_vd = 
-    (List.map get_var_name glob_vd.var_decls) 
+    (List.map (fun (x,y) -> y) glob_vd.var_decls) 
   in 
 
   (* Returns the global var decl list *)
@@ -47,14 +43,68 @@ let analyze (globals, functions) =
     function { var_decls=vd_list; var_assgns=_; fr_decls=_; fr_assgns=_; fc_decls=_ } -> vd_list 
   in 
 
+  (* Check for restricted function names *)
+  if List.mem "print" (List.map (fun fd -> fd.fname) functions) then 
+    raise (Failure ("function print may not be defined")) 
+  else ();
+  if List.mem "build" (List.map (fun fd -> fd.fname) functions) then 
+    raise (Failure ("function build may not be defined")) 
+  else ();
+  if List.mem "join" (List.map (fun fd -> fd.fname) functions) then 
+    raise (Failure ("function join may not be defined")) 
+  else ();
+  if List.mem "convert" (List.map (fun fd -> fd.fname) functions) then 
+    raise (Failure ("function convert may not be defined")) 
+  else ();
+
+  (* Check for duplicate function names *)
+  report_duplicate (fun n -> "duplicate function " ^ n) (List.map (fun fd -> fd.fname) functions);
+
+  (* Function declarations for built-in functions *)
+  let built_in_decls = 
+    StringMap.add "print"
+      { typ     = Void; 
+        fname   = "print"; 
+        formals = [(Int, "x")];
+        body    = [] 
+      } 
+    (StringMap.singleton "printb"
+      { typ     = Void; 
+        fname   = "printb"; 
+        formals = [(Bool, "x")];
+        body    = [] })
+  in
+     
+  let function_decls = 
+    List.fold_left (fun m fd -> StringMap.add fd.fname fd m) built_in_decls functions
+  in
+
+  let function_decl s = try StringMap.find s function_decls
+       with Not_found -> raise (Failure ("unrecognized function " ^ s))
+  in
+
+  let _ = function_decl "main" in (* Ensure "main" is defined *)
+
+
+
+
+
+
+
+
 
   (* Iterate over the list of globals *)
   let check_globals g =
 
     (* Check for duplicate global variable declarations *)
     report_duplicate 
-    (fun n -> "duplicate global var decl" ^ n) 
-      (List.rev (get_var_decl g)) 
+      (fun n -> "duplicate global var decl" ^ n) 
+        (List.rev (get_var_decl g)) 
+
+    (* Check for duplicate global frame declarations *)
+    (* report_duplicate 
+      (fun n -> "duplicate global frame decl" ^ n) 
+        (List.rev (get_fr_decl g))  *)
 
   in
   List.iter check_globals globals
