@@ -60,6 +60,8 @@ type var_decl = dtype * string
 type expr =
   | Id of string
   | Lit_Int of int
+  | Lit_Flt of float
+  | Lit_Str of string
   | Lit_Bool of bool
   | Assign of string * expr
   | Fr_assign of string * expr
@@ -149,6 +151,8 @@ let rec string_of_dtype = function
 (* print expressions *)
 let rec string_of_expr = function         
   | Lit_Int(x)        -> string_of_int x
+  | Lit_Flt(x)        -> string_of_float x
+  | Lit_Str(x)        -> "\"" ^ x ^ "\""
   | Id(x)             -> x
   | Lit_Bool(true)    -> "true"
   | Lit_Bool(false)   -> "false"

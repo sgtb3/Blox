@@ -6,7 +6,7 @@
 %token NOT DOT
 %token LT GT EQ NEQ LEQ GEQ FRAMEEQ AND OR
 %token IF ELSE FOR WHILE RETURN BREAK CONTINUE 
-%token VOID INT BOOL STRING 
+%token VOID INT BOOL STRING FLOAT
 %token TRUE FALSE NULL EOF
 %token PRINT BUILD JOIN FRAME SET FACE CONVERT
 %token <string> ID
@@ -39,6 +39,7 @@ decls:
 
 dtype:
   | INT    { Int    }
+  | FLOAT  { Float  }
   | BOOL   { Bool   }
   | STRING { String }
   | VOID   { Void   }
@@ -125,6 +126,8 @@ expr_opt:
 expr:
   | ID                     { Id($1)                 }
   | LIT_INT                { Lit_Int($1)            }
+  | LIT_FLT                { Lit_Flt($1)            }
+  | LIT_STR                { Lit_Str($1)            }
   | TRUE                   { Lit_Bool(true)         }
   | FALSE                  { Lit_Bool(false)        }
   | ID ASSIGN expr         { Assign($1, $3)         }
