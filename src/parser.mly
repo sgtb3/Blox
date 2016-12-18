@@ -42,38 +42,23 @@ dtype:
   | BOOL   { Bool   }
   | STRING { String }
   | VOID   { Void   }
+  | FRAME LT LIT_INT COMMA LIT_INT COMMA LIT_INT GT  { Frame($3,$5,$7) }
+  | FACE LT LIT_INT COMMA LIT_INT COMMA LIT_INT COMMA ID GT { FaceId($3,$5,$7,$9) }
+ /* | fr_decl {  $1  } */
   | dtype LBRACK LIT_INT RBRACK ID { Array($1, $3, $5) }
 
 globals:
   | dtype ID SEMI                    /* var decls [($2, $3) :: 1]; */
     { { var_decls  = [($1, $2)]; 
         var_assgns = []; 
-        fr_decls   = []; 
-        fc_decls   = [];
         fr_assgns  = []; } }
   | dtype ID ASSIGN expr SEMI        /* var assigns */
     { { var_decls  = []; 
         var_assgns = [($1, $2, $4)]; 
-        fr_decls   = []; 
-        fc_decls   = [];
-        fr_assgns  = []; } }
-  | fr_decl SEMI                   /* fr decls  ($2 :: $1) */    
-    { { var_decls  = []; 
-        var_assgns = []; 
-        fr_decls   = [$1]; 
-        fc_decls   = [];
-        fr_assgns  = []; } }
-  | fc_decl SEMI                   /* fc decls  ($2 :: $1) */    
-    { { var_decls  = []; 
-        var_assgns = []; 
-        fr_decls   = []; 
-        fc_decls   = [$1];
         fr_assgns  = []; } }
   | FRAME ID ASSIGN ID SEMI        /* fr assigns  */
     { { var_decls  = []; 
         var_assgns = []; 
-        fr_decls   = []; 
-        fc_decls   = [];
         fr_assgns  = [($2, $4)]; } }
 
 func_decl:
@@ -90,7 +75,7 @@ formals_opt:
 formal_list:
   | dtype ID  { [($1,$2)] }
   | formal_list COMMA dtype ID { ($3,$4) :: $1 }
-
+/*
 fr_decl:
   FRAME LT LIT_INT COMMA LIT_INT COMMA LIT_INT GT ID 
     { { fr_x    = $3; 
@@ -103,7 +88,7 @@ fc_decl:
     { { fcd_dim  = ($3, $5, $7); 
         fcd_face = $9; 
         fcd_name = $11; } }
-
+*/
 stmt_list:
   |/* nothing */   { [] }
   | stmt_list stmt { $2 :: $1 }
@@ -115,8 +100,8 @@ stmt:
   | dtype ID SEMI          { Var_decl($1,$2)    }
   | CONVERT LPAREN ID RPAREN SEMI     { Convert($3)       }
   | dtype LBRACK LIT_INT RBRACK ID SEMI { Array($1, $3, $5) }
-  | fr_decl SEMI           { Fr_decl($1)        }
-  | fc_decl SEMI           { Fc_decl($1)        }
+ /* | fr_decl SEMI           { Fr_decl($1)        }
+  | fc_decl SEMI           { Fc_decl($1)        } */
   | LCURL stmt_list RCURL  { Block(List.rev $2) }
   | RETURN SEMI            { Return Noexpr      }
   | RETURN expr SEMI       { Return $2          }
