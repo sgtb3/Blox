@@ -7,10 +7,14 @@ type op =
 (* unary operators *)
 type uop = Neg | Not 
 
+(* if form is Face<x,y,z,d> A; then id = ""; 
+   if form is Face A = B;      then id = A  *)
+
 (* block face identifier *)
 type face_id = {
-  dim  : int * int * int;
-  face : string;
+  dim   : int * int * int;
+  face  : string;
+  fc_id : string
 }
 
 (* actual block *)
@@ -18,28 +22,30 @@ type blck = {
   faces : bool array;
 }
 
+(* if form is Frame<x,y,z> A; then id = ""; 
+   if form is Frame A = B;    then id = A  *)
+
 (* actual frame *)
 type frame = {
   x : int;
   y : int;
   z : int;
   blocks : blck array; 
+  fr_id : string 
 }
 
 (* All types *)
 type dtype = 
-  | Int | Bool | Float | String
+  | Int | Bool | Float | String | Void
   | Frame of frame
   | FaceId of face_id
-  | Void
   | Array of dtype * int * string
 
-(* built-in function calls *)
-type join    = string * string * string * string
-type build   = string * string * string * string
-type convert = string
+(* built-in function call parameters *)
+type join  = string * string * string * string
+type build = frame * face_id * frame * face_id
 
-(* variable declarations - was "bind" *)
+(* variable declarations *)
 type var_decl = dtype * string
 
 (* expressions *)
@@ -70,7 +76,7 @@ type stmt =
   | Build of build
   | Print of expr
   | Array of dtype * int * string
-  | Convert of convert
+  | Convert of frame
   | Var_decl of var_decl
   | Return of expr
   | If of expr * stmt * stmt
@@ -126,18 +132,10 @@ let string_of_uop = function
   | Neg     -> "-"
   | Not     -> "!"
 
-let string_of_frame fr = 
-  "Frame" ^ "<" ^ string_of_int fr.x ^ "," ^ 
-                  string_of_int fr.y ^ "," ^ 
-                  string_of_int fr.z ^ ">"
-
 let string_of_dim (x,y,z) = 
   string_of_int x ^ "," ^ 
   string_of_int y ^ "," ^ 
   string_of_int z
-
-let string_of_face_id fc =
-  "Face" ^ "<" ^  string_of_dim fc.dim ^ "," ^ fc.face ^ ">"
 
 (* print datatypes *)
 let rec string_of_dtype = function
@@ -145,8 +143,8 @@ let rec string_of_dtype = function
   | Bool         -> "bool"
   | String       -> "string"
   | Float        -> "float"
-  | Frame(fr)    -> string_of_frame fr
-  | FaceId(fc)   -> string_of_face_id fc
+  | Frame(fr)    -> "Frame" ^ "<" ^ string_of_dim (fr.x, fr.y, fr.z) ^ ">"
+  | FaceId(fc)   -> "Face"  ^ "<" ^ string_of_dim fc.dim ^ "," ^ fc.face ^ ">"
   | Void         -> "void"
   | Array(x,y,z) -> string_of_dtype x ^ "[" ^ string_of_int y ^ "] " ^ z
 
@@ -185,7 +183,8 @@ let string_of_face_id_list fid =
 
 (* print Build function calls *)
 let string_of_build (w,x,y,z) =
-  "Build(" ^ w ^ "," ^ x ^ "," ^ y ^ "," ^ z ^ ");\n"
+  "Build(" ^ w.fr_id ^ "," ^ x.fc_id ^ "," 
+           ^ y.fr_id ^ "," ^ z.fc_id ^ ");\n"
 
 (* print Join function calls  *)
 let string_of_join (w,x,y,z) =
@@ -200,7 +199,7 @@ let rec string_of_stmt = function
   | Build(w,x,y,z)    -> string_of_build (w,x,y,z)
   | Array(x,y,z)      -> string_of_dtype x ^ "[" ^ string_of_int y ^ "] " ^ z ^";\n"
   | Print(e)          -> "print(" ^ string_of_expr e ^ ");\n"
-  | Convert(fname)    -> "Convert(" ^ fname ^ ");\n"
+  | Convert(fr)       -> "Convert(" ^ fr.fr_id ^ ");\n"
   | Break             -> "break;\n"
   | Continue          -> "continue;\n"
   | Return(expr)      -> "return " ^ string_of_expr expr ^ ";\n";
@@ -220,6 +219,10 @@ let string_of_vassign (t,id,exp) =
 let string_of_frassign (fn1,fn2) = 
   "Frame " ^ fn1 ^ " = " ^ fn2 ^ ";"
 
+(* print face assignments *)
+let string_of_fcassign (fn1,fn2) = 
+  "Face " ^ fn1 ^ " = " ^ fn2 ^ ";"
+
 (* print function declarations *)
 let string_of_func_decl fd =
   string_of_dtype fd.typ ^ " " ^ fd.fname ^ "(" ^ 
@@ -231,7 +234,7 @@ let string_of_globals glob =
   String.concat "" (List.map string_of_var_decl glob.var_decls) ^
   String.concat "" (List.map string_of_vassign glob.var_assgns) ^
   String.concat "" (List.map string_of_frassign glob.fr_assgns) ^
-  String.concat "" (List.map string_of_frassign glob.fc_assgns) ^"\n"
+  String.concat "" (List.map string_of_fcassign glob.fc_assgns) ^"\n"
 
 (* print blox program *)
 let string_of_program (globals,funcs) =

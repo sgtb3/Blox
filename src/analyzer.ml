@@ -66,7 +66,7 @@ let analyze (globals, functions) =
     (* StringMap.add "Join"
       { typ     = Void; 
         fname   = "Join";    
-        formals = [ (Frame(Int,Int,Int), "A"); (FaceId(Int,Int,Int,String), "B"); 
+        formals = [ (Frame(Ast.frame), "A"); (FaceId(Int,Int,Int,String), "B"); 
                     (Frame(Int,Int,Int), "C"); (FaceId(Int,Int,Int,String), "D"); ];
         body    = [] }; *)
     (* NOT WORKING *)

@@ -3,43 +3,42 @@
 /* global var declar - working */
 int y;
 int z;
-int z; /* BAD */
-
-/* int y; duplicate global var decl - should NOT be allowed */
 float b;
+int z;   /* BAD - duplicate global var decl - should NOT be allowed */
+
+
 /* global frame declaration - working */
 Frame<1,1,1> one;
 Frame<1,1,1> two;
+Face b = a;
 
-
-/* global var assignment - working*/
+/* global var assignment - NOT working*/
 int z1 = y;
 float a = 1.5;
-/* string s = "please work"; */
+string s = "please work";
 
 /* global frame assignment - working */
 Frame C = one;
 Frame D = C;
 
+/* global face declaration and assignment - working */
 Face<1,1,1,E> facea;
 Face faceb = facea;
-
 
 /* duplicate functions - working */
 /* int main() { return 1; } */
 
-
 /* multiple functions - working */
 int someFunction() { return 1; }
 
-
+/* required ain function - working */
 int main()
 {
-
 	/* function call - working */
 	functioncall();
 
 	int a = 1 + 2;
+	float a = 1.5;
 
 	/* local var declar - working */
 	int x;
@@ -50,7 +49,7 @@ int main()
 	Face g = facea;
 
 	float b;
-	float a = 1.5;
+	
 	b = 2.3;
 	void i;  /* BAD this should NOT be accepted - catch this in the analyzer */ 
 
