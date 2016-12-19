@@ -137,6 +137,16 @@ let string_of_dim (x,y,z) =
   string_of_int y ^ "," ^ 
   string_of_int z
 
+let rec get_type = function
+  | Int          -> Int
+  | Bool         -> Bool
+  | String       -> String
+  | Float        -> Float
+  | Frame(fr)    -> Frame(fr)
+  | FaceId(fc)   -> FaceId(fc)
+  | Void         -> Void
+  | Array(x,y,z) -> Array(x,y,z)
+
 (* print datatypes *)
 let rec string_of_dtype = function
   | Int          -> "int"
