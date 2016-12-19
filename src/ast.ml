@@ -181,7 +181,7 @@ let string_of_face_id (w,x,y,z) =
 let string_of_join_args (w,x,y,z) =
   w.fr_id ^ "," ^ x.fc_id ^ "," ^ y.fr_id ^ "," ^ z.fc_id 
 
-(* print block face identifiers *)
+(* print block face identifiers - not currently used *)
 let string_of_face_id_list faceid =
   "(" ^ string_of_dim faceid.dim ^ "," ^ faceid.face ^ ")"
 
@@ -189,8 +189,8 @@ let string_of_face_id_list faceid =
 let string_of_build_args (w,x,y,z) =
   let alist = (Array.to_list x) in
   let blist = (Array.to_list z) in
-  w.fr_id ^ ",{" ^ (String.concat "," (List.map string_of_face_id_list alist)) ^ "}," ^
-  y.fr_id ^ ",{" ^ (String.concat "," (List.map string_of_face_id_list blist)) ^ "}"
+  w.fr_id ^ "," ^ (String.concat "," (List.map (fun f -> f.fc_id) alist)) ^ "," ^
+  y.fr_id ^ "," ^ (String.concat "," (List.map (fun f -> f.fc_id) blist))
   
 (* print statements *)
 let rec string_of_stmt = function 
