@@ -43,17 +43,15 @@ dtype:
   | BOOL     { Bool   }
   | STRING   { String } 
   | VOID     { Void   }
-  | FRAME frame_args { Frame($2)  }
-  | FACE face_args   { FaceId($2) }
+  | FRAME frame_decl { Frame($2)  }
+  | FACE face_decl   { FaceId($2) }
   | dtype LBRACK LIT_INT RBRACK ID { Array($1, $3, $5) }
 
-/* face decl */
-face_args:
+face_decl:
   LT LIT_INT COMMA LIT_INT COMMA LIT_INT COMMA ID GT 
     { { dim  = ($2,$4,$6); face = $8; fc_id = ""} }
 
-/* frame decl */
-frame_args:
+frame_decl:
   LT LIT_INT COMMA LIT_INT COMMA LIT_INT GT 
     { { x = $2; y = $4; z = $6; fr_id = ""; blocks = [||] } }
 
@@ -111,7 +109,10 @@ stmt:
   | CONVERT LPAREN ID RPAREN SEMI 
     { Convert({ x = 0; y = 0; z = 0; fr_id = $3; blocks = [||] }) }
   | JOIN LPAREN ID COMMA ID COMMA ID COMMA ID RPAREN SEMI 
-    { Join($3,$5,$7,$9) }
+    { Join({ x = 0; y = 0; z = 0; fr_id = $3; blocks = [||] }, 
+            { dim = (0,0,0); face = ""; fc_id = $5},
+            { x = 0; y = 0; z = 0; fr_id = $7; blocks = [||] }, 
+            { dim = (0,0,0); face = ""; fc_id = $9}) }
   | BUILD LPAREN ID COMMA ID COMMA ID COMMA ID RPAREN SEMI
     { Build({ x = 0; y = 0; z = 0; fr_id = $3; blocks = [||] }, 
             { dim = (0,0,0); face = ""; fc_id = $5},

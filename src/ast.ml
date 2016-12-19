@@ -42,7 +42,7 @@ type dtype =
   | Array of dtype * int * string
 
 (* built-in function call parameters *)
-type join  = string * string * string * string
+type join  = frame * face_id * frame * face_id
 type build = frame * face_id * frame * face_id
 
 (* variable declarations *)
@@ -182,21 +182,15 @@ let string_of_face_id_list fid =
   String.concat "," (List.rev (List.map string_of_face_id fid))
 
 (* print Build function calls *)
-let string_of_build (w,x,y,z) =
-  "Build(" ^ w.fr_id ^ "," ^ x.fc_id ^ "," 
-           ^ y.fr_id ^ "," ^ z.fc_id ^ ");\n"
-
-(* print Join function calls  *)
-let string_of_join (w,x,y,z) =
-  "Join(" ^ w ^ "," ^ x ^ "," ^ y ^ "," ^ z ^ ");\n"
+let string_of_built_in_args (w,x,y,z) =
+  w.fr_id ^ "," ^ x.fc_id ^ "," ^ y.fr_id ^ "," ^ z.fc_id 
 
 (* print statements *)
 let rec string_of_stmt = function 
-  | Var_decl(x,y)     -> string_of_var_decl (x,y)  ^ "\n"
-  | Block(stmts)      -> "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
-  | Expr(expr)        -> string_of_expr  expr      ^ "\n"
-  | Join(w,x,y,z)     -> string_of_join  (w,x,y,z)
-  | Build(w,x,y,z)    -> string_of_build (w,x,y,z)
+  | Var_decl(x,y)     -> string_of_var_decl (x,y) ^ "\n"
+  | Expr(expr)        -> string_of_expr expr      ^ "\n"
+  | Join(w,x,y,z)     -> "Join("  ^ string_of_built_in_args (w,x,y,z) ^ ");\n"
+  | Build(w,x,y,z)    -> "Build(" ^ string_of_built_in_args (w,x,y,z) ^ ");\n"
   | Array(x,y,z)      -> string_of_dtype x ^ "[" ^ string_of_int y ^ "] " ^ z ^";\n"
   | Print(e)          -> "print(" ^ string_of_expr e ^ ");\n"
   | Convert(fr)       -> "Convert(" ^ fr.fr_id ^ ");\n"
@@ -209,6 +203,8 @@ let rec string_of_stmt = function
   | For(e1,e2,e3,s)   -> "for ("   ^ string_of_expr e1   ^ "; " ^ string_of_expr e2 ^ 
                          "; "      ^ string_of_expr e3   ^ ") "  ^ string_of_stmt s
   | While(e,s)        -> "while (" ^ string_of_expr e    ^ ") "  ^ string_of_stmt s
+  | Block(stmts)      -> "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
+
 
 (* print variable assignments *) 
 let string_of_vassign (t,id,exp) = 

@@ -1,11 +1,9 @@
-open Ast
-open Sast
+open Ast;;
+(* open Sast *)
 
 module StringMap = Map.Make(String)
 
 let analyze (globals, functions) = 
-
-  (* print_endline "\n" *)
 
   (* Raise an exception if the given list has a duplicate frames *)
   let report_duplicate exceptf list = 
@@ -27,11 +25,6 @@ let analyze (globals, functions) =
     if lvaluet == rvaluet then lvaluet 
     else raise err
   in
-
-  (* (* Returns the frame name  *)
-  let get_frname { fr_x=_; fr_y=_; fr_z=_; fr_name=_} = function 
-    { fr_x=_; fr_y=_; fr_z=_; fr_name=fn } -> fn 
-  in *)
 
   (* Returns the global var decl list version 2 *)
   let get_var_decl glob_vd = 
@@ -60,14 +53,21 @@ let analyze (globals, functions) =
   (* Check for duplicate function names *)
   report_duplicate (fun n -> "duplicate function " ^ n) (List.map (fun fd -> fd.fname) functions);
 
+  (* (* Returns the frame name  *)
+  let get_frname { fr_x=_; fr_y=_; fr_z=_; fr_name=_} = function 
+    { fr_x=_; fr_y=_; fr_z=_; fr_name=fn } -> fn 
+  in *)
+
   (* Function declarations for built-in functions *)
   let built_in_decls = 
     (* NOT WORKING *)
     (* StringMap.add "Join"
       { typ     = Void; 
         fname   = "Join";    
-        formals = [ (Frame(Ast.frame), "A"); (FaceId(Int,Int,Int,String), "B"); 
-                    (Frame(Int,Int,Int), "C"); (FaceId(Int,Int,Int,String), "D"); ];
+        formals = [ (Frame( { x = 0; y = 0; z = 0; fr_id = ""; blocks = [||] } ), "A"); 
+                    (FaceId({ dim = (0,0,0); face = 0; fc_id = ""}), "B"); 
+                    (Frame({ x = 0; y = 0; z = 0; fr_id = ""; blocks = [||] }); 
+                    (FaceId({ dim = (0,0,0); face = 0; fc_id = ""}), "D"); ];
         body    = [] }; *)
     (* NOT WORKING *)
     (* StringMap.add "Build"
