@@ -56,7 +56,7 @@ frame_decl:
     { { x = $2; y = $4; z = $6; fr_id = ""; blocks = [||] } }
 
 globals:
-  | dtype ID SEMI                    /* var decls [($2, $3) :: 1]; */
+  | dtype ID SEMI                    /* var decls   */
     { { var_decls  = [($1, $2)]; 
         var_assgns = [];
         fr_assgns  = [];
@@ -101,23 +101,23 @@ stmt:
   | BREAK SEMI             { Break              }
   | CONTINUE SEMI          { Continue           }
   | dtype ID SEMI          { Var_decl($1,$2)    }
-  | PRINT LPAREN expr RPAREN SEMI { Print($3)   }
-  | dtype LBRACK LIT_INT RBRACK ID SEMI { Array($1, $3, $5) }
   | LCURL stmt_list RCURL  { Block(List.rev $2) }
   | RETURN SEMI            { Return Noexpr      }
   | RETURN expr SEMI       { Return $2          }
+  | PRINT LPAREN expr RPAREN SEMI       { Print($3)         }
+  | dtype LBRACK LIT_INT RBRACK ID SEMI { Array($1, $3, $5) }
   | CONVERT LPAREN ID RPAREN SEMI 
     { Convert({ x = 0; y = 0; z = 0; fr_id = $3; blocks = [||] }) }
   | JOIN LPAREN ID COMMA ID COMMA ID COMMA ID RPAREN SEMI 
-    { Join({ x = 0; y = 0; z = 0; fr_id = $3; blocks = [||] }, 
+    { Join( { x = 0; y = 0; z = 0; fr_id = $3; blocks = [||] }, 
             { dim = (0,0,0); face = ""; fc_id = $5},
             { x = 0; y = 0; z = 0; fr_id = $7; blocks = [||] }, 
             { dim = (0,0,0); face = ""; fc_id = $9}) }
   | BUILD LPAREN ID COMMA ID COMMA ID COMMA ID RPAREN SEMI
-    { Build({ x = 0; y = 0; z = 0; fr_id = $3; blocks = [||] }, 
-            { dim = (0,0,0); face = ""; fc_id = $5},
-            { x = 0; y = 0; z = 0; fr_id = $7; blocks = [||] }, 
-            { dim = (0,0,0); face = ""; fc_id = $9}) }
+    { Build({ x = 0; y = 0; z = 0; fr_id = $3; blocks = [||] },
+             Array.of_list [{ dim = (0,0,0); face = "*"; fc_id = $5}],
+            { x = 0; y = 0; z = 0; fr_id = $7; blocks = [||] },
+             Array.of_list [{ dim = (0,0,0); face = "*"; fc_id = $9}]) }
   | IF LPAREN expr RPAREN stmt %prec NOELSE 
     { If($3, $5, Block([])) }
   | IF LPAREN expr RPAREN stmt ELSE stmt

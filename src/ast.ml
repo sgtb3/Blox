@@ -31,7 +31,7 @@ type frame = {
   y : int;
   z : int;
   blocks : blck array; 
-  fr_id : string 
+  fr_id  : string 
 }
 
 (* All types *)
@@ -43,7 +43,7 @@ type dtype =
 
 (* built-in function call parameters *)
 type join  = frame * face_id * frame * face_id
-type build = frame * face_id * frame * face_id
+type build = frame * face_id array * frame * face_id array
 
 (* variable declarations *)
 type var_decl = dtype * string
@@ -177,20 +177,27 @@ let string_of_face_id (w,x,y,z) =
         string_of_int y ^ ", " ^ 
         z ^ ")"
 
-(* print list of face_id's *)
-let string_of_face_id_list fid =
-  String.concat "," (List.rev (List.map string_of_face_id fid))
-
-(* print Build function calls *)
-let string_of_built_in_args (w,x,y,z) =
+(* print Join function arguments *)
+let string_of_join_args (w,x,y,z) =
   w.fr_id ^ "," ^ x.fc_id ^ "," ^ y.fr_id ^ "," ^ z.fc_id 
 
+(* print block face identifiers *)
+let string_of_face_id_list faceid =
+  "(" ^ string_of_dim faceid.dim ^ "," ^ faceid.face ^ ")"
+
+(* print Build function arguments - will substitute the actual face values in here *)
+let string_of_build_args (w,x,y,z) =
+  let alist = (Array.to_list x) in
+  let blist = (Array.to_list z) in
+  w.fr_id ^ ",{" ^ (String.concat "," (List.map string_of_face_id_list alist)) ^ "}," ^
+  y.fr_id ^ ",{" ^ (String.concat "," (List.map string_of_face_id_list blist)) ^ "}"
+  
 (* print statements *)
 let rec string_of_stmt = function 
   | Var_decl(x,y)     -> string_of_var_decl (x,y) ^ "\n"
   | Expr(expr)        -> string_of_expr expr      ^ "\n"
-  | Join(w,x,y,z)     -> "Join("  ^ string_of_built_in_args (w,x,y,z) ^ ");\n"
-  | Build(w,x,y,z)    -> "Build(" ^ string_of_built_in_args (w,x,y,z) ^ ");\n"
+  | Join(w,x,y,z)     -> "Join("  ^ string_of_join_args  (w,x,y,z) ^ ");\n"
+  | Build(w,x,y,z)    -> "Build(" ^ string_of_build_args (w,x,y,z) ^ ");\n"
   | Array(x,y,z)      -> string_of_dtype x ^ "[" ^ string_of_int y ^ "] " ^ z ^";\n"
   | Print(e)          -> "print(" ^ string_of_expr e ^ ");\n"
   | Convert(fr)       -> "Convert(" ^ fr.fr_id ^ ");\n"
@@ -204,7 +211,6 @@ let rec string_of_stmt = function
                          "; "      ^ string_of_expr e3   ^ ") "  ^ string_of_stmt s
   | While(e,s)        -> "while (" ^ string_of_expr e    ^ ") "  ^ string_of_stmt s
   | Block(stmts)      -> "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
-
 
 (* print variable assignments *) 
 let string_of_vassign (t,id,exp) = 

@@ -61,19 +61,21 @@ let analyze (globals, functions) =
   (* Function declarations for built-in functions *)
   let built_in_decls = 
     (* NOT WORKING *)
-    (* StringMap.add "Join"
+    StringMap.add "Join"
       { typ     = Void; 
         fname   = "Join";    
-        formals = [ (Frame( { x = 0; y = 0; z = 0; fr_id = ""; blocks = [||] } ), "A"); 
-                    (FaceId({ dim = (0,0,0); face = 0; fc_id = ""}), "B"); 
-                    (Frame({ x = 0; y = 0; z = 0; fr_id = ""; blocks = [||] }); 
-                    (FaceId({ dim = (0,0,0); face = 0; fc_id = ""}), "D"); ];
-        body    = [] }; *)
+        formals = [ (Frame ({ x = 0; y = 0; z = 0; blocks = [||]; fr_id = ""}), "A"); 
+                    (FaceId({ dim = (0,0,0); face = ""; fc_id = ""}), "B"); 
+                    (Frame ({ x = 0; y = 0; z = 0; blocks = [||]; fr_id = ""}), "C"); 
+                    (FaceId({ dim = (0,0,0); face = ""; fc_id = ""}), "D"); 
+                  ];
+        body    = [] };
+        
     (* NOT WORKING *)
     (* StringMap.add "Build"
       { typ     = Void; 
         fname   = "Build";
-        (* this needs to be Build((Frame(Int,Int,Int), "A", Frame(Int,Int,Int), "B") *) 
+        
         formals = [(Build("frA","faceArrA","frB","faceArrB"), "f")];   
         body    = [] }; *)
     (* NOT WORKING *)
