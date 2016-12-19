@@ -9,8 +9,7 @@ exception Opposite_Face of string;;
 exception Invalid_Block of string;;
 exception Block_Out_Of_Bounds of string;;
 
-let generate frm = function 
-	| Convert frm ->	
+let generate frm =
 		let name = frm.fr_id ^ ".amf" in	
 		let oc = open_out name in 
 			let x = ref 0 in
@@ -107,6 +106,4 @@ let generate frm = function
 			
 			fprintf oc "%s\n" triangleend;	
 			fprintf oc "%s\n" bottom;  			
-			close_out oc               		
-			
-	| _ -> ();;
+			close_out oc;;
