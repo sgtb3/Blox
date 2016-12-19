@@ -107,7 +107,6 @@ let analyze (globals, functions) =
     with Not_found -> raise (Failure ("missing main() entry point"))
   in
 
-
   (* Check globals for dup var/frame/face decls - NOT WORKING CORRECTLY *)
   let check_globals glob =
     report_duplicate (fun n -> "duplicate global var/frame/face decl" ^ n) 
@@ -119,11 +118,6 @@ let analyze (globals, functions) =
   (* Check functions *)
   let check_functions func glob =
 
-    (* Returns the global var decl list   *)
-    let get_var_decl t = 
-      (List.map (fun (x,y) -> y) t.var_decls) 
-    in 
-
     (* Create a symbol table of globals, formals, and locals - NOT COMPLETE *)
     let symbols = List.fold_left (fun map (t, n) -> StringMap.add n t map)
       StringMap.empty ( glob @ func.formals ) (*@ func.body)*)
@@ -134,6 +128,7 @@ let analyze (globals, functions) =
       with Not_found -> raise (Failure ("undeclared identifier " ^ s))
     in
 
+    (* NOT WORKING  *)
     (*((check_not_void 
       (fun n -> "illegal void argument" ^ n ^ " to function " ^ func.fname)) func.formals); *)
 
@@ -196,8 +191,8 @@ let analyze (globals, functions) =
                   ignore (check_assign ft et
                   (Failure ("illegal actual argument found " ^ string_of_dtype et ^ " expected " ^
                             string_of_dtype ft ^ " in " ^ string_of_expr e)))) 
-    fd.formals actuals;
-    fd.typ
+          fd.formals actuals;
+        fd.typ
     in
 
     let check_bool_expr e = 
@@ -210,7 +205,6 @@ let analyze (globals, functions) =
       | Frame({ x; y; z; blocks; fr_id}) -> true
       | _ -> false 
     in
-
 
     (* Check statements *)
     let rec check_stmt = function
@@ -245,7 +239,7 @@ let analyze (globals, functions) =
                                ignore (check_expr e3); check_stmt st
       | While(p, s)         -> check_bool_expr p; check_stmt s
     in
-    check_stmt (Block func.body)
+    check_stmt (Block func.body);
   in
-  List.iter check_functions functions globals 
+  List.iter check_functions functions globals
   
