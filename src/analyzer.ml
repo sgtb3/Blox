@@ -106,6 +106,7 @@ let analyze (globals, functions) =
   let check_main_decl = try StringMap.find "main" function_decls
     with Not_found -> raise (Failure ("missing main() entry point"))
   in
+  check_main_decl;
 
   (* Check globals for dup var/frame/face decls - NOT WORKING CORRECTLY *)
   let check_globals glob =
@@ -114,13 +115,20 @@ let analyze (globals, functions) =
   in
   List.iter check_globals globals;
 
-
+  (* (* UNCOMMENTING THIS PORTION  WILL CAUSE COMPILER TO BREAK *)
+  
   (* Check functions *)
-  let check_functions func glob =
+  let check_functions func =
 
+    let get_var_decl_g globs = 
+      List.hd (List.map (fun (x,y) -> y) globs.var_decls) 
+    in
+    
+    (* THE PROBLEM IS HERE - get_var_decl_g globals returns a list instead of a single item *)
+    
     (* Create a symbol table of globals, formals, and locals - NOT COMPLETE *)
     let symbols = List.fold_left (fun map (t, n) -> StringMap.add n t map)
-      StringMap.empty ( glob @ func.formals ) (*@ func.body)*)
+      StringMap.empty ( get_var_decl_g globals @ func.formals ) (*@ func.body)*)
     in
 
     let type_of_identifier s =
@@ -241,5 +249,5 @@ let analyze (globals, functions) =
     in
     check_stmt (Block func.body);
   in
-  List.iter check_functions functions globals
+  List.iter check_functions functions *)
   

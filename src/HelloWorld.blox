@@ -31,11 +31,11 @@ Face faceb = facea;
 /* multiple functions - working */
 int someFunction() { return 1; }
 
-/* required ain function - working */
+/* required main function - working */
 int main()
 {
 	/* function call - working */
-	functioncall();
+	someFunction();
 
 	int a = 1 + 2;
 	float a = 1.5;
