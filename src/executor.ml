@@ -9,15 +9,25 @@ exception Invalid_Face of string;;
 exception Opposite_Face of string;;
 exception Invalid_Block of string;;
 exception Block_Out_Of_Bounds of string;;
+
+
+let execute (globals, functions) =
+  print_endline "Add executor code here ...\n"
+
 (*
 
+
+(* Return a face object *)
+let faceCons x y z w =
+  let fc = {dim = (x, y, z); face = w} in
+  fc;;
 
 (* Takes 1D index and corresponding frame and returns 3D coordinates*)
 let getCoord i frm =
   let z_val = (i mod frm.z) in
   let y_val = (((i - z_val) / frm.z) mod frm.y) in
   let x_val = ((((i - z_val) / frm.z) - y_val) / frm.y) in
-  (x_val, y_val, z_val) in
+  (x_val, y_val, z_val);;
 
 
 (* Takes face array index returns face string *)
@@ -28,7 +38,7 @@ let getFcStr i = match i with
 | 3 -> "S"
 | 4 -> "F"
 | 5 -> "B"
-| _ -> raise (Invalid_Face "Face index out of bounds") in
+| _ -> raise (Invalid_Face "Face index out of bounds");;
 
 
 (* faceCheck takes a 1D array of blocks and its 3D dimensions, it updates block
@@ -63,7 +73,7 @@ let faceCheck a x y z=
         gz(a.(i + 1)))
       else true)) in
 
-  Array.iteri f a in
+  Array.iteri f a;;
 
 
 (* Checks arguments given to join function and returns coordinate shifts *)
@@ -150,7 +160,7 @@ let argCheck frameA fidA frameB fidB =
     (if bz_shift < 0 then (-bz_shift, 0) else (0, bz_shift)) in
 
   (* Return shift values and copied arrays *)
-  (ax_shift, ay_shift, az_shift, bx_shift, by_shift, bz_shift, aArray, bArray) in
+  (ax_shift, ay_shift, az_shift, bx_shift, by_shift, bz_shift, aArray, bArray);;
 
 
 (* Joins two frames *)
@@ -201,10 +211,9 @@ let join frameA fidA frameB fidB =
   blocks = c;
   } in
 
-  frameC in
+  frameC;;
 
 
-(* ARRAY VERSION OF BUILD
 (* build takes two frames and an array of face ID's for each frame, returns
    all possible frames made by joining the two original frames at the specified
    faces. If the faceID array is empty for either frame the algorithm assumes
@@ -276,8 +285,7 @@ let build frameA faceArrA frameB faceArrB =
   let returnList = if (List.hd returnList).x = 0 then List.tl returnList else returnList in
   let returnArr = Array.of_list returnList in
 
-  returnArr in *)
-
+  returnArr;;
 
 
 
@@ -458,16 +466,13 @@ let build2 frameA faceArrA frameB faceArrB returnstring =
   let returnList = if (List.hd returnList).x = 0 then List.tl returnList else returnList in
   let returnArr = Array.of_list returnList in
 
-  if (Array.length returnArr) > 0 then returner returnstring returnArr else {x = 0; y = 0; z = 0; blocks = [||]} in
+  if (Array.length returnArr) > 0 then returner returnstring returnArr else {x = 0; y = 0; z = 0; blocks = [||]};;
 
 
 (* Return a frame with the given dimensions *)
-let frameConstruct x y z =
+let frameCons x y z =
   let arr = Array.init (x*y*z) (fun _ -> {faces = [|true;true;true;true;true;true|]}) in
   let frm = {x = x; y = y; z = z; blocks = arr} in
   faceCheck frm.blocks x y z;
-  frm in
+  frm;;
 *)
-
-let execute (globals, functions) =
-  print_endline "Add executor code here ...\n"
