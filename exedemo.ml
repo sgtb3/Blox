@@ -218,7 +218,7 @@ let join frameA fidA frameB fidB =
   y = cy;
   z = cz; 
   blocks = c;
-  fr_id = "";
+  fr_id = "Result";
   } in
 
   frameC;;
@@ -586,7 +586,46 @@ let generate frm =
       fprintf oc "%s\n" bottom;       
       close_out oc;;
 
-let fr1 = frameCons 1 1 1 "fr1" in
+let fr1 = frameCons 1 1 1 "" in
+print_string "Frame<1,1,1> fr1\n";
+
+let fc1 = faceCons 0 0 0 "E" in
+let fc2 = faceCons 0 0 0 "W" in
+let fr2 = join fr1 fc1 fr1 fc2 in
+print_string "fr2 = Join(fr1, fc1, fr1, fc2)\n";
+
+let fc1 = faceCons 0 0 0 "N" in
+let fc2 = faceCons 0 0 0 "S" in
+let fr3 = join fr2 fc1 fr1 fc2 in
+print_string "fr3 = Join(fr2, fc3, fr1, fc4)\n";
+
+let fc1 = faceCons 0 0 0 "F" in
+let fc2 = faceCons 0 0 0 "B" in
+let fr4 = join fr3 fc1 fr1 fc2 in
+print_string "fr4 = Join(fr3, fc5, fr1, fc6)\n";
+
+let fc1 = faceCons 0 0 0 "B" in
+let fc2 = faceCons 0 0 0 "F" in
+let fr5 = join fr4 fc1 fr1 fc2 in
+print_string "fr5 = Join(fr4, fc7, fr1, fc8)\n";
+
+let fc1 = faceCons 0 0 1 "S" in
+let fc2 = faceCons 0 0 0 "N" in
+let fr6 = join fr5 fc1 fr1 fc2 in
+print_string "fr6 = Join(fr5, fc9, fr1, fc10)\n";
+
+let fc1 = faceCons 0 1 1 "W" in
+let fc2 = faceCons 0 0 0 "E" in
+let fr7 = join fr6 fc1 fr1 fc2 in
+print_string "fr7 = Join(fr6, fc11, fr1, fc12)\n";
 
 
-generate fr1
+let arr = build fr7 [||] fr7 [||] in
+print_string "build_array = Join(fr7, [], fr7, [])\n";
+print_string "build_array size: ";
+print_int (Array.length arr);
+print_newline();
+
+print_string "Convert(fr7)\n";
+generate fr7
+
