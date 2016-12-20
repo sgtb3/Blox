@@ -1,4 +1,4 @@
-type action = Usage | Ast | Execute | Compile 
+type action = Usage | Ast | Compile 
 
 let usage = 
   "\n USAGE: \n" ^
@@ -6,14 +6,13 @@ let usage =
   " OPTIONS: \n" ^
   " \t  -a   Display the Abstract Syntax Tree\n" ^
   " \t  -c   Compile input_file.blox to AMF\n"   ^
-  " \t  -e   Run the executor\n"                 ^
   " \t  -h   Display the Blox compiler help menu\n"
 
 let _ =
   let action = 
     if Array.length Sys.argv > 1 then
       List.assoc Sys.argv.(1) 
-      [ ("-h", Usage); ("-a", Ast); ("-e", Execute); ("-c", Compile); ] 
+      [ ("-h", Usage); ("-a", Ast); ("-c", Compile); ] 
     else 
       Compile
   in
@@ -28,8 +27,4 @@ let _ =
   match action with
     | Usage   ->  print_endline usage
     | Ast     ->  print_string (Ast.string_of_program ast)
-    | Execute ->  Executor.execute ast
-    | Compile ->  Generator.generate ast
-    (* | Compile ->  let e = Executor.execute ast 
-                  in
-                  Generator.generate e *)
+    | Compile ->  Executor.execute ast

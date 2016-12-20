@@ -3,7 +3,7 @@
 		Compile-Parser Compile-Analyzer Compile-Generator Compile-Executor \ 
 		Compile-Blox Link-Objects \
 		AST-Test Executor-Test Compile-Test \
-		Run-Menhir-Test Blox.tar.gz compiler
+		Run-Menhir-Test Blox.tar.gz compiler Demo
 
 # name of blox binary file
 EXEC = blox
@@ -142,11 +142,17 @@ Run-Menhir-Test:
 	menhir --interpret --interpret-show-cst $(SRC)/parser.mly
 	@$(PRINT_OK)
 
+Demo: Clean
+	ocamlc -o demo exedemo.ml
+	./demo
+	cat fr1.amf
+
 Clean:
 	@echo "\n-------------------------------------------------------\n"
 	@rm -rf $(GEN)/*
 	@rm -rf $(OBJ)/*
 	@rm -rf $(EXEC)
+	@rm -rf demo exedemo.cmi exedemo.cmo fr1.amf
 	@$(PRINT_OK)
 
 Blox.tar.gz : $(TARFILES) Clean
