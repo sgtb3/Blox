@@ -1,5 +1,4 @@
 open Ast
-open Sast
 open Printf
 
 exception Face_Taken of string;;

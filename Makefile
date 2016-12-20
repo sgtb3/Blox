@@ -1,5 +1,5 @@
 .PHONY: Create-Scanner Create-Parser Create-AST \
-		Create-SAST Compile-Scanner \
+		Compile-Scanner \
 		Compile-Parser Compile-Analyzer Compile-Generator Compile-Executor \ 
 		Compile-Blox Link-Objects \
 		AST-Test Executor-Test Compile-Test \
@@ -46,7 +46,7 @@ AWK_CMD    = awk '{ printf "\n%-50s %-10s\n",$$1, $$2; }'
 PRINT_OK   = printf "$@ $(OK_STR)"  | $(AWK_CMD)
 BUILD_OK   = printf "$@ $(SUC_STR)" | $(AWK_CMD)
 
-compiler:	Clean Create-Scanner Create-AST Create-Parser Create-SAST \
+compiler:	Clean Create-Scanner Create-AST Create-Parser \
 		Compile-Scanner Compile-Parser Compile-Analyzer Compile-Executor \
 		Compile-Generator Compile-Blox Link-Objects  
 
@@ -69,14 +69,8 @@ Create-AST:
 	@mv $(SRC)/ast.cmo $(OBJ)/ast.cmo
 	@$(PRINT_OK)
 
-Create-SAST:
-	@$(OCC1) -I $(GEN) $(SRC)/sast.ml $(GEN)/parser.mli $(GEN)/scanner.ml
-	@mv $(SRC)/sast.cmi $(GEN)/sast.cmi
-	@mv $(SRC)/sast.cmo $(OBJ)/sast.cmo
-	@$(PRINT_OK)
-
 Compile-Scanner:
-	@$(OCC1) -I $(GEN) $(GEN)/scanner.ml
+	@$(OCC1) -I $(GEN) $(GEN)/parser.mli $(GEN)/scanner.ml
 	@mv $(GEN)/scanner.cmo $(OBJ)/scanner.cmo
 	@$(PRINT_OK)
 
@@ -110,7 +104,7 @@ Compile-Blox:
 	@$(PRINT_OK)
 
 Link-Objects:
-	@$(OCC2) $(EXEC) $(OBJ)/parser.cmo $(OBJ)/scanner.cmo $(OBJ)/ast.cmo $(OBJ)/sast.cmo \
+	@$(OCC2) $(EXEC) $(OBJ)/parser.cmo $(OBJ)/scanner.cmo $(OBJ)/ast.cmo \
 	$(OBJ)/analyzer.cmo $(OBJ)/executor.cmo $(OBJ)/generator.cmo $(OBJ)/blox.cmo 
 	@$(BUILD_OK)
 	@echo "\n-------------------------------------------------------\n"
@@ -143,17 +137,20 @@ Run-Menhir-Test:
 	@$(PRINT_OK)
 
 Demo: Clean
-	ocamlc -o demo exedemo.ml
-	./demo
-	cat fr1.amf
+	@ocamlc -o demo src/exedemo.ml
+	@mv src/exedemo.cmi gen/
+	@mv src/exedemo.cmo obj/
+	@./demo
+	@$(PRINT_OK)
 
 Clean:
 	@echo "\n-------------------------------------------------------\n"
 	@rm -rf $(GEN)/*
 	@rm -rf $(OBJ)/*
 	@rm -rf $(EXEC)
-	@rm -rf demo exedemo.cmi exedemo.cmo fr1.amf
+	@rm -rf demo *.amf
 	@$(PRINT_OK)
+	@echo "\n"
 
 Blox.tar.gz : $(TARFILES) Clean
 	@cd .. && tar czf Blox/Blox.tar.gz $(TARFILES:%=Blox/%)
