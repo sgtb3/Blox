@@ -31,6 +31,13 @@ Face faceb = facea;
 /* multiple functions - working */
 int someFunction() { return 1; }
 
+
+/* check for redeclaring built-in function - NOT working*/
+void printi(int x) { return 1; }
+void print(string s) { return 1; }
+
+void Join(Frame A, Face B, Frame C, Face D) { return 1; }
+
 /* required main function - working */
 int main()
 {
@@ -39,6 +46,8 @@ int main()
 
 	int a = 1 + 2;
 	float a = 1.5;
+
+	printi(1);
 
 	/* local var declar - working */
 	int x;

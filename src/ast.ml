@@ -43,7 +43,7 @@ type dtype =
 
 (* built-in function call parameters *)
 type join  = frame * face_id * frame * face_id
-type build = frame * face_id array * frame * face_id array
+type build = frame * face_id list * frame * face_id list
 
 (* variable declarations *)
 type var_decl = dtype * string
@@ -197,10 +197,10 @@ let string_of_face_id_list faceid =
 
 (* print Build function arguments - will substitute the actual face values in here *)
 let string_of_build_args (w,x,y,z) =
-  let alist = (Array.to_list x) in
-  let blist = (Array.to_list z) in
-  w.fr_id ^ "," ^ (String.concat "," (List.map (fun f -> f.fc_id) alist)) ^ "," ^
-  y.fr_id ^ "," ^ (String.concat "," (List.map (fun f -> f.fc_id) blist))
+  (* let alist = (Array.to_list x) in
+  let blist = (Array.to_list z) in *)
+  w.fr_id ^ "," ^ (String.concat "," (List.map (fun f -> f.fc_id) x)) ^ "," ^
+  y.fr_id ^ "," ^ (String.concat "," (List.map (fun f -> f.fc_id) z))
   
 (* print statements *)
 let rec string_of_stmt = function 
