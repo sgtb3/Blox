@@ -13,29 +13,29 @@ let analyze (globals, functions) =
     in helper (List.sort compare list)
   in
 
-  (* Raise an exception if a given binding is to a void type *)
+  (* (* Raise an exception if a given binding is to a void type *)
   let check_not_void exceptf = function
     | (Void, n) -> raise (Failure (exceptf n))
     | _ -> ()
-  in
+  in *)
 
-  (* Raise an excp if given rvalue type can't be assigned to the given lvalue type *)
+  (* (* Raise an excp if given rvalue type can't be assigned to the given lvalue type *)
   let check_assign lvaluet rvaluet err =  
     if lvaluet == rvaluet then lvaluet 
     else raise err
-  in
+  in *)
 
   (* Returns the global var decl list *)
   let get_var_decl globs = 
     (List.map (fun (x,y) -> y) globs.var_decls) 
   in 
 
-  (* Returns an empty face_id array - NOT USED *)
+  (* (* Returns an empty face_id array - NOT USED *)
   let make_faceid_array =
     (fun _ -> [{ dim = (0,0,0); face = ""; fc_id = ""}])
-  in
+  in *)
 
-  (* Returns the type of t *)
+  (* (* Returns the type of t *)
   let get_type = function
     | Int    -> Int
     | Bool   -> Bool
@@ -45,7 +45,7 @@ let analyze (globals, functions) =
     | Array(x,y,z) -> Array(x,y,z)
     | FaceId({ dim; face; fc_id }) -> FaceId({ dim; face; fc_id })
     | Frame({x; y; z; blocks; fr_id}) -> Frame({x; y; z; blocks; fr_id})
-  in
+  in *)
 
   (* Check for restricted function names *)
   if List.mem "print" (List.map (fun fd -> fd.fname) functions) then 
@@ -160,24 +160,23 @@ let analyze (globals, functions) =
   in
 
   (* Function declarations for built-in functions *)
-  let built_in_decls = 
-    add_join (add_build (add_convert (add_print m)))
+  let add_built_in_decls = 
+    add_join (add_build (add_convert (add_printfl (add_printi (add_printb (add_print m))))))
   in
-  
   
   (* Add built-in function declarations to map, mapping: func_name -> func_decl *)
   let function_decls = 
     List.fold_left 
-      (fun map fdecl -> StringMap.add fdecl.fname fdecl map) built_in_decls functions
+      (fun map fdecl -> StringMap.add fdecl.fname fdecl map) add_built_in_decls functions
   in
 
   (* Check for unrecognized functions *)
-  let function_decl s = 
+  (* let function_decl s = 
     try 
       StringMap.find s function_decls
     with 
       Not_found -> raise (Failure ("unrecognized function " ^ s))
-  in
+  in *)
 
   (* Check for main function *)
   let check_main_decl = 
@@ -186,14 +185,17 @@ let analyze (globals, functions) =
     with 
       Not_found -> raise (Failure ("missing main() entry point"))
   in
-  check_main_decl;
+
+  let _ = check_main_decl in
+  
 
   (* Check globals for dup var/frame/face decls - NOT WORKING CORRECTLY *)
   let check_globals glob =
+
     report_duplicate (fun n -> "duplicate global var/frame/face decl" ^ n) 
       (List.rev (get_var_decl glob)) 
   in
-  List.iter check_globals globals;
+  check_globals globals;
 
 
 

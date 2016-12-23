@@ -36,6 +36,10 @@ int someFunction() { return 1; }
 void printi(int x) { return 1; }
 void print(string s) { return 1; }
 
+int printtest() {
+	return 1;
+}
+
 void Join(Frame A, Face B, Frame C, Face D) { return 1; }
 
 /* required main function - working */

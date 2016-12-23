@@ -33,42 +33,22 @@ program:
   decls EOF { $1 }
 
 decls:
-  |/* nothing */    { ([],[])                }
-  | decls globals   { ($2 :: fst $1), snd $1 }
-  | decls func_decl { fst $1, ($2 :: snd $1) }
+  |/* nothing */    
+    { ({ 
+        var_decls  = []; 
+        var_assgns = [];
+        fr_assgns  = [];
+        fc_assgns  = []; 
+       }, [])                
+    }
+  | decls globals   { $2, snd $1 }             /**/
+  | decls func_decl { fst $1, ($2 :: snd $1) } /**/
 
-dtype:
-  | INT                            { Int               }
-  | FLOAT                          { Float             }
-  | BOOL                           { Bool              }
-  | STRING                         { String            } 
-  | VOID                           { Void              }
-  | FRAME frame_decl               { Frame($2)         }
-  | FACE face_decl                 { FaceId($2)        }
-  | dtype LBRACK LIT_INT RBRACK ID { Array($1,$3,$5)   }
-
-face_decl:
-  LT LIT_INT COMMA LIT_INT COMMA LIT_INT COMMA ID GT 
-    { { 
-        dim   = ($2,$4,$6); 
-        face  = $8; 
-        fc_id = "" 
-    } }
-
-frame_decl:
-  LT LIT_INT COMMA LIT_INT COMMA LIT_INT GT 
-    { { 
-        x      = $2;
-        y      = $4; 
-        z      = $6; 
-        fr_id  = ""; 
-        blocks = [||] 
-    } }
 
 globals:
-  | dtype ID SEMI                    /* var decls   */
+  | dtype ID SEMI                   /* var decls   */
     { { 
-        var_decls  = [($1,$2)]; 
+        var_decls  = [($1, $2)]; 
         var_assgns = [];
         fr_assgns  = [];
         fc_assgns  = []; 
@@ -104,6 +84,34 @@ func_decl:
         body    = List.rev $7 
     } }
 
+dtype:
+  | INT                            { Int               }
+  | FLOAT                          { Float             }
+  | BOOL                           { Bool              }
+  | STRING                         { String            } 
+  | VOID                           { Void              }
+  | FRAME frame_decl               { Frame($2)         }
+  | FACE face_decl                 { FaceId($2)        }
+  | dtype LBRACK LIT_INT RBRACK ID { Array($1,$3,$5)   }
+
+face_decl:
+  LT LIT_INT COMMA LIT_INT COMMA LIT_INT COMMA ID GT 
+    { { 
+        dim   = ($2,$4,$6); 
+        face  = $8; 
+        fc_id = "" 
+    } }
+
+frame_decl:
+  LT LIT_INT COMMA LIT_INT COMMA LIT_INT GT 
+    { { 
+        x      = $2;
+        y      = $4; 
+        z      = $6; 
+        fr_id  = ""; 
+        blocks = [||] 
+    } }
+
 formals_opt:
   |/* nothing */{ []          }
   | formal_list { List.rev $1 }
@@ -111,6 +119,14 @@ formals_opt:
 formal_list:
   | dtype ID                   { [($1,$2)]     }
   | formal_list COMMA dtype ID { ($3,$4) :: $1 }
+
+actuals_opt:
+  | /* nothing */ { []          }
+  | actuals_list  { List.rev $1 }
+
+actuals_list:
+  | expr                    { [$1]     }
+  | actuals_list COMMA expr { $3 :: $1 }
 
 stmt_list:
   |/* nothing */   { []       }
@@ -135,18 +151,15 @@ stmt:
   | WHILE LPAREN expr RPAREN stmt 
     { While($3, $5) }
   | CONVERT LPAREN ID RPAREN SEMI 
-    { 
-      Convert({ 
+    { Convert({ 
                 x      = 0; 
                 y      = 0; 
                 z      = 0; 
                 fr_id  = $3; 
-                blocks = [||] 
-              }) 
+                blocks = [||] }) 
     }
   | BUILD LPAREN ID COMMA build_args COMMA ID COMMA build_args RPAREN SEMI
-    { 
-      Build({ 
+    { Build({ 
               x      = 0; 
               y      = 0; 
               z      = 0; 
@@ -159,12 +172,10 @@ stmt:
               z      = 0; 
               fr_id  = $7; 
               blocks = [||] 
-            }, $9
-          )
+            }, $9)
     }
   | JOIN LPAREN ID COMMA ID COMMA ID COMMA ID RPAREN SEMI 
-    { 
-      Join({
+    { Join({
               x      = 0; 
               y      = 0; 
               z      = 0; 
@@ -240,12 +251,3 @@ expr:
   | MINUS expr %prec NEG   { Unop(Neg,$2)         }
   | LPAREN expr RPAREN     { $2                   }
   | ID LPAREN actuals_opt RPAREN { Call($1,$3)    }
-  
-
-actuals_opt:
-  | /* nothing */ { []          }
-  | actuals_list  { List.rev $1 }
-
-actuals_list:
-  | expr                    { [$1]     }
-  | actuals_list COMMA expr { $3 :: $1 }

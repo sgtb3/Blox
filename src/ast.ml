@@ -101,14 +101,14 @@ type fc_assign = string * string
 
 (* gloabls is a combination of var & frame declarations and assignments *)
 type globals = {
-  var_decls  : var_decl list;
+  var_decls  : var_decl   list;
   var_assgns : var_assign list;
-  fr_assgns  : fr_assign list;
-  fc_assgns  : fc_assign list;
+  fr_assgns  : fr_assign  list;
+  fc_assgns  : fc_assign  list;
 }
 
 (* a blox program is a tuple of globals and function declarations *)
-type program = globals list * func_decl list
+type program = globals * func_decl list
 
 (* print binary operators *)
 let string_of_op = function
@@ -243,12 +243,13 @@ let string_of_func_decl fd =
 
 (* print globals *)
 let string_of_globals glob = 
-  String.concat "" (List.map string_of_var_decl glob.var_decls) ^
-  String.concat "" (List.map string_of_vassign glob.var_assgns) ^
-  String.concat "" (List.map string_of_frassign glob.fr_assgns) ^
-  String.concat "" (List.map string_of_fcassign glob.fc_assgns) ^"\n"
+  String.concat "" (List.map string_of_var_decl  glob.var_decls) ^
+  String.concat "" (List.map string_of_vassign  glob.var_assgns) ^
+  String.concat "" (List.map string_of_frassign  glob.fr_assgns) ^
+  String.concat "" (List.map string_of_fcassign  glob.fc_assgns) ^"\n"
 
 (* print blox program *)
 let string_of_program (globals,funcs) =
-  String.concat ""   (List.rev (List.map string_of_globals globals)) ^ "\n" ^
+  string_of_globals globals ^ "\n" ^
   String.concat "\n" (List.rev (List.map string_of_func_decl funcs))
+
