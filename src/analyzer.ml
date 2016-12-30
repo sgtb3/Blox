@@ -24,18 +24,9 @@ let analyze (globals, functions) =
     if lvaluet == rvaluet then lvaluet 
     else raise err
   in *)
-
-  (* Returns the global var decl list *)
-  let get_var_decl globs = 
-    (List.map (fun (x,y) -> y) globs.var_decls) 
-  in 
-
-  (* (* Returns an empty face_id array - NOT USED *)
-  let make_faceid_array =
-    (fun _ -> [{ dim = (0,0,0); face = ""; fc_id = ""}])
-  in *)
-
-  (* (* Returns the type of t *)
+ 
+(* 
+  (* Returns the type of t *)
   let get_type = function
     | Int    -> Int
     | Bool   -> Bool
@@ -62,142 +53,109 @@ let analyze (globals, functions) =
   else ();
 
   (* Check for duplicate function names *)
-  report_duplicate (fun n -> "duplicate function " ^ n) (List.map (fun fd -> fd.fname) functions);
+  report_duplicate 
+    (fun n -> "duplicate function " ^ n) 
+      (List.map (fun fd -> fd.fname) functions);
   
   (* Create an empty map *)
-  let m = 
-    StringMap.empty 
+  let m = StringMap.empty 
   in
 
   let add_join m = 
     StringMap.add "Join"
-      { 
-        typ     = Void;
-        fname   = "Join";    
-        formals = [ 
-                    (Frame ({ x = 0; y = 0; z = 0; blocks = [||]; fr_id = ""}), "A"); 
-                    (FaceId({ dim = (0,0,0); face = ""; fc_id = ""}), "B");                
-                    (Frame ({ x = 0; y = 0; z = 0; blocks = [||]; fr_id = ""}), "C"); 
-                    (FaceId({ dim = (0,0,0); face = ""; fc_id = ""}), "D"); 
-                  ];
-        body    = [] 
-      } m
+    { typ     = Void;
+      fname   = "Join";    
+      formals = [(Frame ({x = 0; y = 0; z = 0; blocks = [||]; fr_id = ""}), "A"); 
+                 (FaceId({dim = (0,0,0); face = ""; fc_id = ""}), "B");     
+                 (Frame ({x = 0; y = 0; z = 0; blocks = [||]; fr_id = ""}), "C"); 
+                 (FaceId({dim = (0,0,0); face = ""; fc_id = ""}), "D"); ];
+      body    = [] } m
   in 
   
   let add_build m = 
     StringMap.add "Build"
-      { 
-        typ     = Void; 
-        fname   = "Build";
-        formals = [ 
-                    (Frame ({ x = 0; y = 0; z = 0; blocks = [||]; fr_id = ""}), "A"); 
-                    (FaceId({ dim = (0,0,0); face = ""; fc_id = ""}), "B"); 
-                    (Frame ({ x = 0; y = 0; z = 0; blocks = [||]; fr_id = ""}), "C"); 
-                    (FaceId({ dim = (0,0,0); face = ""; fc_id = ""}), "D"); 
-                  ];
-        body    = [] 
-      } m
+    { typ = Void; fname = "Build";
+      formals = [(Frame ({x = 0; y = 0; z = 0; blocks = [||]; fr_id = ""}), "A"); 
+                 (FaceId({dim = (0,0,0); face = ""; fc_id = ""}), "B"); 
+                 (Frame ({x = 0; y = 0; z = 0; blocks = [||]; fr_id = ""}), "C"); 
+                 (FaceId({dim = (0,0,0); face = ""; fc_id = ""}), "D");];
+      body = [] } m
   in
 
   let add_convert m = 
     StringMap.add "Convert"
-      { 
-        typ     = Void; 
-        fname   = "Convert"; 
-        formals = [
-                    (Frame ({ x = 0; y = 0; z = 0; blocks = [||]; fr_id = ""}), "A")
-                  ]; 
-        body    = [] 
-      } m
+    { typ = Void; fname = "Convert"; 
+      formals = [(Frame({x = 0; y = 0; z = 0; blocks = [||]; fr_id = ""}), "A")]; 
+      body = [] } m
   in
 
   let add_print m = 
     StringMap.add "print"
-      { 
-        typ     = Void; 
-        fname   = "print";   
-        formals = [
-                    (String, "s")
-                  ];  
-        body    = [] 
-      } m
+      { typ = Void; fname = "print"; formals = [(String, "s")]; body = [] } m
   in 
 
   let add_printb m =
     StringMap.add "printb"
-      { 
-        typ     = Void; 
-        fname   = "printb";  
-        formals = [
-                    (Bool, "b")
-                  ];    
-        body    = [] 
-      } m
+      { typ = Void; fname = "printb"; formals = [(Bool, "b")]; body = [] } m
   in 
 
   let add_printi m = 
     StringMap.add "printi"
-      { 
-        typ     = Void; 
-        fname   = "printi";  
-        formals = [
-                    (Int, "i")
-                  ];     
-        body    = [] 
-      } m
+      { typ = Void; fname = "printi"; formals = [(Int, "i")]; body = [] } m
   in
 
   let add_printfl m =
     StringMap.add "printfl"
-      { 
-        typ     = Void; 
-        fname   = "printfl";  
-        formals = [
-                    (Float, "f")
-                  ];     
-        body    = [] 
-      } m
+      { typ = Void; fname = "printfl"; formals = [(Float, "f")]; body = [] } m
   in
 
   (* Function declarations for built-in functions *)
   let add_built_in_decls = 
-    add_join (add_build (add_convert (add_printfl (add_printi (add_printb (add_print m))))))
+    add_join 
+      (add_build 
+        (add_convert 
+          (add_printfl (add_printi (add_printb (add_print m))))))
   in
   
-  (* Add built-in function declarations to map, mapping: func_name -> func_decl *)
+  (* Add built-in function decls to map;  mapping: func_name -> func_decl *)
   let function_decls = 
     List.fold_left 
-      (fun map fdecl -> StringMap.add fdecl.fname fdecl map) add_built_in_decls functions
+      (fun map fdecl -> StringMap.add fdecl.fname fdecl map) 
+        add_built_in_decls functions
   in
 
   (* Check for unrecognized functions *)
-  (* let function_decl s = 
-    try 
-      StringMap.find s function_decls
-    with 
-      Not_found -> raise (Failure ("unrecognized function " ^ s))
-  in *)
+  let function_decl s = 
+    try StringMap.find s function_decls 
+    with Not_found -> raise (Failure ("unrecognized function: " ^ s))
+  in
+
 
   (* Check for main function *)
   let check_main_decl = 
-    try 
-      StringMap.find "main" function_decls
-    with 
-      Not_found -> raise (Failure ("missing main() entry point"))
+    try StringMap.find "main" function_decls
+    with Not_found -> raise (Failure ("missing main() entry point"))
   in
 
-  let _ = check_main_decl in
+  let _ = check_main_decl 
+  in
   
+  (* Returns the identifer for a global *)
+  let get_glob_id globs = 
+    (List.map (fun f -> match f with 
+                | VarDecl(_,id)     -> id 
+                | VarAssign(_,id,_) -> id
+                | FrAssign(id,_)    -> id
+                | FcAssign(id,_)    -> id
+                | _                 -> "") globals)
+  in
 
-  (* Check globals for dup var/frame/face decls - NOT WORKING CORRECTLY *)
+  (* Check globals for dup globals decls *)
   let check_globals glob =
-
-    report_duplicate (fun n -> "duplicate global var/frame/face decl" ^ n) 
-      (List.rev (get_var_decl glob)) 
+    report_duplicate (fun n -> "duplicate global declaration: " ^ n) 
+      (List.rev (get_glob_id glob)) 
   in
   check_globals globals;
-
-
 
   (* 
 
@@ -315,8 +273,8 @@ let analyze (globals, functions) =
             | [Return _ as s] -> check_stmt s
             | Return _ :: _   -> raise (Failure "statements after return")
             | Block sl :: ss  -> check_block (sl @ ss)
-            | s :: ss -> check_stmt s ; check_block ss
-            | [] -> ()
+            | s :: ss         -> check_stmt s ; check_block ss
+            | []              -> ()
           in check_block sl
       | Expr e   -> ignore (check_expr e)
       | Break    -> ()

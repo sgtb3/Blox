@@ -1,21 +1,20 @@
-
-
 /* global var declar - working */
 int y;
 int z;
 float b;
-int z;   /* BAD - duplicate global var decl - should NOT be allowed */
 
+/* duplicate globals - working */
+/* int z;  */
+/* Face b = a; */
 
 /* global frame declaration - working */
 Frame<1,1,1> one;
 Frame<1,1,1> two;
-Face b = a;
 
-/* global var assignment - NOT working*/
-int z1 = y;
+/* global var assignment - working */
+int z1 = y; 
 float a = 1.5;
-string s = "please work";
+string s = "global string";
 
 /* global frame assignment - working */
 Frame C = one;
@@ -31,20 +30,21 @@ Face faceb = facea;
 /* multiple functions - working */
 int someFunction() { return 1; }
 
+/* globals arrays - NOT working */
+/* int[5] arr; */
 
-/* check for redeclaring built-in function - NOT working*/
-void printi(int x) { return 1; }
-void print(string s) { return 1; }
+/* check for redeclaring built in function - NOT working correctly */
+/* void printi(int x) { return 1; } */
+/* void print(string s) { return 1; } */
+/* void join(Frame A, Face B, Frame C, Face D) { return 1; } */
 
-int printtest() {
-	return 1;
-}
-
-void Join(Frame A, Face B, Frame C, Face D) { return 1; }
 
 /* required main function - working */
 int main()
 {
+	/* undeclared functions - NOT working */
+	undeclaredFunction(x);
+
 	/* function call - working */
 	someFunction();
 
@@ -60,13 +60,11 @@ int main()
 	Face<1,1,1,E>[2] fcarr;
 
 	Face g = facea;
-
 	float b;
-	
 	b = 2.3;
 	void i;  /* BAD this should NOT be accepted - catch this in the analyzer */ 
 
-	string s = "please work";
+	string s = "local string";
 	
 	/* local arrays - working */
 	int[5] x; /* BAD */
@@ -132,3 +130,7 @@ int main()
 	print(false);
 
 }
+
+int abc;
+bool def;
+int endFunc() {return;}

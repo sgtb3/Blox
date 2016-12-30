@@ -47,12 +47,19 @@ PRINT_OK   = printf "$@ $(OK_STR)"  | $(AWK_CMD)
 BUILD_OK   = printf "$@ $(SUC_STR)" | $(AWK_CMD)
 
 compiler:	Clean Create-Scanner Create-AST Create-Parser \
-		Compile-Scanner Compile-Parser Compile-Analyzer Compile-Executor \
-		Compile-Generator Compile-Blox Link-Objects  
+			Compile-Printer Compile-Scanner Compile-Parser \
+			Compile-Analyzer Compile-Executor Compile-Generator \
+			Compile-Blox Link-Objects  
 
 Create-Scanner:
 	@$(LEXGEN) $(SRC)/scanner.mll
 	@mv $(SRC)/scanner.ml $(GEN)/scanner.ml
+	@$(PRINT_OK)
+
+Create-AST:
+	@$(OCC1) $(SRC)/ast.ml 
+	@mv $(SRC)/ast.cmi $(GEN)/ast.cmi
+	@mv $(SRC)/ast.cmo $(OBJ)/ast.cmo
 	@$(PRINT_OK)
 
 Create-Parser:
@@ -63,10 +70,10 @@ Create-Parser:
 	@#cat $(GEN)/parser.output
 	@$(PRINT_OK)
 
-Create-AST:
-	@$(OCC1) $(SRC)/ast.ml 
-	@mv $(SRC)/ast.cmi $(GEN)/ast.cmi
-	@mv $(SRC)/ast.cmo $(OBJ)/ast.cmo
+Compile-Printer:
+	@$(OCC1) -I $(GEN) $(SRC)/pprint.ml
+	@mv $(SRC)/pprint.cmo $(OBJ)/pprint.cmo
+	@mv $(SRC)/pprint.cmi $(GEN)/pprint.cmi
 	@$(PRINT_OK)
 
 Compile-Scanner:
@@ -105,7 +112,8 @@ Compile-Blox:
 
 Link-Objects:
 	@$(OCC2) $(EXEC) $(OBJ)/parser.cmo $(OBJ)/scanner.cmo $(OBJ)/ast.cmo \
-	$(OBJ)/analyzer.cmo $(OBJ)/executor.cmo $(OBJ)/generator.cmo $(OBJ)/blox.cmo 
+	$(OBJ)/pprint.cmo $(OBJ)/analyzer.cmo $(OBJ)/executor.cmo \
+	$(OBJ)/generator.cmo $(OBJ)/blox.cmo 
 	@$(BUILD_OK)
 	@echo "\n-------------------------------------------------------\n"
 

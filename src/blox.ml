@@ -26,5 +26,5 @@ let _ =
 
   match action with
     | Usage   ->  print_endline usage
-    | Ast     ->  print_string (Ast.string_of_program ast)
-    | Compile ->  Executor.execute ast
+    | Ast     ->  print_string (Pprint.string_of_program ast)
+    (* | Compile ->  Executor.execute ast *)
