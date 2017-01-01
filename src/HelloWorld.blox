@@ -33,10 +33,15 @@ int someFunction() { return 1; }
 /* globals arrays - NOT working */
 /* int[5] arr; */
 
-/* check for redeclaring built in function - NOT working correctly */
+/* check for redeclaring built-in PRINT functions - NOT working correctly */
 /* void printi(int x) { return 1; } */
-/* void print(string s) { return 1; } */
-/* void join(Frame A, Face B, Frame C, Face D) { return 1; } */
+/* void print() {} */
+
+
+/* redeclaring built-in functions - working */
+/* void join() {}    */
+/* void build() {}   */
+/* void convert() {} */
 
 
 /* required main function - working */
@@ -133,4 +138,15 @@ int main()
 
 int abc;
 bool def;
-int endFunc() {return;}
+
+/* void, duplicate formal arguments - working */
+/* int endFunc(void v) {return;} */
+/* int dupFormals(int a, int a) {return;} */
+
+int endFunc() {
+	int endint;
+	bool endbool;
+	Frame<1,1,1> endFrameone;
+	Frame<2,1,1> endFrametwox;
+	return 1;
+}

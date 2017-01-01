@@ -1,5 +1,3 @@
-open Printf
-
 (* binary operators *)
 type op = 
   | And   | Or  | Mod

@@ -1,4 +1,6 @@
 open Ast
+open Pprint
+open Printf
 
 module StringMap = Map.Make(String)
 
@@ -13,21 +15,19 @@ let analyze (globals, functions) =
     in helper (List.sort compare list)
   in
 
-  (* (* Raise an exception if a given binding is to a void type *)
+  (* Raise an exception if a given binding is to a void type *)
   let check_not_void exceptf = function
     | (Void, n) -> raise (Failure (exceptf n))
     | _ -> ()
-  in *)
+  in
 
-  (* (* Raise an excp if given rvalue type can't be assigned to the given lvalue type *)
+  (* Raise excp if given rvalue type can't be assigned to given lvalue type *)
   let check_assign lvaluet rvaluet err =  
     if lvaluet == rvaluet then lvaluet 
     else raise err
-  in *)
- 
-(* 
-  (* Returns the type of t *)
-  let get_type = function
+  in
+ (* 
+  let get_dtype = function
     | Int    -> Int
     | Bool   -> Bool
     | Float  -> Float
@@ -38,31 +38,30 @@ let analyze (globals, functions) =
     | Frame({x; y; z; blocks; fr_id}) -> Frame({x; y; z; blocks; fr_id})
   in *)
 
-  (* Check for restricted function names *)
-  if List.mem "print" (List.map (fun fd -> fd.fname) functions) then 
-    raise (Failure ("function print may not be defined")) 
-  else ();
-  if List.mem "build" (List.map (fun fd -> fd.fname) functions) then 
-    raise (Failure ("function build may not be defined")) 
-  else ();
-  if List.mem "join" (List.map (fun fd -> fd.fname) functions) then 
-    raise (Failure ("function join may not be defined")) 
-  else ();
-  if List.mem "convert" (List.map (fun fd -> fd.fname) functions) then 
-    raise (Failure ("function convert may not be defined")) 
+  (* Check func names against list of built-in funcs *)
+  let redefined_func_list = 
+    List.filter 
+      (fun fname -> List.mem fname 
+                    ["print"; "printb"; "printi"; "printfl"; 
+                     "build"; "join"; "convert";])
+        (List.map (fun fd -> fd.fname) functions) 
+  in
+
+  if List.length redefined_func_list != 0 then 
+    raise (Failure ("illegal redefinition of built-in function(s): " ^ 
+                      (String.concat " " (List.rev redefined_func_list)))) 
   else ();
 
   (* Check for duplicate function names *)
   report_duplicate 
-    (fun n -> "duplicate function " ^ n) 
+    (fun n -> "duplicate function: " ^ n) 
       (List.map (fun fd -> fd.fname) functions);
   
   (* Create an empty map *)
-  let m = StringMap.empty 
-  in
+  let m = StringMap.empty in
 
-  let add_join m = 
-    StringMap.add "Join"
+  (* Define built-in funcs *)
+  let add_join m = StringMap.add "Join"
     { typ     = Void;
       fname   = "Join";    
       formals = [(Frame ({x = 0; y = 0; z = 0; blocks = [||]; fr_id = ""}), "A"); 
@@ -71,45 +70,35 @@ let analyze (globals, functions) =
                  (FaceId({dim = (0,0,0); face = ""; fc_id = ""}), "D"); ];
       body    = [] } m
   in 
-  
-  let add_build m = 
-    StringMap.add "Build"
-    { typ = Void; fname = "Build";
+  let add_build m = StringMap.add "Build"
+    { typ     = Void; 
+      fname   = "Build";
       formals = [(Frame ({x = 0; y = 0; z = 0; blocks = [||]; fr_id = ""}), "A"); 
                  (FaceId({dim = (0,0,0); face = ""; fc_id = ""}), "B"); 
                  (Frame ({x = 0; y = 0; z = 0; blocks = [||]; fr_id = ""}), "C"); 
                  (FaceId({dim = (0,0,0); face = ""; fc_id = ""}), "D");];
-      body = [] } m
+      body    = [] } m
   in
-
-  let add_convert m = 
-    StringMap.add "Convert"
-    { typ = Void; fname = "Convert"; 
+  let add_convert m = StringMap.add "Convert"
+    { typ     = Void; 
+      fname   = "Convert"; 
       formals = [(Frame({x = 0; y = 0; z = 0; blocks = [||]; fr_id = ""}), "A")]; 
-      body = [] } m
+      body    = [] } m
   in
-
-  let add_print m = 
-    StringMap.add "print"
-      { typ = Void; fname = "print"; formals = [(String, "s")]; body = [] } m
+  let add_print m = StringMap.add "print"
+    { typ = Void; fname = "print"; formals = [(String, "s")]; body = [] } m
   in 
-
-  let add_printb m =
-    StringMap.add "printb"
-      { typ = Void; fname = "printb"; formals = [(Bool, "b")]; body = [] } m
+  let add_printb m = StringMap.add "printb"
+    { typ = Void; fname = "printb"; formals = [(Bool, "b")]; body = [] } m 
   in 
-
-  let add_printi m = 
-    StringMap.add "printi"
-      { typ = Void; fname = "printi"; formals = [(Int, "i")]; body = [] } m
+  let add_printi m = StringMap.add "printi"
+    { typ = Void; fname = "printi"; formals = [(Int, "i")]; body = [] } m
+  in
+  let add_printfl m = StringMap.add "printfl"
+    { typ = Void; fname = "printfl"; formals = [(Float, "f")]; body = [] } m
   in
 
-  let add_printfl m =
-    StringMap.add "printfl"
-      { typ = Void; fname = "printfl"; formals = [(Float, "f")]; body = [] } m
-  in
-
-  (* Function declarations for built-in functions *)
+  (* Create map for built-in funcs *)
   let add_built_in_decls = 
     add_join 
       (add_build 
@@ -117,7 +106,7 @@ let analyze (globals, functions) =
           (add_printfl (add_printi (add_printb (add_print m))))))
   in
   
-  (* Add built-in function decls to map;  mapping: func_name -> func_decl *)
+  (* Add built-in func decls to StringMap; mapping: func_name -> func_decl *)
   let function_decls = 
     List.fold_left 
       (fun map fdecl -> StringMap.add fdecl.fname fdecl map) 
@@ -125,11 +114,10 @@ let analyze (globals, functions) =
   in
 
   (* Check for unrecognized functions *)
-  let function_decl s = 
-    try StringMap.find s function_decls 
-    with Not_found -> raise (Failure ("unrecognized function: " ^ s))
+  let function_decl fname = 
+    try StringMap.find fname function_decls 
+    with Not_found -> raise (Failure ("unrecognized function '" ^ fname ^ "'"))
   in
-
 
   (* Check for main function *)
   let check_main_decl = 
@@ -137,42 +125,67 @@ let analyze (globals, functions) =
     with Not_found -> raise (Failure ("missing main() entry point"))
   in
 
-  let _ = check_main_decl 
-  in
+  let _ = check_main_decl in
   
-  (* Returns the identifer for a global *)
+  (* Returns the string identifer for a global *)
   let get_glob_id globs = 
     (List.map (fun f -> match f with 
                 | VarDecl(_,id)     -> id 
                 | VarAssign(_,id,_) -> id
                 | FrAssign(id,_)    -> id
                 | FcAssign(id,_)    -> id
-                | _                 -> "") globals)
+                | _ -> "") globals)
   in
 
-  (* Check globals for dup globals decls *)
+  (* Check globals for duplicate declarations *)
   let check_globals glob =
-    report_duplicate (fun n -> "duplicate global declaration: " ^ n) 
+    report_duplicate (fun n -> "duplicate global declaration '" ^ n ^ "'") 
       (List.rev (get_glob_id glob)) 
   in
-  check_globals globals;
+  check_globals globals; (* could have used List.iter since globals is a list *)
 
-  (* 
-
-  (* UNCOMMENTING THIS PORTION  WILL CAUSE COMPILER TO BREAK *)
   
   (* Check functions *)
   let check_functions func =
 
-    let get_var_decl_g globs = 
-      List.hd (List.map (fun (x,y) -> y) globs.var_decls) 
+    (* likely incorrect, but currently compiling *)
+    let get_local_vd = function
+      | Var_decl(dt, id) :: _ -> [(dt, id)]
+      | _ -> []
     in
     
-    (* THE PROBLEM IS HERE - get_var_decl_g globals returns a list instead of a single item *)
+    (* Check for void args in func definitions *)
+    List.iter 
+      (check_not_void 
+        (fun n -> "illegal void formal argument '" ^ n ^ 
+                  "' in function: " ^ func.fname)) func.formals;
+
+    (* Check for duplicate formal args in func definitions *)
+    report_duplicate 
+      (fun n -> "duplicate formal argument: '" ^ n ^ 
+                "' in function: " ^ func.fname) (List.map snd func.formals);
+
+    (* Not working correctly *)
+    List.iter 
+      (check_not_void
+        (fun n -> "illegal void local var decl '" ^ n ^ 
+          "' in function" ^ func.fname)) (get_local_vd func.body);
+
+  (* 
+    report_duplicate 
+      (fun n -> "duplicate local " ^ n ^ " in " ^ func.fname)
+        (List.map get_vd_type func.body); 
     
+    let get_var_decl_g globs = 
+      List.hd (List.map (fun (x,y) -> y) globs.var_decls) 
+    in 
+  *)
+
+    (* let 
     (* Create a symbol table of globals, formals, and locals - NOT COMPLETE *)
-    let symbols = List.fold_left (fun map (t, n) -> StringMap.add n t map)
-      StringMap.empty ( get_var_decl_g globals @ func.formals ) (*@ func.body)*)
+    let symbols = 
+      List.fold_left (fun map (t, n) -> StringMap.add n t map)
+        StringMap.empty (globals @ func.formals) (*@ func.body)*)
     in
 
     let type_of_identifier s =
@@ -181,18 +194,7 @@ let analyze (globals, functions) =
     in
 
     (* NOT WORKING  *)
-    (*((check_not_void 
-      (fun n -> "illegal void argument" ^ n ^ " to function " ^ func.fname)) func.formals); *)
-
-    (* report_duplicate (fun n -> "duplicate formal " ^ n ^ " in " ^ func.fname)
-      (List.map snd func.formals); *)
-
-    (* List.iter (check_not_void (fun n -> "illegal void local " ^ n ^
-      " in " ^ func.fname)) func.locals; *)
-
-    (* report_duplicate (fun n -> "duplicate local " ^ n ^ " in " ^ func.fname)
-      (List.map snd func.locals); *)
-
+    
     (* Return expression type *)
     let rec check_expr = function
       | Id s       -> type_of_identifier s
@@ -291,7 +293,7 @@ let analyze (globals, functions) =
                                ignore (check_expr e3); check_stmt st
       | While(p, s)         -> check_bool_expr p; check_stmt s
     in
-    check_stmt (Block func.body);
+    check_stmt (Block func.body);  *)
   in
-  List.iter check_functions functions *)
+  List.iter check_functions functions
   

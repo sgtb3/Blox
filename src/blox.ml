@@ -10,7 +10,9 @@ let usage =
 
 let _ =
   let action = 
-    if Array.length Sys.argv > 1 then
+    if Array.length Sys.argv = 1 then
+      Usage
+    else if Array.length Sys.argv > 1 then
       List.assoc Sys.argv.(1) 
       [ ("-h", Usage); ("-a", Ast); ("-c", Compile); ] 
     else 
@@ -27,4 +29,4 @@ let _ =
   match action with
     | Usage   ->  print_endline usage
     | Ast     ->  print_string (Pprint.string_of_program ast)
-    (* | Compile ->  Executor.execute ast *)
+    | Compile ->  Executor.execute ast

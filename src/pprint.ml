@@ -79,33 +79,35 @@ let string_of_join_args (w,x,y,z) =
 let string_of_build_args (w,x,y,z) =
   w.fr_id ^ "," ^ (String.concat "," (List.map (fun f -> f.fc_id) x)) ^ "," ^
   y.fr_id ^ "," ^ (String.concat "," (List.map (fun f -> f.fc_id) z))
-  
+
+let tab str = "\t" ^ str
+
 (* print statements *)
 let rec string_of_stmt = function 
-  | Var_decl(x,y)     -> string_of_var_decl (x,y) ^ ";\n"
-  | Expr(expr)        -> string_of_expr expr      ^ "\n"
-  | Join(w,x,y,z)     -> "Join("  ^ string_of_join_args  (w,x,y,z) ^ ");\n"
-  | Build(w,x,y,z)    -> "Build(" ^ string_of_build_args (w,x,y,z) ^ ");\n"
-  | Array(x,y,z)      -> string_of_dtype x ^ "[" ^ 
+  | Var_decl(x,y)     -> "\t"^ string_of_var_decl (x,y) ^ ";\n"
+  | Expr(expr)        -> "\t"^ string_of_expr expr      ^ "\n"
+  | Join(w,x,y,z)     -> "\t"^ "Join("  ^ string_of_join_args  (w,x,y,z) ^ ");\n"
+  | Build(w,x,y,z)    -> "\t"^ "Build(" ^ string_of_build_args (w,x,y,z) ^ ");\n"
+  | Array(x,y,z)      -> "\t"^ string_of_dtype x ^ "[" ^ 
                          string_of_int y   ^ "] " ^ z ^";\n"
-  | Print(e)          -> "print(" ^ string_of_expr e ^ ");\n"
-  | Convert(fr)       -> "Convert(" ^ fr.fr_id ^ ");\n"
-  | Break             -> "break;\n"
-  | Continue          -> "continue;\n"
-  | Return(expr)      -> "return " ^ string_of_expr expr ^ ";\n";
-  | If(e,s,Block([])) -> "if ("    ^ string_of_expr e  ^ 
-                         ")\n"     ^ string_of_stmt s
-  | If(e,s1,s2)       -> "if ("    ^ string_of_expr e  ^ 
-                         ")\n"     ^ string_of_stmt s1 ^ 
-                         "else\n"  ^ string_of_stmt s2
-  | For(e1,e2,e3,s)   -> "for ("   ^ string_of_expr e1 ^ 
-                         "; "      ^ string_of_expr e2 ^ 
-                         "; "      ^ string_of_expr e3 ^ 
-                         ") "      ^ string_of_stmt s
-  | While(e,s)        -> "while (" ^ string_of_expr e  ^ 
-                         ") "      ^ string_of_stmt s
-  | Block(stmts)      -> "{\n"     ^ String.concat "" 
-                                     (List.map string_of_stmt stmts) ^ "}\n"
+  | Print(e)          -> "\t"^ "print(" ^ string_of_expr e ^ ");\n"
+  | Convert(fr)       -> "\t"^ "Convert(" ^ fr.fr_id ^ ");\n"
+  | Break             -> "\t"^ "break;\n"
+  | Continue          -> "\t"^ "continue;\n"
+  | Return(expr)      -> "\treturn " ^ string_of_expr expr ^ ";\n";
+  | If(e,s,Block([])) -> "\n\tif ("    ^ string_of_expr e  ^ 
+                         ")"     ^ string_of_stmt s
+  | If(e,s1,s2)       -> "\n\tif ("    ^ string_of_expr e  ^ 
+                         ")"     ^ string_of_stmt s1 ^ 
+                         "\telse\n"  ^ string_of_stmt s2
+  | For(e1,e2,e3,s)   -> "\n\tfor (" ^ string_of_expr e1 ^ "; "  
+  									 ^ string_of_expr e2 ^ "; "  
+  									 ^ string_of_expr e3 ^ ") "  
+  									 ^ string_of_stmt s
+  | While(e,s)        -> "\n\twhile (" ^ string_of_expr e  ^ 
+                         ")"          ^ string_of_stmt s
+  | Block(stmts)      -> " {\n\t" ^ String.concat "" 
+                                (List.map string_of_stmt stmts) ^ "\t}\n\n"
 
 (* print variable assignments *) 
 let string_of_vassign (t,id,exp) = 
@@ -118,12 +120,19 @@ let string_of_frassign (fn1,fn2) =
 (* print face assignments *)
 let string_of_fcassign (fn1,fn2) = 
   "Face " ^ fn1 ^ " = " ^ fn2 ^ ";"
+(* 
+let string_of_formals fd = 
+
+  let l1 = List.map fst fd.formals in
+  let l2 = List.map snd fd.formals in
+  List.iter2 String.concat " " l1 l2
+   *)
 
 (* print function declarations *)
 let string_of_func_decl fd =
   "\n" ^ string_of_dtype fd.typ ^ " " ^ fd.fname ^ "(" ^ 
-  String.concat ", " (List.map snd fd.formals)         ^ ")\n{\n" ^
-  String.concat ""   (List.map string_of_stmt fd.body) ^ "}\n"
+  String.concat ", " (List.map snd fd.formals)         ^ ") {\n" ^
+  String.concat "" (List.map string_of_stmt fd.body) ^ "}\n"
 
 let rec string_of_vd = fun list -> match list with
   | [(dt,id)]     -> string_of_var_decl (dt,id) ^ ";"
