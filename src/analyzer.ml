@@ -26,18 +26,7 @@ let analyze (globals, functions) =
     if lvaluet == rvaluet then lvaluet 
     else raise err
   in
- (* 
-  let get_dtype = function
-    | Int    -> Int
-    | Bool   -> Bool
-    | Float  -> Float
-    | String -> String
-    | Void   -> Void
-    | Array(x,y,z) -> Array(x,y,z)
-    | FaceId({ dim; face; fc_id }) -> FaceId({ dim; face; fc_id })
-    | Frame({x; y; z; blocks; fr_id}) -> Frame({x; y; z; blocks; fr_id})
-  in *)
-
+ 
   (* Check func names against list of built-in funcs *)
   let redefined_func_list = 
     List.filter 
@@ -64,25 +53,25 @@ let analyze (globals, functions) =
   let add_join m = StringMap.add "Join"
     { typ     = Void;
       fname   = "Join";    
-      formals = [(Frame ({x = 0; y = 0; z = 0; blocks = [||]; fr_id = ""}), "A"); 
+      formals = [(Frame ({x = 0; y = 0; z = 0; blocks = [||]; fr_id = ""}),"A"); 
                  (FaceId({dim = (0,0,0); face = ""; fc_id = ""}), "B");     
-                 (Frame ({x = 0; y = 0; z = 0; blocks = [||]; fr_id = ""}), "C"); 
-                 (FaceId({dim = (0,0,0); face = ""; fc_id = ""}), "D"); ];
+                 (Frame ({x = 0; y = 0; z = 0; blocks = [||]; fr_id = ""}),"C"); 
+                 (FaceId({dim = (0,0,0); face = ""; fc_id = ""}), "D");];
       body    = [] } m
   in 
   let add_build m = StringMap.add "Build"
     { typ     = Void; 
       fname   = "Build";
-      formals = [(Frame ({x = 0; y = 0; z = 0; blocks = [||]; fr_id = ""}), "A"); 
+      formals = [(Frame ({x = 0; y = 0; z = 0; blocks = [||]; fr_id = ""}),"A"); 
                  (FaceId({dim = (0,0,0); face = ""; fc_id = ""}), "B"); 
-                 (Frame ({x = 0; y = 0; z = 0; blocks = [||]; fr_id = ""}), "C"); 
+                 (Frame ({x = 0; y = 0; z = 0; blocks = [||]; fr_id = ""}),"C"); 
                  (FaceId({dim = (0,0,0); face = ""; fc_id = ""}), "D");];
       body    = [] } m
   in
   let add_convert m = StringMap.add "Convert"
     { typ     = Void; 
       fname   = "Convert"; 
-      formals = [(Frame({x = 0; y = 0; z = 0; blocks = [||]; fr_id = ""}), "A")]; 
+      formals = [(Frame({x = 0; y = 0; z = 0; blocks = [||]; fr_id = ""}),"A")]; 
       body    = [] } m
   in
   let add_print m = StringMap.add "print"
@@ -120,12 +109,9 @@ let analyze (globals, functions) =
   in
 
   (* Check for main function *)
-  let check_main_decl = 
-    try StringMap.find "main" function_decls
+  let _ = try StringMap.find "main" function_decls
     with Not_found -> raise (Failure ("missing main() entry point"))
   in
-
-  let _ = check_main_decl in
   
   (* Returns the string identifer for a global *)
   let get_glob_id globs = 
@@ -137,55 +123,79 @@ let analyze (globals, functions) =
                 | _ -> "") globals)
   in
 
-  (* Check globals for duplicate declarations *)
+  (* Check for duplicate global declarations *)
   let check_globals glob =
     report_duplicate (fun n -> "duplicate global declaration '" ^ n ^ "'") 
       (List.rev (get_glob_id glob)) 
   in
   check_globals globals; (* could have used List.iter since globals is a list *)
 
-  
+
   (* Check functions *)
   let check_functions func =
 
-    (* likely incorrect, but currently compiling *)
-    let get_local_vd = function
-      | Var_decl(dt, id) :: _ -> [(dt, id)]
-      | _ -> []
+    (* Create a list of globals (type, id) from globals list *)
+    let global_bindings = 
+      let rec make_type_id_mapping = function
+        | []       -> []
+        | hd :: tl -> (match hd with 
+                        | VarDecl(dt,id)       -> [(dt,id)]
+                        | VarAssign(dt,id,exp) -> [(dt,id)]
+                        | _                    -> []) 
+                       @ make_type_id_mapping (List.filter ((<>) hd) tl)
+      in 
+      make_type_id_mapping globals;
     in
-    
+
+    (* Create a list of locals (type, id) from func body *)
+    let local_bindings = 
+      let rec make_type_id_mapping = function
+        | []       -> []
+        | hd :: tl -> (match hd with 
+                        | Var_Decl(dt,id)    -> [(dt,id)]
+                        | Var_Assign(va,exp) -> [(fst va,snd va)]
+                        | _                  -> []) 
+                       @ make_type_id_mapping (List.filter ((<>) hd) tl)
+      in 
+      make_type_id_mapping func.body;
+    in
+
     (* Check for void args in func definitions *)
     List.iter 
       (check_not_void 
         (fun n -> "illegal void formal argument '" ^ n ^ 
-                  "' in function: " ^ func.fname)) func.formals;
+                  "' in function " ^ func.fname)) func.formals;
 
     (* Check for duplicate formal args in func definitions *)
     report_duplicate 
       (fun n -> "duplicate formal argument: '" ^ n ^ 
-                "' in function: " ^ func.fname) (List.map snd func.formals);
+                "' in function " ^ func.fname) (List.map snd func.formals);
 
-    (* Not working correctly *)
+    (* Check for illegal void type declarations and declaration assignments *)
     List.iter 
       (check_not_void
         (fun n -> "illegal void local var decl '" ^ n ^ 
-          "' in function" ^ func.fname)) (get_local_vd func.body);
+          "' in function " ^ func.fname)) local_bindings;
 
-  (* 
-    report_duplicate 
-      (fun n -> "duplicate local " ^ n ^ " in " ^ func.fname)
-        (List.map get_vd_type func.body); 
-    
-    let get_var_decl_g globs = 
-      List.hd (List.map (fun (x,y) -> y) globs.var_decls) 
+    let local_ids_list =
+      let rec get_ids = function
+        | [] -> []
+        | (dt,id) :: tl -> id :: get_ids tl
+      in
+      get_ids local_bindings;
     in 
-  *)
 
-    (* let 
+    (* Check for duplicate locals *)
+    report_duplicate 
+      (fun n -> "duplicate local '" ^ n ^ "' in function " ^ func.fname) 
+        local_ids_list;
+
     (* Create a symbol table of globals, formals, and locals - NOT COMPLETE *)
     let symbols = 
-      List.fold_left (fun map (t, n) -> StringMap.add n t map)
-        StringMap.empty (globals @ func.formals) (*@ func.body)*)
+      List.fold_left 
+        (fun map (dt, id) -> StringMap.add id dt map)
+          StringMap.empty (global_bindings @ func.formals @ local_bindings) 
+          (* StringMap.empty (global_bindings @ func.formals @ local_bindings)  *)
     in
 
     let type_of_identifier s =
@@ -193,7 +203,10 @@ let analyze (globals, functions) =
       with Not_found -> raise (Failure ("undeclared identifier " ^ s))
     in
 
-    (* NOT WORKING  *)
+    (* testing - delete when symbol table works *)
+    print_string "\n";
+
+(* 
     
     (* Return expression type *)
     let rec check_expr = function
@@ -202,7 +215,7 @@ let analyze (globals, functions) =
       | Lit_Flt  _ -> Float
       | Lit_Bool _ -> Bool
       | Lit_Str  _ -> String
-      | Null     _ -> Void
+      | Null       -> Void
       | Binop(e1, op, e2) as e -> 
           let t1 = check_expr e1 and t2 = check_expr e2 
           in
@@ -277,7 +290,8 @@ let analyze (globals, functions) =
             | Block sl :: ss  -> check_block (sl @ ss)
             | s :: ss         -> check_stmt s ; check_block ss
             | []              -> ()
-          in check_block sl
+          in 
+          check_block sl
       | Expr e   -> ignore (check_expr e)
       | Break    -> ()
       | Continue -> ()
@@ -293,7 +307,7 @@ let analyze (globals, functions) =
                                ignore (check_expr e3); check_stmt st
       | While(p, s)         -> check_bool_expr p; check_stmt s
     in
-    check_stmt (Block func.body);  *)
+    check_stmt (Block func.body);  *) 
   in
   List.iter check_functions functions
   

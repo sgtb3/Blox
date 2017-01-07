@@ -27,35 +27,42 @@ Face faceb = facea;
 /* duplicate functions - working */
 /* int main() { return 1; } */
 
-/* multiple functions - working */
-int someFunction() { return 1; }
+/* multiple functions and formal declarations - working */
+int someFunction(int x, int y) { return 1; }
+
+/* void, duplicate formal arguments - working */
+/* int voidformalfunc(void v) {return;} */
+/* int dupFormals(int a, int a) {return;} */
 
 /* globals arrays - NOT working */
 /* int[5] arr; */
 
-/* check for redeclaring built-in PRINT functions - NOT working correctly */
+/* redeclaring built-in PRINT functions - NOT working correctly */
 /* void printi(int x) { return 1; } */
 /* void print() {} */
-
 
 /* redeclaring built-in functions - working */
 /* void join() {}    */
 /* void build() {}   */
 /* void convert() {} */
 
-
 /* required main function - working */
 int main()
 {
 	/* undeclared functions - NOT working */
 	undeclaredFunction(x);
+	abc(4);
 
 	/* function call - working */
 	someFunction();
 
 	int a = 1 + 2;
-	float a = 1.5;
 
+	/* duplicate local vars - working */
+	/* float a = 1.5; */
+
+	/* local arrays - working; duplicate name - NOT working for arrays */
+	int[5] x;
 	printi(1);
 
 	/* local var declar - working */
@@ -67,21 +74,17 @@ int main()
 	Face g = facea;
 	float b;
 	b = 2.3;
-	void i;  /* BAD this should NOT be accepted - catch this in the analyzer */ 
+	
+	/* illegal void type declarations - working */
+	/* void i; */
 
 	string s = "local string";
-	
-	/* local arrays - working */
-	int[5] x; /* BAD */
-
 	bool[10] b1;
 	void[10] b1;
 
 	/* local variable declaration and assignment - working */
-	bool t = true; /* BAD */
+	bool tr = true; 
 	bool f = false;
-	
-
 	
 	/* continue and break - working */
 	continue;
@@ -115,8 +118,8 @@ int main()
 	Frame I = one;
 
 	/* local face declarations - working */
-	Face<1,2,3,E> a;
-	Face<1,1,1,W> b;
+	Face<1,2,3,E> fa;
+	Face<1,1,1,W> fb;
 
 	/* Face assignment - NOT WORKING */
 	Face c = b; 
@@ -138,10 +141,6 @@ int main()
 
 int abc;
 bool def;
-
-/* void, duplicate formal arguments - working */
-/* int endFunc(void v) {return;} */
-/* int dupFormals(int a, int a) {return;} */
 
 int endFunc() {
 	int endint;

@@ -50,10 +50,8 @@ let rec string_of_expr = function
   | Null              -> "null"
   | Noexpr            -> ""
   | Assign(x,y)       -> x ^ " = " ^ string_of_expr y ^ ";"
-  | Fr_assign(x,y)    -> "Frame "  ^ x ^ " = " ^ string_of_expr y ^ ";"
-  | Fc_assign(x,y)    -> "Face "   ^ x ^ " = " ^ string_of_expr y ^ ";"
-  | Var_assign(x,y,z) -> string_of_dtype x ^ " " ^ y ^ " = " ^ 
-                         string_of_expr z  ^ ";"
+  | Fr_Assign(x,y)    -> "Frame "  ^ x ^ " = " ^ string_of_expr y ^ ";"
+  | Fc_Assign(x,y)    -> "Face "   ^ x ^ " = " ^ string_of_expr y ^ ";"
   | Binop(e1,o,e2)    -> string_of_expr e1 ^ " " ^ 
                          string_of_op   o  ^ " " ^ 
                          string_of_expr e2
@@ -82,18 +80,23 @@ let string_of_build_args (w,x,y,z) =
 
 let tab str = "\t" ^ str
 
+(* print variable assignments *) 
+let string_of_vassign (t,id,exp) = 
+  string_of_dtype t ^ " " ^ id ^ " = " ^ string_of_expr exp ^ ";"
+
 (* print statements *)
 let rec string_of_stmt = function 
-  | Var_decl(x,y)     -> "\t"^ string_of_var_decl (x,y) ^ ";\n"
-  | Expr(expr)        -> "\t"^ string_of_expr expr      ^ "\n"
-  | Join(w,x,y,z)     -> "\t"^ "Join("  ^ string_of_join_args  (w,x,y,z) ^ ");\n"
-  | Build(w,x,y,z)    -> "\t"^ "Build(" ^ string_of_build_args (w,x,y,z) ^ ");\n"
-  | Array(x,y,z)      -> "\t"^ string_of_dtype x ^ "[" ^ 
+  | Block(stmts)      -> " {\n\t" ^ String.concat "" 
+                         (List.map string_of_stmt stmts) ^ "\t}\n\n"
+  | Expr(expr)        -> "\t" ^ string_of_expr expr      ^ "\n"
+  | Join(w,x,y,z)     -> "\t" ^ "Join("  ^ string_of_join_args  (w,x,y,z) ^ ");\n"
+  | Build(w,x,y,z)    -> "\t" ^ "Build(" ^ string_of_build_args (w,x,y,z) ^ ");\n"
+  | Print(e)          -> "\t" ^ "print(" ^ string_of_expr e ^ ");\n"
+  | Array(x,y,z)      -> "\t" ^ string_of_dtype x ^ "[" ^ 
                          string_of_int y   ^ "] " ^ z ^";\n"
-  | Print(e)          -> "\t"^ "print(" ^ string_of_expr e ^ ");\n"
-  | Convert(fr)       -> "\t"^ "Convert(" ^ fr.fr_id ^ ");\n"
-  | Break             -> "\t"^ "break;\n"
-  | Continue          -> "\t"^ "continue;\n"
+  | Convert(fr)       -> "\t" ^ "Convert(" ^ fr.fr_id ^ ");\n"
+  | Var_Decl(x,y)     -> "\t" ^ string_of_var_decl (x,y) ^ ";\n"
+  | Var_Assign(va,ex) -> "\t" ^ string_of_vassign (fst va,snd va,ex) ^ "\n"
   | Return(expr)      -> "\treturn " ^ string_of_expr expr ^ ";\n";
   | If(e,s,Block([])) -> "\n\tif ("    ^ string_of_expr e  ^ 
                          ")"     ^ string_of_stmt s
@@ -106,12 +109,8 @@ let rec string_of_stmt = function
   									 ^ string_of_stmt s
   | While(e,s)        -> "\n\twhile (" ^ string_of_expr e  ^ 
                          ")"          ^ string_of_stmt s
-  | Block(stmts)      -> " {\n\t" ^ String.concat "" 
-                                (List.map string_of_stmt stmts) ^ "\t}\n\n"
-
-(* print variable assignments *) 
-let string_of_vassign (t,id,exp) = 
-  string_of_dtype t ^ " " ^ id ^ " = " ^ string_of_expr exp ^ ";"
+  | Break             -> "\t"^ "break;\n"
+  | Continue          -> "\t"^ "continue;\n"
 
 (* print frame assignments *)
 let string_of_frassign (fn1,fn2) = 
@@ -120,19 +119,12 @@ let string_of_frassign (fn1,fn2) =
 (* print face assignments *)
 let string_of_fcassign (fn1,fn2) = 
   "Face " ^ fn1 ^ " = " ^ fn2 ^ ";"
-(* 
-let string_of_formals fd = 
-
-  let l1 = List.map fst fd.formals in
-  let l2 = List.map snd fd.formals in
-  List.iter2 String.concat " " l1 l2
-   *)
 
 (* print function declarations *)
 let string_of_func_decl fd =
   "\n" ^ string_of_dtype fd.typ ^ " " ^ fd.fname ^ "(" ^ 
-  String.concat ", " (List.map snd fd.formals)         ^ ") {\n" ^
-  String.concat "" (List.map string_of_stmt fd.body) ^ "}\n"
+  String.concat ", " (List.map string_of_var_decl fd.formals) ^ ") {\n" ^
+  String.concat ""   (List.map string_of_stmt fd.body)        ^ "}\n"
 
 let rec string_of_vd = fun list -> match list with
   | [(dt,id)]     -> string_of_var_decl (dt,id) ^ ";"
@@ -158,9 +150,9 @@ let rec string_of_fca = fun list -> match list with
 let string_of_program (globals,funcs) = 
   String.concat "\n" 
    (List.rev (List.map (fun f -> match f with
-	                     | VarDecl(vd)   -> string_of_vd  [vd]
-	                     | VarAssign(va) -> string_of_va  [va]
-	                     | FrAssign(fra) -> string_of_fra [fra]
-	                     | FcAssign(fca) -> string_of_fca [fca]
-	                     | NoGlob        -> "") globals)) ^ "\n" ^
+  	                     | VarDecl(vd)   -> string_of_vd  [vd]
+  	                     | VarAssign(va) -> string_of_va  [va]
+  	                     | FrAssign(fra) -> string_of_fra [fra]
+  	                     | FcAssign(fca) -> string_of_fca [fca]
+	                     ) globals)) ^ "\n" ^
   String.concat "" (List.rev (List.map string_of_func_decl funcs))

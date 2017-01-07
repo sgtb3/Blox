@@ -96,18 +96,19 @@ dtype:
   | dtype LBRACK LIT_INT RBRACK ID { Array($1, $3, $5)  }
 
 stmt:
-  | expr SEMI                               { Expr($1)              }
-  | BREAK SEMI                              { Break                 }
-  | CONTINUE SEMI                           { Continue              }
-  | LCURL stmt_list RCURL                   { Block(List.rev $2)    }
-  | RETURN SEMI                             { Return Noexpr         }
-  | RETURN expr SEMI                        { Return $2             }
-  | PRINT LPAREN expr RPAREN SEMI           { Print($3)             }
-  | dtype LBRACK LIT_INT RBRACK ID SEMI     { Array($1, $3, $5)     }
-  | dtype ID SEMI                           { Var_decl($1, $2)      }
-  | WHILE LPAREN expr RPAREN stmt           { While($3, $5)         }
-  | IF LPAREN expr RPAREN stmt ELSE stmt    { If($3, $5, $7)        }
-  | IF LPAREN expr RPAREN stmt %prec NOELSE { If($3, $5, Block([])) }
+  | expr SEMI                               { Expr($1)                 }
+  | BREAK SEMI                              { Break                    }
+  | CONTINUE SEMI                           { Continue                 }
+  | LCURL stmt_list RCURL                   { Block(List.rev $2)       }
+  | RETURN SEMI                             { Return Noexpr            }
+  | RETURN expr SEMI                        { Return $2                }
+  | PRINT LPAREN expr RPAREN SEMI           { Print($3)                }
+  | dtype LBRACK LIT_INT RBRACK ID SEMI     { Array($1, $3, $5)        }
+  | dtype ID SEMI                           { Var_Decl($1, $2)         }
+  | dtype ID ASSIGN expr SEMI               { Var_Assign(($1, $2), $4) }
+  | WHILE LPAREN expr RPAREN stmt           { While($3, $5)            }
+  | IF LPAREN expr RPAREN stmt ELSE stmt    { If($3, $5, $7)           }
+  | IF LPAREN expr RPAREN stmt %prec NOELSE { If($3, $5, Block([]))    }
   | FOR LPAREN expr_opt SEMI expr SEMI expr_opt RPAREN stmt 
     { For($3, $5, $7, $9) }
   | CONVERT LPAREN ID RPAREN SEMI 
@@ -128,9 +129,8 @@ expr:
   | TRUE                   { Lit_Bool(true)         }
   | FALSE                  { Lit_Bool(false)        }
   | ID ASSIGN expr         { Assign($1, $3)         }
-  | FRAME ID ASSIGN expr   { Fr_assign($2, $4)      }
-  | FACE ID ASSIGN expr    { Fc_assign($2, $4)      }  
-  | dtype ID ASSIGN expr   { Var_assign($1, $2, $4) }
+  | FRAME ID ASSIGN expr   { Fr_Assign($2, $4)      }
+  | FACE ID ASSIGN expr    { Fc_Assign($2, $4)      }  
   | expr PLUS   expr       { Binop($1, Add, $3)     }
   | expr MINUS  expr       { Binop($1, Sub, $3)     }
   | expr TIMES  expr       { Binop($1, Mult, $3)    }
