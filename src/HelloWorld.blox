@@ -49,16 +49,15 @@ int someFunction(int x, int y) { return 1; }
 /* required main function - working */
 int main()
 {
-	/* undeclared functions - NOT working */
-	undeclaredFunction(x);
-	abc(4);
+	/* undeclared functions - working */
+	/* undeclaredFunction(x); */
 
-	/* function call - working */
-	someFunction();
+	/* function call and correct num of params - working */
+	someFunction(a,z);
 
 	int a = 1 + 2;
 
-	/* duplicate local vars - working */
+	/* duplicate global/local vars - working */
 	/* float a = 1.5; */
 
 	/* local arrays - working; duplicate name - NOT working for arrays */
@@ -93,18 +92,23 @@ int main()
 	/* for loops - working */
 	int i;
 	for (i = 0; i < 10; i = i + 1) {
-		if (a < b + 1) {
-			return;
+
+		/* binary operations on same types - working */
+		/* if (a < b + 1) { */
+		if (a < i + 1) {
+			return 1;
 		}
-		return;
+		return 0;
+		/* statement after return - working */
+		/* return i; */
 	}
 
 	/* while loops - working */
 	while (i < 10) {
-		if (a < b + 1) {
-			return;
+		if (a < i + 1) {
+			return 1;
 		}
-		return;
+		return 0;
 	}
 
 	/* local fram declarations - working  */
@@ -137,6 +141,8 @@ int main()
 	print(true);
 	print(false);
 
+	/* matching return type - working */
+	return 0;
 }
 
 int abc;

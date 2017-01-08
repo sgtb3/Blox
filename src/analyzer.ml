@@ -119,8 +119,7 @@ let analyze (globals, functions) =
                 | VarDecl(_,id)     -> id 
                 | VarAssign(_,id,_) -> id
                 | FrAssign(id,_)    -> id
-                | FcAssign(id,_)    -> id
-                | _ -> "") globals)
+                | FcAssign(id,_)    -> id) globals)
   in
 
   (* Check for duplicate global declarations *)
@@ -130,6 +129,9 @@ let analyze (globals, functions) =
   in
   check_globals globals; (* could have used List.iter since globals is a list *)
 
+  let check_frame_stmt = function
+    | { x; y; z; blocks; fr_id} -> true
+  in
 
   (* Check functions *)
   let check_functions func =
@@ -177,6 +179,7 @@ let analyze (globals, functions) =
         (fun n -> "illegal void local var decl '" ^ n ^ 
           "' in function " ^ func.fname)) local_bindings;
 
+    (* List of local identifiers only *)
     let local_ids_list =
       let rec get_ids = function
         | [] -> []
@@ -190,12 +193,11 @@ let analyze (globals, functions) =
       (fun n -> "duplicate local '" ^ n ^ "' in function " ^ func.fname) 
         local_ids_list;
 
-    (* Create a symbol table of globals, formals, and locals - NOT COMPLETE *)
+    (* Create a symbol table of globals, formals, and locals *)
     let symbols = 
       List.fold_left 
         (fun map (dt, id) -> StringMap.add id dt map)
           StringMap.empty (global_bindings @ func.formals @ local_bindings) 
-          (* StringMap.empty (global_bindings @ func.formals @ local_bindings)  *)
     in
 
     let type_of_identifier s =
@@ -203,63 +205,58 @@ let analyze (globals, functions) =
       with Not_found -> raise (Failure ("undeclared identifier " ^ s))
     in
 
-    (* testing - delete when symbol table works *)
-    print_string "\n";
-
-(* 
-    
     (* Return expression type *)
     let rec check_expr = function
-      | Id s       -> type_of_identifier s
-      | Lit_Int  _ -> Int
-      | Lit_Flt  _ -> Float
-      | Lit_Bool _ -> Bool
-      | Lit_Str  _ -> String
-      | Null       -> Void
-      | Binop(e1, op, e2) as e -> 
-          let t1 = check_expr e1 and t2 = check_expr e2 
-          in
+      | Id(s)       -> type_of_identifier s
+      | Lit_Int(_)  -> Int
+      | Lit_Flt(_)  -> Float
+      | Lit_Bool(_) -> Bool
+      | Lit_Str(_)  -> String
+      | Null        -> Void
+      | Binop(e1,op,e2) as e -> 
+          let t1 = check_expr e1 and t2 = check_expr e2 in
           (match op with
-            | Add   | Sub | Mult | Div when t1 = Int && t2 = Int -> Int
-            | Equal | Neq when t1 = t2 -> Bool
+            | Add   | Sub | Mult | Div    when t1 = Int && t2 = Int -> Int
+            | Equal | Neq                 when t1 = t2 -> Bool
             | Less  | Leq | Greater | Geq when t1 = Int && t2 = Int -> Bool
-            | And   | Or when t1 = Bool && t2 = Bool -> Bool
-            | _ -> raise (Failure ("illegal binary operator " ^
-                  string_of_dtype t1 ^ " "    ^ string_of_op op ^ " " ^
-                  string_of_dtype t2 ^ " in " ^ string_of_expr e)))
-      | Unop(op, e) as ex -> 
-          let t = check_expr e 
-          in
+            | And   | Or                  when t1 = Bool && t2 = Bool -> Bool
+            | _ -> raise (Failure (func.fname ^ ": illegal binary operator '" ^
+                  string_of_dtype t1 ^ " "    ^ string_of_op op  ^ " " ^
+                  string_of_dtype t2 ^ "': '" ^ string_of_expr e ^ "' ")))
+      | Unop(op,e) as ex -> 
+          let t = check_expr e in
           (match op with
             | Neg when t = Int -> Int
             | Not when t = Bool -> Bool
-            | _ -> raise (Failure ("illegal unary operator " ^ 
+            | _ -> raise (Failure (func.fname ^ ": illegal unary operator '" ^ 
                                     string_of_uop op  ^
-                                    string_of_dtype t ^ " in " ^ 
-                                    string_of_expr ex)))
+                                    string_of_dtype t ^ "' in '" ^ 
+                                    string_of_expr ex ^ "' ")))
       | Noexpr -> Void
-      | Assign(var, e) as ex -> 
-          let lt = type_of_identifier var and rt = check_expr e 
-          in
-          check_assign lt rt (Failure ("illegal assignment " ^
+      | Assign(var,e) as ex -> 
+          let lt = type_of_identifier var and rt = check_expr e in
+          check_assign lt rt (Failure (func.fname ^ ": illegal assignment '" ^
                                         string_of_dtype lt ^ " = " ^ 
-                                        string_of_dtype rt ^ " in " ^ 
-                                        string_of_expr ex))
-      | Call(fname, actuals) as call -> 
-          let fd = function_decl fname 
-          in
+                                        string_of_dtype rt ^ "' in expr '" ^ 
+                                        string_of_expr ex  ^ "'"))
+      | Call(fname,actuals) as call -> 
+          let fd = function_decl fname in
           if List.length actuals != List.length fd.formals then
-            raise (Failure ("expecting "     ^ string_of_int (List.length fd.formals) ^ 
-                            " arguments in " ^ string_of_expr call))
-          else
-            List.iter2 (fun (ft, _) e -> 
-                  let et = check_expr e 
-                  in
-                  ignore (check_assign ft et
-                  (Failure ("illegal actual argument found " ^ string_of_dtype et ^ " expected " ^
-                            string_of_dtype ft ^ " in " ^ string_of_expr e)))) 
-          fd.formals actuals;
-        fd.typ
+            raise (Failure (func.fname ^ ": expecting '" ^ 
+                             string_of_int (List.length fd.formals) ^ 
+                            "'' arguments in '" ^ string_of_expr call ^ "'"))
+          else  List.iter2 
+                (fun (ft, _) e -> 
+                  let et = check_expr e in
+                  ignore 
+                    (check_assign ft et
+                      (Failure (func.fname ^ ": illegal actual argument '"^ 
+                                string_of_expr e   ^ "'. found '" ^ 
+                                string_of_dtype et ^ "', expected '" ^ 
+                                string_of_dtype ft )))) fd.formals actuals; 
+                fd.typ
+      | Fr_Assign(id,e) -> check_expr e (* TODO *)
+      | Fc_Assign(id,e) -> check_expr e (* TODO *)
     in
 
     let check_bool_expr e = 
@@ -268,46 +265,45 @@ let analyze (globals, functions) =
       else () 
     in
 
-    let check_frame_stmt = function
-      | Frame({ x; y; z; blocks; fr_id}) -> true
-      | _ -> false 
-    in
-
     (* Check statements *)
     let rec check_stmt = function
-      | Print e   -> ignore (check_expr e)
-      (* | Convert f -> ignore (check_frame_stmt f) *)
-          (* let t = check_frame_stmt f in 
-          if t  then () 
-          else raise (Failure ("return gives " ^ string_of_dtype t ^ 
-                              " expected " ^ string_of_dtype func.typ ^ 
-                              " in " ^ string_of_expr f)) *)
-      | If(p, b1, b2)       -> check_bool_expr p; check_stmt b1; check_stmt b2
-      | Block sl  -> 
+      | Print(e)              ->  ignore (check_expr e)
+      | Convert(fr)           ->  (* TODO: make sure it's a valid frame also *)
+          let is_frame = check_frame_stmt fr in
+          if is_frame then () 
+          else raise (Failure (func.fname ^ 
+                               ": Convert called with non-frame type"))
+      | Join(f1,id1,f2,id2)   -> () (* TODO *) 
+      | Build(f1,fc1,f2,fc2)  -> () (* TODO *) 
+      | Var_Decl(vd)          -> () (* TODO *) 
+      | Var_Assign(va,exp)    -> () (* TODO *) 
+      | Array(dt,sz,id)       -> () (* TODO *) 
+      | If(p,b1,b2)           -> check_bool_expr p; check_stmt b1; check_stmt b2
+      | Block sl              -> 
           let rec check_block = function
             | [Return _ as s] -> check_stmt s
-            | Return _ :: _   -> raise (Failure "statements after return")
+            | Return _ :: _   -> raise (Failure (func.fname ^ 
+                                                 ": statement after return"))
             | Block sl :: ss  -> check_block (sl @ ss)
             | s :: ss         -> check_stmt s ; check_block ss
             | []              -> ()
           in 
           check_block sl
-      | Expr e   -> ignore (check_expr e)
-      | Break    -> ()
-      | Continue -> ()
-      | Return e -> 
-          let t = check_expr e 
-          in 
+      | Expr(e)               -> ignore (check_expr e)
+      | Break                 -> ()
+      | Continue              -> ()
+      | Return(e)             -> 
+          let t = check_expr e in 
           if t = func.typ then () 
-          else raise (Failure ("return gives " ^ string_of_dtype t ^ 
-                              " expected " ^ string_of_dtype func.typ ^ 
-                              " in " ^ string_of_expr e))
-      | If(p, b1, b2)       -> check_bool_expr p; check_stmt b1; check_stmt b2
-      | For(e1, e2, e3, st) -> ignore (check_expr e1); check_bool_expr e2;
-                               ignore (check_expr e3); check_stmt st
-      | While(p, s)         -> check_bool_expr p; check_stmt s
+          else raise (Failure (func.fname ^ ": illegal return type. found '" ^ 
+                               string_of_dtype t ^ "', expected '" ^ 
+                               string_of_dtype func.typ ^ "' in expr: '" ^ 
+                               string_of_expr e ^ "' "))
+      | For(e1,e2,e3,st)      -> ignore (check_expr e1); check_bool_expr e2;
+                                 ignore (check_expr e3); check_stmt st
+      | While(p,s)            -> check_bool_expr p; check_stmt s
     in
-    check_stmt (Block func.body);  *) 
+    check_stmt (Block func.body);  
   in
   List.iter check_functions functions
   

@@ -19,7 +19,8 @@ let generate frm =
       let x_val = ref 0 in
       let vertices = ref [|0; 1; 2; 3; 4; 5; 6; 7|] in
       let line = ref 8 in
-      let top = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<amf>\n\t<object id=\"1\">\n\t\t<mesh>" in 
+      let top = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<amf> \
+                \n\t<object id=\"1\">\n\t\t<mesh>" in 
       let bottom = "\t\t</mesh>\n\t</object>\n</amf>" in   
       let vertexstart = "\t\t\t<vertices>" in
       let vertexend = "\t\t\t</vertices>" in
@@ -64,7 +65,8 @@ let generate frm =
               else( 
                 z := !z_val - 1
               );
-              fprintf oc "\t\t\t\t%s%d%s%d%s%d%s\n" vpart1 !x vpart2 !y vpart3 !z vpart4;  
+              fprintf oc "\t\t\t\t%s%d%s%d%s%d%s\n" 
+                vpart1 !x vpart2 !y vpart3 !z vpart4;  
               line := !line - 1             
             )done;
               check := !check + 1;
@@ -82,23 +84,71 @@ let generate frm =
 
       while (!actlength > !check) do(           
         displacement := !check * 8;
-        fprintf oc "\t\t\t\t%s%d%s%d%s%d%s\n" tpart1 (!vertices.(0) + !displacement) tpart2 (!vertices.(1) + !displacement) tpart3 (!vertices.(3) + !displacement) tpart4; (* write each triangle *) 
-        fprintf oc "\t\t\t\t%s%d%s%d%s%d%s\n" tpart1 (!vertices.(0) + !displacement) tpart2 (!vertices.(2) + !displacement) tpart3 (!vertices.(3) + !displacement) tpart4; (* write each triangle *)
+        fprintf oc "\t\t\t\t%s%d%s%d%s%d%s\n" 
+          tpart1 (!vertices.(0) + !displacement) 
+          tpart2 (!vertices.(1) + !displacement) 
+          tpart3 (!vertices.(3) + !displacement) 
+          tpart4; (* write each triangle *) 
+        fprintf oc "\t\t\t\t%s%d%s%d%s%d%s\n" 
+          tpart1 (!vertices.(0) + !displacement) 
+          tpart2 (!vertices.(2) + !displacement) 
+          tpart3 (!vertices.(3) + !displacement) 
+          tpart4; (* write each triangle *)
         
-        fprintf oc "\t\t\t\t%s%d%s%d%s%d%s\n" tpart1 (!vertices.(5) + !displacement) tpart2 (!vertices.(6) + !displacement) tpart3 (!vertices.(7) + !displacement) tpart4; (* write each triangle *)
-        fprintf oc "\t\t\t\t%s%d%s%d%s%d%s\n" tpart1 (!vertices.(4) + !displacement) tpart2 (!vertices.(5) + !displacement) tpart3 (!vertices.(6) + !displacement) tpart4; (* write each triangle *)
+        fprintf oc "\t\t\t\t%s%d%s%d%s%d%s\n" 
+          tpart1 (!vertices.(5) + !displacement) 
+          tpart2 (!vertices.(6) + !displacement) 
+          tpart3 (!vertices.(7) + !displacement) 
+          tpart4; (* write each triangle *)
+        fprintf oc "\t\t\t\t%s%d%s%d%s%d%s\n" 
+          tpart1 (!vertices.(4) + !displacement) 
+          tpart2 (!vertices.(5) + !displacement) 
+          tpart3 (!vertices.(6) + !displacement) 
+          tpart4; (* write each triangle *)
         
-        fprintf oc "\t\t\t\t%s%d%s%d%s%d%s\n" tpart1 (!vertices.(0) + !displacement) tpart2 (!vertices.(1) + !displacement) tpart3 (!vertices.(5) + !displacement) tpart4; (* write each triangle *)
-        fprintf oc "\t\t\t\t%s%d%s%d%s%d%s\n" tpart1 (!vertices.(0) + !displacement) tpart2 (!vertices.(4) + !displacement) tpart3 (!vertices.(5) + !displacement) tpart4; (* write each triangle *)
+        fprintf oc "\t\t\t\t%s%d%s%d%s%d%s\n" 
+          tpart1 (!vertices.(0) + !displacement) 
+          tpart2 (!vertices.(1) + !displacement) 
+          tpart3 (!vertices.(5) + !displacement) 
+          tpart4; (* write each triangle *)
+        fprintf oc "\t\t\t\t%s%d%s%d%s%d%s\n" 
+          tpart1 (!vertices.(0) + !displacement) 
+          tpart2 (!vertices.(4) + !displacement) 
+          tpart3 (!vertices.(5) + !displacement) 
+          tpart4; (* write each triangle *)
         
-        fprintf oc "\t\t\t\t%s%d%s%d%s%d%s\n" tpart1 (!vertices.(2) + !displacement) tpart2 (!vertices.(3) + !displacement) tpart3 (!vertices.(7) + !displacement) tpart4; (* write each triangle *)
-        fprintf oc "\t\t\t\t%s%d%s%d%s%d%s\n" tpart1 (!vertices.(2) + !displacement) tpart2 (!vertices.(6) + !displacement) tpart3 (!vertices.(7) + !displacement) tpart4; (* write each triangle *)
+        fprintf oc "\t\t\t\t%s%d%s%d%s%d%s\n" 
+          tpart1 (!vertices.(2) + !displacement) 
+          tpart2 (!vertices.(3) + !displacement) 
+          tpart3 (!vertices.(7) + !displacement) 
+          tpart4; (* write each triangle *)
+        fprintf oc "\t\t\t\t%s%d%s%d%s%d%s\n" 
+          tpart1 (!vertices.(2) + !displacement) 
+          tpart2 (!vertices.(6) + !displacement) 
+          tpart3 (!vertices.(7) + !displacement) 
+          tpart4; (* write each triangle *)
         
-        fprintf oc "\t\t\t\t%s%d%s%d%s%d%s\n" tpart1 (!vertices.(0) + !displacement) tpart2 (!vertices.(2) + !displacement) tpart3 (!vertices.(6) + !displacement) tpart4; (* write each triangle *)
-        fprintf oc "\t\t\t\t%s%d%s%d%s%d%s\n" tpart1 (!vertices.(0) + !displacement) tpart2 (!vertices.(4) + !displacement) tpart3 (!vertices.(6) + !displacement) tpart4; (* write each triangle *)
+        fprintf oc "\t\t\t\t%s%d%s%d%s%d%s\n" 
+          tpart1 (!vertices.(0) + !displacement) 
+          tpart2 (!vertices.(2) + !displacement) 
+          tpart3 (!vertices.(6) + !displacement) 
+          tpart4; (* write each triangle *)
+        fprintf oc "\t\t\t\t%s%d%s%d%s%d%s\n" 
+          tpart1 (!vertices.(0) + !displacement) 
+          tpart2 (!vertices.(4) + !displacement) 
+          tpart3 (!vertices.(6) + !displacement) 
+          tpart4; (* write each triangle *)
         
-        fprintf oc "\t\t\t\t%s%d%s%d%s%d%s\n" tpart1 (!vertices.(1) + !displacement) tpart2 (!vertices.(3) + !displacement) tpart3 (!vertices.(7) + !displacement) tpart4; (* write each triangle *)
-        fprintf oc "\t\t\t\t%s%d%s%d%s%d%s\n" tpart1 (!vertices.(1) + !displacement) tpart2 (!vertices.(5) + !displacement) tpart3 (!vertices.(7) + !displacement) tpart4; (* write each triangle *) 
+        fprintf oc "\t\t\t\t%s%d%s%d%s%d%s\n" 
+          tpart1 (!vertices.(1) + !displacement) 
+          tpart2 (!vertices.(3) + !displacement) 
+          tpart3 (!vertices.(7) + !displacement) 
+          tpart4; (* write each triangle *)
+        fprintf oc "\t\t\t\t%s%d%s%d%s%d%s\n" 
+          tpart1 (!vertices.(1) + !displacement) 
+          tpart2 (!vertices.(5) + !displacement) 
+          tpart3 (!vertices.(7) + !displacement) 
+          tpart4; (* write each triangle *) 
         
         check := !check + 1;  
       )done;    

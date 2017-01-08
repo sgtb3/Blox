@@ -23,9 +23,9 @@ type blck = {
 (* actual frame - if form is Frame<x,y,z> A; then id = ""; 
                   if form is Frame A = B;    then id = A  *)
 type frame = {
-  x : int;
-  y : int;
-  z : int;
+  x      : int;
+  y      : int;
+  z      : int;
   blocks : blck array; 
   fr_id  : string 
 }
@@ -99,7 +99,6 @@ type globals =
   | VarAssign of var_assign 
   | FrAssign  of fr_assign  
   | FcAssign  of fc_assign 
-  (* | NoGlob *)
 
 (* blox program is a tuple of a globals list and a function decls list *)
 type program = globals list * func_decl list
