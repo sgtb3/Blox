@@ -1,9 +1,9 @@
-.PHONY: Create-Scanner Create-Parser Create-AST \
-		Compile-Scanner \
-		Compile-Parser Compile-Analyzer Compile-Generator Compile-Executor \ 
-		Compile-Blox Link-Objects \
-		AST-Test Executor-Test Compile-Test \
-		Run-Menhir-Test Blox.tar.gz compiler Demo
+.PHONY:	Clean Compiler Demo AST-Test Blox.tar.gz \
+		AST-Test IR-Test Compile-Test Run-Menhir-Test \
+		Compile-AST Compile-Printer \
+		Create-Scanner Create-Parser Compile-Scanner Compile-Parser \
+		Compile-Analyzer Compile-IR Compile-Transltor Compile-Executor \
+		Compile-Generator Compile-Blox Link-Objects
 
 # name of blox binary file
 EXEC = blox
@@ -32,7 +32,7 @@ OBJ = obj
 TST = tests
 AMF = amf
 TARFILES = $(SRC) $(GEN) $(OBJ) $(TST) $(TESTSH).sh README.md Makefile \
-		   $(TESTFILES:%=tests/%)
+           $(TESTFILES:%=tests/%)
 
 # add src, gen, and obj directories to Make path when looking for files
 VPATH = src:gen:obj
@@ -46,20 +46,26 @@ AWK_CMD    = awk '{ printf "\n%-50s %-10s\n",$$1, $$2; }'
 PRINT_OK   = printf "$@ $(OK_STR)"  | $(AWK_CMD)
 BUILD_OK   = printf "$@ $(SUC_STR)" | $(AWK_CMD)
 
-compiler:	Clean Create-Scanner Create-AST Create-Parser \
-			Compile-Printer Compile-Scanner Compile-Parser \
-			Compile-Analyzer Compile-Executor Compile-Generator \
-			Compile-Blox Link-Objects  
+Compiler:	Clean Compile-AST Compile-Printer \
+			Create-Scanner Create-Parser Compile-Scanner Compile-Parser \
+			Compile-Analyzer Compile-IR Compile-Transltor Compile-Executor \
+			Compile-Generator Compile-Blox Link-Objects
+
+Compile-AST:
+	@$(OCC1) $(SRC)/ast.ml
+	@mv $(SRC)/ast.cmi $(GEN)/ast.cmi
+	@mv $(SRC)/ast.cmo $(OBJ)/ast.cmo
+	@$(PRINT_OK)
+
+Compile-Printer:
+	@$(OCC1) -I $(GEN) $(SRC)/pprint.ml
+	@mv $(SRC)/pprint.cmo $(OBJ)/pprint.cmo
+	@mv $(SRC)/pprint.cmi $(GEN)/pprint.cmi
+	@$(PRINT_OK)
 
 Create-Scanner:
 	@$(LEXGEN) $(SRC)/scanner.mll
 	@mv $(SRC)/scanner.ml $(GEN)/scanner.ml
-	@$(PRINT_OK)
-
-Create-AST:
-	@$(OCC1) $(SRC)/ast.ml 
-	@mv $(SRC)/ast.cmi $(GEN)/ast.cmi
-	@mv $(SRC)/ast.cmo $(OBJ)/ast.cmo
 	@$(PRINT_OK)
 
 Create-Parser:
@@ -68,12 +74,6 @@ Create-Parser:
 	@mv $(SRC)/parser.mli $(GEN)/parser.mli
 	@mv $(SRC)/parser.output $(GEN)/parser.output
 	@#cat $(GEN)/parser.output
-	@$(PRINT_OK)
-
-Compile-Printer:
-	@$(OCC1) -I $(GEN) $(SRC)/pprint.ml
-	@mv $(SRC)/pprint.cmo $(OBJ)/pprint.cmo
-	@mv $(SRC)/pprint.cmi $(GEN)/pprint.cmi
 	@$(PRINT_OK)
 
 Compile-Scanner:
@@ -90,6 +90,18 @@ Compile-Analyzer:
 	@$(OCC1) -I $(GEN) $(SRC)/analyzer.ml
 	@mv $(SRC)/analyzer.cmo $(OBJ)/analyzer.cmo
 	@mv $(SRC)/analyzer.cmi $(GEN)/analyzer.cmi
+	@$(PRINT_OK)
+
+Compile-IR:
+	@$(OCC1) -I $(GEN) $(SRC)/ir.ml
+	@mv $(SRC)/ir.cmi $(GEN)/ir.cmi
+	@mv $(SRC)/ir.cmo $(OBJ)/ir.cmo
+	@$(PRINT_OK)
+
+Compile-Transltor:
+	@$(OCC1) -I $(GEN) $(SRC)/translator.ml
+	@mv $(SRC)/translator.cmi $(GEN)/translator.cmi
+	@mv $(SRC)/translator.cmo $(OBJ)/translator.cmo
 	@$(PRINT_OK)
 
 Compile-Executor:
@@ -111,23 +123,23 @@ Compile-Blox:
 	@$(PRINT_OK)
 
 Link-Objects:
-	@$(OCC2) $(EXEC) $(OBJ)/parser.cmo $(OBJ)/scanner.cmo $(OBJ)/ast.cmo \
-	$(OBJ)/pprint.cmo $(OBJ)/analyzer.cmo $(OBJ)/executor.cmo \
-	$(OBJ)/generator.cmo $(OBJ)/blox.cmo 
+	@$(OCC2) $(EXEC) $(OBJ)/ast.cmo $(OBJ)/scanner.cmo $(OBJ)/parser.cmo \
+	$(OBJ)/pprint.cmo $(OBJ)/analyzer.cmo $(OBJ)/ir.cmo $(OBJ)/translator.cmo \
+	$(OBJ)/executor.cmo $(OBJ)/generator.cmo $(OBJ)/blox.cmo
 	@$(BUILD_OK)
 	@echo "\n-------------------------------------------------------\n"
 
-AST-Test: compiler
+AST-Test:	Compiler
 	@echo "[$(HELLO).blox:]\n"
 	@./$(EXEC) -a $(SRC)/$(HELLO).blox
 	@$(PRINT_OK)
 
-Executor-Test: compiler
+IR-Test:	Compiler
 	@echo "[$(HELLO).blox:]\n"
-	@./$(EXEC) -e $(SRC)/$(HELLO).blox
+	@./$(EXEC) -i $(SRC)/$(HELLO).blox
 	@$(PRINT_OK)
 
-Compile-Test: compiler
+Compile-Test:	Compiler
 	@echo "[$(HELLO).blox:]\n"
 	@./$(EXEC) -c $(SRC)/$(HELLO).blox
 	@$(PRINT_OK)
@@ -144,7 +156,7 @@ Run-Menhir-Test:
 	menhir --interpret --interpret-show-cst $(SRC)/parser.mly
 	@$(PRINT_OK)
 
-Demo: Clean
+Demo:	Clean
 	@ocamlc -o demo src/exedemo.ml
 	@mv src/exedemo.cmi gen/
 	@mv src/exedemo.cmo obj/
@@ -152,14 +164,9 @@ Demo: Clean
 	@$(PRINT_OK)
 
 Clean:
-	@echo "\n-------------------------------------------------------\n"
-	@rm -rf $(GEN)/*
-	@rm -rf $(OBJ)/*
-	@rm -rf $(EXEC)
-	@rm -rf demo *.amf
+	@rm -rf $(GEN)/* $(OBJ)/* $(EXEC) demo *.amf
 	@$(PRINT_OK)
-	@echo "\n"
 
-Blox.tar.gz : $(TARFILES) Clean
+Blox.tar.gz :	$(TARFILES) Clean
 	@cd .. && tar czf Blox/Blox.tar.gz $(TARFILES:%=Blox/%)
 	@$(PRINT_OK)

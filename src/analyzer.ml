@@ -32,13 +32,13 @@ let analyze (globals, functions) =
     List.filter 
       (fun fname -> List.mem fname 
                     ["print"; "printb"; "printi"; "printfl"; 
-                     "build"; "join"; "convert";])
+                     "join"; "convert";]) (* "build"; ADD THIS BACK IN WHEN DONE*)
         (List.map (fun fd -> fd.fname) functions) 
   in
 
   if List.length redefined_func_list != 0 then 
     raise (Failure ("illegal redefinition of built-in function(s): " ^ 
-                      (String.concat " " (List.rev redefined_func_list)))) 
+                   (String.concat " " (List.rev redefined_func_list)))) 
   else ();
 
   (* Check for duplicate function names *)
@@ -59,7 +59,8 @@ let analyze (globals, functions) =
                  (FaceId({dim = (0,0,0); face = ""; fc_id = ""}), "D");];
       body    = [] } m
   in 
-  let add_build m = StringMap.add "Build"
+  (* TODO: ADD THIS BACK IN WHEN DONE TESTING *)
+  (* let add_build m = StringMap.add "Build"
     { typ     = Void; 
       fname   = "Build";
       formals = [(Frame ({x = 0; y = 0; z = 0; blocks = [||]; fr_id = ""}),"A"); 
@@ -67,7 +68,7 @@ let analyze (globals, functions) =
                  (Frame ({x = 0; y = 0; z = 0; blocks = [||]; fr_id = ""}),"C"); 
                  (FaceId({dim = (0,0,0); face = ""; fc_id = ""}), "D");];
       body    = [] } m
-  in
+  in *)
   let add_convert m = StringMap.add "Convert"
     { typ     = Void; 
       fname   = "Convert"; 
@@ -90,9 +91,9 @@ let analyze (globals, functions) =
   (* Create map for built-in funcs *)
   let add_built_in_decls = 
     add_join 
-      (add_build 
+      (* (add_build  *)(* TODO: ADD THIS BACK IN WHEN DONE TESTING *)
         (add_convert 
-          (add_printfl (add_printi (add_printb (add_print m))))))
+          (add_printfl (add_printi (add_printb (add_print m)))))
   in
   
   (* Add built-in func decls to StringMap; mapping: func_name -> func_decl *)
@@ -105,14 +106,14 @@ let analyze (globals, functions) =
   (* Check for unrecognized functions *)
   let function_decl fname = 
     try StringMap.find fname function_decls 
-    with Not_found -> raise (Failure ("unrecognized function '" ^ fname ^ "'"))
+    with Not_found -> raise (Failure ("unrecognized function '" ^ fname ^ "' "))
   in
-
+(* 
   (* Check for main function *)
   let _ = try StringMap.find "main" function_decls
     with Not_found -> raise (Failure ("missing main() entry point"))
   in
-  
+   *)
   (* Returns the string identifer for a global *)
   let get_glob_id globs = 
     (List.map (fun f -> match f with 
@@ -165,19 +166,19 @@ let analyze (globals, functions) =
     (* Check for void args in func definitions *)
     List.iter 
       (check_not_void 
-        (fun n -> "illegal void formal argument '" ^ n ^ 
-                  "' in function " ^ func.fname)) func.formals;
+        (fun n -> func.fname ^ ": illegal void formal argument '" ^ n ^ "' ")) 
+          func.formals;
 
     (* Check for duplicate formal args in func definitions *)
     report_duplicate 
-      (fun n -> "duplicate formal argument: '" ^ n ^ 
-                "' in function " ^ func.fname) (List.map snd func.formals);
+      (fun n -> func.fname ^ ": duplicate formal argument: '" ^ n ^ "' ") 
+        (List.map snd func.formals);
 
     (* Check for illegal void type declarations and declaration assignments *)
     List.iter 
       (check_not_void
-        (fun n -> "illegal void local var decl '" ^ n ^ 
-          "' in function " ^ func.fname)) local_bindings;
+        (fun n -> func.fname ^ ": illegal void local var decl '" ^ n ^ "' ")) 
+          local_bindings;
 
     (* List of local identifiers only *)
     let local_ids_list =
@@ -190,10 +191,10 @@ let analyze (globals, functions) =
 
     (* Check for duplicate locals *)
     report_duplicate 
-      (fun n -> "duplicate local '" ^ n ^ "' in function " ^ func.fname) 
+      (fun n -> func.fname ^ ": duplicate local '" ^ n ^ "' ") 
         local_ids_list;
 
-    (* Create a symbol table of globals, formals, and locals *)
+    (* Symbol table of globals, formals, and locals. Mapping: (type -> id) *)
     let symbols = 
       List.fold_left 
         (fun map (dt, id) -> StringMap.add id dt map)
@@ -202,7 +203,8 @@ let analyze (globals, functions) =
 
     let type_of_identifier s =
       try StringMap.find s symbols
-      with Not_found -> raise (Failure ("undeclared identifier " ^ s))
+      with Not_found -> raise (Failure (func.fname ^ 
+                                        ":undeclared identifier '" ^ s ^ "' "))
     in
 
     (* Return expression type *)
@@ -219,7 +221,7 @@ let analyze (globals, functions) =
             | Add   | Sub | Mult | Div    when t1 = Int && t2 = Int -> Int
             | Equal | Neq                 when t1 = t2 -> Bool
             | Less  | Leq | Greater | Geq when t1 = Int && t2 = Int -> Bool
-            | And   | Or                  when t1 = Bool && t2 = Bool -> Bool
+            (* | And   | Or                  when t1 = Bool && t2 = Bool -> Bool *)
             | _ -> raise (Failure (func.fname ^ ": illegal binary operator '" ^
                   string_of_dtype t1 ^ " "    ^ string_of_op op  ^ " " ^
                   string_of_dtype t2 ^ "': '" ^ string_of_expr e ^ "' ")))

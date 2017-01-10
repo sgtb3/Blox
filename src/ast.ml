@@ -1,13 +1,15 @@
 (* binary operators *)
-type op = 
-  | And   | Or  | Mod
-  | Add   | Sub | Mult | Div 
-  | Equal | Neq | Less | Leq | Greater | Geq | FrameEq
+type op =
+  (* | And   | Or   *)
+  | Mod
+  | Add   | Sub | Mult | Div
+  | Equal | Neq | Less | Leq | Greater | Geq 
+  (* | FrameEq *)
 
 (* unary operators *)
-type uop = Neg | Not 
+type uop = Neg | Not
 
-(* block face identifier - if form is Face<x,y,z,d> A; then id = ""; 
+(* block face identifier - if form is Face<x,y,z,d> A; then id = "";
                            if form is Face A = B;      then id = A *)
 type face_id = {
   dim   : int * int * int;
@@ -20,18 +22,18 @@ type blck = {
   faces : bool array;
 }
 
-(* actual frame - if form is Frame<x,y,z> A; then id = ""; 
+(* actual frame - if form is Frame<x,y,z> A; then id = "";
                   if form is Frame A = B;    then id = A  *)
 type frame = {
   x      : int;
   y      : int;
   z      : int;
-  blocks : blck array; 
-  fr_id  : string 
+  blocks : blck array;
+  fr_id  : string
 }
 
 (* all types *)
-type dtype = 
+type dtype =
   | Int | Bool | Float | String | Void
   | Frame  of frame
   | FaceId of face_id
@@ -86,7 +88,7 @@ type fr_assign = string * string
 type fc_assign = string * string
 
 (* function declarations *)
-type func_decl = { 
+type func_decl = {
   typ     : dtype;
   fname   : string;
   formals : var_decl list;
@@ -94,11 +96,11 @@ type func_decl = {
 }
 
 (* gloabls *)
-type globals = 
-  | VarDecl   of var_decl 
-  | VarAssign of var_assign 
-  | FrAssign  of fr_assign  
-  | FcAssign  of fc_assign 
+type globals =
+  | VarDecl   of var_decl
+  | VarAssign of var_assign
+  | FrAssign  of fr_assign
+  | FcAssign  of fc_assign
 
 (* blox program is a tuple of a globals list and a function decls list *)
 type program = globals list * func_decl list

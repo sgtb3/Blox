@@ -1,157 +1,17 @@
-/* global var declar - working */
-int y;
-int z;
-float b;
+int b = 1;
+int c = 2;
 
-/* duplicate globals - working */
-/* int z;  */
-/* Face b = a; */
-
-/* global frame declaration - working */
-Frame<1,1,1> one;
-Frame<1,1,1> two;
-
-/* global var assignment - working */
-int z1 = y; 
-float a = 1.5;
-string s = "global string";
-
-/* global frame assignment - working */
-Frame C = one;
-Frame D = C;
-
-/* global face declaration and assignment - working */
-Face<1,1,1,E> facea;
-Face faceb = facea;
-
-/* duplicate functions - working */
-/* int main() { return 1; } */
-
-/* multiple functions and formal declarations - working */
-int someFunction(int x, int y) { return 1; }
-
-/* void, duplicate formal arguments - working */
-/* int voidformalfunc(void v) {return;} */
-/* int dupFormals(int a, int a) {return;} */
-
-/* globals arrays - NOT working */
-/* int[5] arr; */
-
-/* redeclaring built-in PRINT functions - NOT working correctly */
-/* void printi(int x) { return 1; } */
-/* void print() {} */
-
-/* redeclaring built-in functions - working */
-/* void join() {}    */
-/* void build() {}   */
-/* void convert() {} */
-
-/* required main function - working */
-int main()
-{
-	/* undeclared functions - working */
-	/* undeclaredFunction(x); */
-
-	/* function call and correct num of params - working */
-	someFunction(a,z);
-
-	int a = 1 + 2;
-
-	/* duplicate global/local vars - working */
-	/* float a = 1.5; */
-
-	/* local arrays - working; duplicate name - NOT working for arrays */
-	int[5] x;
-	printi(1);
-
-	/* local var declar - working */
-	int x;
-	bool t;
-	Frame<1,1,1>[10] framarr;
-	Face<1,1,1,E>[2] fcarr;
-
-	Face g = facea;
-	float b;
-	b = 2.3;
-	
-	/* illegal void type declarations - working */
-	/* void i; */
-
-	string s = "local string";
-	bool[10] b1;
-	void[10] b1;
-
-	/* local variable declaration and assignment - working */
-	bool tr = true; 
-	bool f = false;
-	
-	/* continue and break - working */
-	continue;
-	break;
-
-	/* for loops - working */
-	int i;
-	for (i = 0; i < 10; i = i + 1) {
-
-		/* binary operations on same types - working */
-		/* if (a < b + 1) { */
-		if (a < i + 1) {
-			return 1;
-		}
-		return 0;
-		/* statement after return - working */
-		/* return i; */
-	}
-
-	/* while loops - working */
-	while (i < 10) {
-		if (a < i + 1) {
-			return 1;
-		}
-		return 0;
-	}
-
-	/* local fram declarations - working  */
-	Frame<1,1,1> one;
-	Frame<2,1,1> twox;
-	Frame<1,5,1> fivey;
-	Frame<46,5,1> base;
-
-	/* local frame declaration and frame assignments - working  */
-	Frame H = fivey;
-	Frame I = one;
-
-	/* local face declarations - working */
-	Face<1,2,3,E> fa;
-	Face<1,1,1,W> fb;
-
-	/* Face assignment - NOT WORKING */
-	Face c = b; 
-
-	/* Join, Build, Convert calls - working  */
-	Join(H, a, twox, b);
-	Join(H, a, fivey, b);
-	Build(H, c, I, d);
-	Convert(base);	
-	
-	/* Print string, int, float, bool - WORKING */ 
-	print("hello");
-	print(10);
-	print(10.5);
-	print(true);
-	print(false);
-
-	/* matching return type - working */
-	return 0;
+int temp(int a) {
+    return a;
 }
 
-int abc;
-bool def;
-
-int endFunc() {
-	int endint;
-	bool endbool;
-	Frame<1,1,1> endFrameone;
-	Frame<2,1,1> endFrametwox;
-	return 1;
+/* required main function - working */
+int main() {
+    if (b == 1) {
+        return b;
+    } else if (c == 2) {
+        return c;
+    } else {
+        return 0;
+    }
 }
