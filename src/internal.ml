@@ -1,6 +1,5 @@
-open Ast
-open Ir
 open Printf
+open Ast
 
 exception Face_Taken of string;;
 exception Block_Overlap of string;;
@@ -8,6 +7,155 @@ exception Invalid_Face of string;;
 exception Opposite_Face of string;;
 exception Invalid_Block of string;;
 exception Block_Out_Of_Bounds of string;;
+
+(* AMF Generator code *)
+let generate frm =
+
+  let name          = frm.fr_id ^ ".amf" in
+  let oc            = open_out name in
+  let x             = ref 0 in
+  let y             = ref 0 in
+  let z             = ref 0 in
+  let z_val         = ref 0 in
+  let y_val         = ref 0 in
+  let x_val         = ref 0 in
+  let vertices      = ref [|0; 1; 2; 3; 4; 5; 6; 7|] in
+  let line          = ref 8 in
+  let top           = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<amf> \
+                       \n\t<object id    = \"1\">\n\t\t<mesh>" in
+  let bottom        = "\t\t</mesh>\n\t</object>\n</amf>" in
+  
+  let vertexstart   = "\t\t\t<vertices>" in
+  let vertexend     = "\t\t\t</vertices>" in
+  let vpart1        = "<vertex><coordinates><x>" in
+  let vpart2        = "</x><y>" in
+  let vpart3        = "</y><z>" in
+  let vpart4        = "</z></coordinates></vertex>" in
+  
+  let trianglestart = "\t\t\t<volume>" in
+  let triangleend   = "\t\t\t</volume>" in
+  let tpart1        = "<triangle><v1>" in
+  let tpart2        = "</v1><v2>" in
+  let tpart3        = "</v2><v3>" in
+  let tpart4        = "</v3></triangle>" in
+
+  let check         = ref 0 in
+  let displacement  = ref 0 in
+  let actlength     = ref 0 in
+  let length        = ref (Array.length frm.blocks) in
+
+  fprintf oc "%s\n" top;
+  fprintf oc "%s\n" vertexstart;
+
+  while (!check < !length) do(
+
+    if ((Array.length frm.blocks.(!check).faces) = 6) then(
+
+      z_val := (!check mod frm.z);
+      y_val := (((!check - !z_val) / frm.z) mod frm.y);
+      x_val := ((((!check - !z_val) / frm.z) - !y_val) / frm.y);
+
+      while (!line > 0) do(
+        if   (!line > 4) then x := !x_val
+        else (x := !x_val - 1);
+        if   (!line mod 4 = 0 || !line mod 4 = 3) then y := !y_val
+        else (y := !y_val - 1);
+        if   (!line mod 2 = 0) then z := !z_val
+        else (z := !z_val - 1);
+        fprintf oc "\t\t\t\t%s%d%s%d%s%d%s\n"
+          vpart1 !x vpart2 !y vpart3 !z vpart4;
+        line := !line - 1
+      )done;
+
+      check     := !check + 1;
+      actlength := !actlength + 1;
+      line      := 8
+
+      )
+
+  else (check := !check + 1)
+  
+  )done;
+
+  fprintf oc "%s\n" vertexend;
+  fprintf oc "%s\n" trianglestart;
+  check := 0;
+
+  while (!actlength > !check) do(
+    displacement := !check * 8;
+    fprintf oc "\t\t\t\t%s%d%s%d%s%d%s\n"
+      tpart1 (!vertices.(0) + !displacement)
+      tpart2 (!vertices.(1) + !displacement)
+      tpart3 (!vertices.(3) + !displacement)
+      tpart4; (* write each triangle *)
+    fprintf oc "\t\t\t\t%s%d%s%d%s%d%s\n"
+      tpart1 (!vertices.(0) + !displacement)
+      tpart2 (!vertices.(2) + !displacement)
+      tpart3 (!vertices.(3) + !displacement)
+      tpart4; (* write each triangle *)
+
+    fprintf oc "\t\t\t\t%s%d%s%d%s%d%s\n"
+      tpart1 (!vertices.(5) + !displacement)
+      tpart2 (!vertices.(6) + !displacement)
+      tpart3 (!vertices.(7) + !displacement)
+      tpart4; (* write each triangle *)
+    fprintf oc "\t\t\t\t%s%d%s%d%s%d%s\n"
+      tpart1 (!vertices.(4) + !displacement)
+      tpart2 (!vertices.(5) + !displacement)
+      tpart3 (!vertices.(6) + !displacement)
+      tpart4; (* write each triangle *)
+
+    fprintf oc "\t\t\t\t%s%d%s%d%s%d%s\n"
+      tpart1 (!vertices.(0) + !displacement)
+      tpart2 (!vertices.(1) + !displacement)
+      tpart3 (!vertices.(5) + !displacement)
+      tpart4; (* write each triangle *)
+    fprintf oc "\t\t\t\t%s%d%s%d%s%d%s\n"
+      tpart1 (!vertices.(0) + !displacement)
+      tpart2 (!vertices.(4) + !displacement)
+      tpart3 (!vertices.(5) + !displacement)
+      tpart4; (* write each triangle *)
+
+    fprintf oc "\t\t\t\t%s%d%s%d%s%d%s\n"
+      tpart1 (!vertices.(2) + !displacement)
+      tpart2 (!vertices.(3) + !displacement)
+      tpart3 (!vertices.(7) + !displacement)
+      tpart4; (* write each triangle *)
+    fprintf oc "\t\t\t\t%s%d%s%d%s%d%s\n"
+      tpart1 (!vertices.(2) + !displacement)
+      tpart2 (!vertices.(6) + !displacement)
+      tpart3 (!vertices.(7) + !displacement)
+      tpart4; (* write each triangle *)
+
+    fprintf oc "\t\t\t\t%s%d%s%d%s%d%s\n"
+      tpart1 (!vertices.(0) + !displacement)
+      tpart2 (!vertices.(2) + !displacement)
+      tpart3 (!vertices.(6) + !displacement)
+      tpart4; (* write each triangle *)
+    fprintf oc "\t\t\t\t%s%d%s%d%s%d%s\n"
+      tpart1 (!vertices.(0) + !displacement)
+      tpart2 (!vertices.(4) + !displacement)
+      tpart3 (!vertices.(6) + !displacement)
+      tpart4; (* write each triangle *)
+
+    fprintf oc "\t\t\t\t%s%d%s%d%s%d%s\n"
+      tpart1 (!vertices.(1) + !displacement)
+      tpart2 (!vertices.(3) + !displacement)
+      tpart3 (!vertices.(7) + !displacement)
+      tpart4; (* write each triangle *)
+    fprintf oc "\t\t\t\t%s%d%s%d%s%d%s\n"
+      tpart1 (!vertices.(1) + !displacement)
+      tpart2 (!vertices.(5) + !displacement)
+      tpart3 (!vertices.(7) + !displacement)
+      tpart4; (* write each triangle *)
+
+    check := !check + 1;)
+  done;
+  fprintf oc "%s\n" triangleend;
+  fprintf oc "%s\n" bottom;
+  close_out oc;;
+
+(* Executor code *)
 
 (* Return a frame with the given dimensions *)
 let faceCons x y z w n =
@@ -23,12 +171,7 @@ let getCoord i frm =
 
 (* Takes face array index returns face string *)
 let getFcStr i = match i with
-  | 0 -> "E"
-  | 1 -> "W"
-  | 2 -> "N"
-  | 3 -> "S"
-  | 4 -> "F"
-  | 5 -> "B"
+  | 0 -> "E" | 1 -> "W" | 2 -> "N" | 3 -> "S" | 4 -> "F" | 5 -> "B"
   | _ -> raise (Invalid_Face "Face index out of bounds");;
 
 (* faceCheck takes a 1D array of blocks and its 3D dimensions, it updates block
@@ -539,75 +682,7 @@ let frameCons x y z n =
   faceCheck frm.blocks x y z;
   frm;;
 
-(* let execute (globals, functions) = *)
-  (* print_endline "execute code here\n"; *)
-
-  (* Stack layout just after "Ent":
-
-                <-- SP
-     Local n
-     ...
-     Local 0
-     Saved FP   <-- FP
-     Saved PC
-     Arg 0
-     ...
-     Arg n *)
-
-(* Execute a blox prog in IR form *)
+(* Execute a blox prog *)
 let execute prog =
+  print_endline "executor.execute called\n";
   
-  let stack   = Array.make 1024 0 and 
-      globals = Array.make prog.num_globals 0 
-  in
-
-  let rec exec fp sp pc = match prog.text.(pc) with
-    | Lit i   -> stack.(sp) <- i; 
-                 exec fp (sp+1) (pc+1)
-    | Drp     -> exec fp (sp-1) (pc+1)
-    | Bin op  -> 
-        let op1 = stack.(sp-2) and 
-            op2 = stack.(sp-1) 
-        in     
-        stack.(sp-2) <- ( let boolean i = if i then 1 
-                                          else 0 
-                          in
-                          match op with
-                            | Add     -> op1 + op2
-                            | Sub     -> op1 - op2
-                            | Mult    -> op1 * op2
-                            | Div     -> op1 / op2
-                            | Equal   -> boolean (op1 = op2)
-                            | Mod     -> op1 mod op2
-                            | Neq     -> boolean (op1 != op2)
-                            | Less    -> boolean (op1 < op2)
-                            | Greater -> boolean (op1 > op2)
-                            | Leq     -> boolean (op1 <= op2)
-                            | Geq     -> boolean (op1 >= op2)
-                        );
-        exec fp (sp-1) (pc+1)
-    | Lod i   ->  stack.(sp)   <- globals.(i); 
-                  exec fp (sp+1) (pc+1)
-    | Str i   ->  globals.(i)  <- stack.(sp-1); 
-                  exec fp sp     (pc+1)
-    | Lfp i   ->  stack.(sp)   <- stack.(fp+i); 
-                  exec fp (sp+1) (pc+1)
-    | Sfp i   ->  stack.(fp+i) <- stack.(sp-1); 
-                  exec fp sp (pc+1)
-    | Jsr(-1) ->  print_endline (string_of_int stack.(sp-1)); 
-                  exec fp sp (pc+1)
-    | Jsr i   ->  stack.(sp)   <- pc + 1; 
-                  exec fp (sp+1) i
-    | Ent i   ->  stack.(sp)   <- fp; 
-                  exec sp (sp+i+1) (pc+1)
-    | Rts i   ->  let new_fp = stack.(fp) and 
-                      new_pc = stack.(fp-1) 
-                  in
-                  stack.(fp-i-1) <- stack.(sp-1); 
-                  exec new_fp (fp-i) new_pc
-    | Beq i   ->  exec fp (sp-1) (pc + if stack.(sp-1) =  0 then i else 1)
-    | Bne i   ->  exec fp (sp-1) (pc + if stack.(sp-1) != 0 then i else 1)
-    | Bra i   ->  exec fp sp (pc+i)
-    | Hlt     ->  ()
-  in 
-  exec 0 0 0 

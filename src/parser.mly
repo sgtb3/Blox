@@ -141,8 +141,8 @@ expr:
   | expr LEQ    expr       { Binop($1, Leq, $3)     }
   | expr GT     expr       { Binop($1, Greater, $3) }
   | expr GEQ    expr       { Binop($1, Geq, $3)     }
-  /*| expr AND    expr       { Binop($1, And, $3)     }*/
-  /*| expr OR     expr       { Binop($1, Or, $3)      }*/
+  | expr AND    expr       { Binop($1, And, $3)     }
+  | expr OR     expr       { Binop($1, Or, $3)      }
   | MINUS expr %prec NEG   { Unop(Neg, $2)          }
   | LPAREN expr RPAREN     { $2                     }
   | ID LPAREN actuals_opt RPAREN { Call($1, $3)     }

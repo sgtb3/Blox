@@ -32,7 +32,7 @@ let analyze (globals, functions) =
     List.filter 
       (fun fname -> List.mem fname 
                     ["print"; "printb"; "printi"; "printfl"; 
-                     "join"; "convert";]) (* "build"; ADD THIS BACK IN WHEN DONE*)
+                     "join"; "convert"; "build";])
         (List.map (fun fd -> fd.fname) functions) 
   in
 
@@ -59,8 +59,7 @@ let analyze (globals, functions) =
                  (FaceId({dim = (0,0,0); face = ""; fc_id = ""}), "D");];
       body    = [] } m
   in 
-  (* TODO: ADD THIS BACK IN WHEN DONE TESTING *)
-  (* let add_build m = StringMap.add "Build"
+  let add_build m = StringMap.add "Build"
     { typ     = Void; 
       fname   = "Build";
       formals = [(Frame ({x = 0; y = 0; z = 0; blocks = [||]; fr_id = ""}),"A"); 
@@ -68,7 +67,7 @@ let analyze (globals, functions) =
                  (Frame ({x = 0; y = 0; z = 0; blocks = [||]; fr_id = ""}),"C"); 
                  (FaceId({dim = (0,0,0); face = ""; fc_id = ""}), "D");];
       body    = [] } m
-  in *)
+  in
   let add_convert m = StringMap.add "Convert"
     { typ     = Void; 
       fname   = "Convert"; 
@@ -91,9 +90,9 @@ let analyze (globals, functions) =
   (* Create map for built-in funcs *)
   let add_built_in_decls = 
     add_join 
-      (* (add_build  *)(* TODO: ADD THIS BACK IN WHEN DONE TESTING *)
+      (add_build 
         (add_convert 
-          (add_printfl (add_printi (add_printb (add_print m)))))
+          (add_printfl (add_printi (add_printb (add_print m))))))
   in
   
   (* Add built-in func decls to StringMap; mapping: func_name -> func_decl *)
@@ -108,19 +107,19 @@ let analyze (globals, functions) =
     try StringMap.find fname function_decls 
     with Not_found -> raise (Failure ("unrecognized function '" ^ fname ^ "' "))
   in
-(* 
+
   (* Check for main function *)
   let _ = try StringMap.find "main" function_decls
     with Not_found -> raise (Failure ("missing main() entry point"))
   in
-   *)
+  
   (* Returns the string identifer for a global *)
   let get_glob_id globs = 
     (List.map (fun f -> match f with 
                 | VarDecl(_,id)     -> id 
                 | VarAssign(_,id,_) -> id
                 | FrAssign(id,_)    -> id
-                | FcAssign(id,_)    -> id) globals)
+                | FcAssign(id,_)    -> id) globs)
   in
 
   (* Check for duplicate global declarations *)
@@ -221,7 +220,7 @@ let analyze (globals, functions) =
             | Add   | Sub | Mult | Div    when t1 = Int && t2 = Int -> Int
             | Equal | Neq                 when t1 = t2 -> Bool
             | Less  | Leq | Greater | Geq when t1 = Int && t2 = Int -> Bool
-            (* | And   | Or                  when t1 = Bool && t2 = Bool -> Bool *)
+            | And   | Or                  when t1 = Bool && t2 = Bool -> Bool
             | _ -> raise (Failure (func.fname ^ ": illegal binary operator '" ^
                   string_of_dtype t1 ^ " "    ^ string_of_op op  ^ " " ^
                   string_of_dtype t2 ^ "': '" ^ string_of_expr e ^ "' ")))
@@ -243,10 +242,10 @@ let analyze (globals, functions) =
                                         string_of_expr ex  ^ "'"))
       | Call(fname,actuals) as call -> 
           let fd = function_decl fname in
-          if List.length actuals != List.length fd.formals then
-            raise (Failure (func.fname ^ ": expecting '" ^ 
-                             string_of_int (List.length fd.formals) ^ 
-                            "'' arguments in '" ^ string_of_expr call ^ "'"))
+          if  List.length actuals != List.length fd.formals then
+              raise (Failure (func.fname ^ ": expecting '" ^ 
+                              string_of_int (List.length fd.formals) ^ 
+                              "'' arguments in '" ^ string_of_expr call ^ "'"))
           else  List.iter2 
                 (fun (ft, _) e -> 
                   let et = check_expr e in

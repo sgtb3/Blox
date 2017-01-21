@@ -1,10 +1,10 @@
 (* binary operators *)
 type op =
-  (* | And   | Or   *)
+  | And   | Or  
   | Mod
   | Add   | Sub | Mult | Div
   | Equal | Neq | Less | Leq | Greater | Geq 
-  (* | FrameEq *)
+  | FrameEq
 
 (* unary operators *)
 type uop = Neg | Not

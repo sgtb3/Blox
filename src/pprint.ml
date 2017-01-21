@@ -12,9 +12,9 @@ let string_of_op = function
   | Leq     -> "<="
   | Greater -> ">"
   | Geq     -> ">="
-  (* | And     -> "&&" *)
-  (* | Or      -> "||" *)
-  (* | FrameEq -> ".=" *)
+  | And     -> "&&"
+  | Or      -> "||"
+  | FrameEq -> ".="
   | Mod     -> "%"
 
 (* print unary operators *)
