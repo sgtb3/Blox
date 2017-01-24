@@ -52,7 +52,7 @@ Run-Menhir-Test:
 
 Test-Suite:
 	@rm -rf tests/logs/*
-	@./$(TESTSH).sh
+	@./$(TESTSH).sh -k
 	@mv *.ll $(TST)/logs/
 	@mv *.err $(TST)/logs/
 	@mv *.diff $(TST)/logs/

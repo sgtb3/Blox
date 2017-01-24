@@ -1,6 +1,9 @@
-int main() {
-	Frame<1,1,1> one;
-	Frame<2,2,2> two;
-	/*Frame x = one;*/
-	
+void foo() {}
+
+int bar(int a, bool b, int c) { return a + c; }
+
+int main()
+{
+  printi(bar(17, false, 25));
+  return 0;
 }

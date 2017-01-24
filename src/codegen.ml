@@ -47,12 +47,11 @@ let rec ltype_of_dtype = function                   (* AST type -> LLVM type *)
   | A.FaceId(_)     -> L.pointer_type (lookup_struct "Face")
   | A.Array(dt,_)   -> ltype_of_dtype dt
 
-
 and lookup_array (dt : A.dtype) = 
   try Hashtbl.find array_tbl dt
   with | Not_found ->
     let struct_t = 
-      L.named_struct_type context ("Arr_" ^ (Pprint.string_of_dtype dt)) 
+      L.named_struct_type context ("Arr_" ^ (Pprint.str_of_dtype dt)) 
     in
     let type_array = [|size_t; L.pointer_type (ltype_of_dtype dt)|] in
     L.struct_set_body struct_t type_array is_struct_packed;
@@ -62,7 +61,7 @@ and lookup_array (dt : A.dtype) =
 
 let translate (globals,functions) =
 
-  (* Declare each global variable; remember its value in a map *)
+  (* Declare each glob var and remember its val in a map *)
   let global_vars =
     let global_var map (t,n) =
       let init = L.const_int (ltype_of_dtype t) 0 in 
@@ -162,7 +161,7 @@ let translate (globals,functions) =
       | "i32*"   -> int_format_str   (*int*)
       | "i8**"   -> str_format_str   (*string*)
       | "i1*"    -> int_format_str   (*bool*)
-      | "float*" -> float_format_str  (*float*)
+      | "float*" -> float_format_str (*float*)
       | _        -> str_format_str
     in 
 
@@ -208,7 +207,7 @@ let translate (globals,functions) =
         	  | A.Greater -> L.build_icmp L.Icmp.Sgt
         	  | A.Geq     -> L.build_icmp L.Icmp.Sge
       	  ) e1' e2' "tmp" builder
-      | A.Unop(op,e)      ->
+      | A.Unop(op,e)  ->
           let e' = expr builder e in
           (match op with
       	    | A.Neg -> L.build_neg
@@ -219,18 +218,14 @@ let translate (globals,functions) =
           ignore (L.build_store e' (lookup s) builder); 
           e'
       | A.Call("print",[e]) | A.Call ("printb",[e]) ->
-          L.build_call 
-            printf_func 
-              [| int_format_str ; (expr builder e) |]
-                "printf" builder
+          L.build_call printf_func 
+            [| int_format_str ; (expr builder e) |] "printf" builder
       | A.Call(f,act) ->
           let (fdef,fdecl) = StringMap.find f function_decls in
           let actuals = List.rev (List.map (expr builder) (List.rev act)) in
-          let result = 
-            (match fdecl.A.typ with 
-              | A.Void -> ""
-              | _      -> f ^ "_result") 
-          in
+          let result  = (match fdecl.A.typ with 
+                          | A.Void -> ""
+                          | _      -> f ^ "_result") in
           L.build_call fdef (Array.of_list actuals) result builder
     in
 
@@ -261,14 +256,12 @@ let translate (globals,functions) =
           let bool_val = expr builder predicate in
           let merge_bb = L.append_block context "merge" the_function in
           let then_bb  = L.append_block context "then" the_function in
-          add_terminal 
-            (stmt (L.builder_at_end context then_bb) then_stmt)
-              (L.build_br merge_bb);
+          add_terminal (stmt (L.builder_at_end context then_bb) then_stmt)
+            (L.build_br merge_bb);
 
           let else_bb = L.append_block context "else" the_function in
-          add_terminal 
-            (stmt (L.builder_at_end context else_bb) else_stmt)
-              (L.build_br merge_bb);
+          add_terminal (stmt (L.builder_at_end context else_bb) else_stmt)
+            (L.build_br merge_bb);
           
           ignore (L.build_cond_br bool_val then_bb else_bb builder);
           L.builder_at_end context merge_bb
@@ -277,9 +270,8 @@ let translate (globals,functions) =
           ignore (L.build_br pred_bb builder);
           
           let body_bb = L.append_block context "while_body" the_function in
-          add_terminal 
-            (stmt (L.builder_at_end context body_bb) body)
-              (L.build_br pred_bb);
+          add_terminal (stmt (L.builder_at_end context body_bb) body)
+            (L.build_br pred_bb);
 
           let pred_builder = L.builder_at_end context pred_bb in
           let bool_val     = expr pred_builder predicate in
@@ -288,20 +280,17 @@ let translate (globals,functions) =
           ignore (L.build_cond_br bool_val body_bb merge_bb pred_builder);
           L.builder_at_end context merge_bb
       | A.For(e1,e2,e3,body) -> 
-          stmt 
-            builder 
-              (A.Block [A.Expr e1 ; A.While (e2, A.Block [body ; A.Expr e3])])
-
+          stmt builder 
+            (A.Block [A.Expr e1 ; A.While (e2, A.Block [body ; A.Expr e3])])
     in
 
     (* Build the code for each statement in the function *)
     let builder = stmt builder (A.Block fdecl.A.body) in
 
     (* Add a return if the last block falls off the end *)
-    add_terminal builder 
-      (match fdecl.A.typ with
-        | A.Void -> L.build_ret_void
-        | t -> L.build_ret (L.const_int (ltype_of_dtype t) 0))
+    add_terminal builder (match fdecl.A.typ with
+                          | A.Void -> L.build_ret_void
+                          | t -> L.build_ret (L.const_int (ltype_of_dtype t) 0))
   
   in
   List.iter build_function_body functions;

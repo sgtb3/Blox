@@ -1,4 +1,4 @@
-type action = Usage | Ast | LLVM_IR | Compile 
+type action = Usage | Ast | LLVM_IR | Compile
 
 let usage =
   "\n USAGE: \n" ^
@@ -9,29 +9,26 @@ let usage =
   " \t  -c   Compile input_file.blox to AMF after performing LLVM Analysis\n" ^
   " \t  -h   Display the Blox compiler help menu\n"
 
+let argc = Array.length Sys.argv
 let _ =
-  let action =
-    let argc = Array.length Sys.argv in
-    (* Printf.printf "Arg count: %d\n" (Array.length Sys.argv); *)
-    (* if argc  1 then Usage else *)
-    if argc > 1 then
-      List.assoc Sys.argv.(1)
-      [ ("-h", Usage); ("-a", Ast); ("-i", LLVM_IR); ("-c", Compile); ]
-    else
-      Compile
-  in
+let action =
+  if argc > 1 then
+    List.assoc Sys.argv.(1)
+    [ ("-h", Usage); ("-a", Ast); ("-i", LLVM_IR); ("-c", Compile); ]
+  else
+    Compile
+in
+let lexbuf =
+  if argc < 3 then Lexing.from_channel stdin
+  else Lexing.from_channel (open_in Sys.argv.(2))
+in
+let ast = Parser.program Scanner.token lexbuf in
+Analyzer.analyze ast;
 
-  (* let lexbuf = Lexing.from_channel (open_in Sys.argv.(2)) in *)
-  (* comment above and uncomment below to test with testsuite *)
-  let lexbuf       = Lexing.from_channel stdin in
-  let ast          = Parser.program Scanner.token lexbuf in
-  Analyzer.analyze ast;
-
-  match action with
-    | Usage   ->  print_endline usage
-    | Ast     ->  print_string (Pprint.string_of_program ast)
-    | LLVM_IR ->  print_string (Llvm.string_of_llmodule (Codegen.translate ast))
-    | Compile ->  let mle = Codegen.translate ast in
-                  Llvm_analysis.assert_valid_module mle;
-                  print_string (Llvm.string_of_llmodule mle)
-    
+match action with
+  | Usage   ->  print_endline usage
+  | Ast     ->  print_string (Pprint.str_of_program ast)
+  | LLVM_IR ->  print_string (Llvm.string_of_llmodule (Codegen.translate ast))
+  | Compile ->  let mle = Codegen.translate ast in
+                Llvm_analysis.assert_valid_module mle;
+                print_string (Llvm.string_of_llmodule mle)
