@@ -5,22 +5,25 @@ let usage =
   " \t  blox.sh [-option] <input_file.blox> \n"  ^
   " OPTIONS: \n" ^
   " \t  -a   Display the Abstract Syntax Tree\n" ^
-  " \t  -c   Compile input_file.blox to AMF\n"   ^
+  " \t  -i   Display the LLVM IR without LLVM Analysis\n" ^
+  " \t  -c   Compile input_file.blox to AMF after performing LLVM Analysis\n" ^
   " \t  -h   Display the Blox compiler help menu\n"
 
 let _ =
   let action =
-    Printf.printf "Args passed: %d\n" (Array.length Sys.argv);
-    if Array.length Sys.argv = 1 then
-      Usage
-    else if Array.length Sys.argv > 1 then
+    let argc = Array.length Sys.argv in
+    (* Printf.printf "Arg count: %d\n" (Array.length Sys.argv); *)
+    (* if argc  1 then Usage else *)
+    if argc > 1 then
       List.assoc Sys.argv.(1)
       [ ("-h", Usage); ("-a", Ast); ("-i", LLVM_IR); ("-c", Compile); ]
     else
       Compile
   in
-  let file_in_chan = open_in Sys.argv.(2) in
-  let lexbuf       = Lexing.from_channel file_in_chan in
+
+  (* let lexbuf = Lexing.from_channel (open_in Sys.argv.(2)) in *)
+  (* comment above and uncomment below to test with testsuite *)
+  let lexbuf       = Lexing.from_channel stdin in
   let ast          = Parser.program Scanner.token lexbuf in
   Analyzer.analyze ast;
 

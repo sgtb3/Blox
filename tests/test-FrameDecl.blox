@@ -1,1 +1,5 @@
-Frame<1,2,3> one;
+
+int main() {
+	Frame<1,2,3> one;
+	return 0;	
+}

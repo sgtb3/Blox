@@ -3,6 +3,7 @@
 rule token = parse
   | [' ' '\t' '\r' '\n'] { token lexbuf   }    (* Whitespace *)
   | "/* "                { comment lexbuf }    (* Comments   *)
+  | "/*"                 { comment lexbuf }
   | '='                  { ASSIGN   }
   | ','                  { COMMA    }
   | ';'                  { SEMI     }
@@ -25,7 +26,6 @@ rule token = parse
   | "=="                 { EQ       }
   | "<="                 { LEQ      }
   | ">="                 { GEQ      }
-  | ".="                 { FRAMEEQ  }
   | "&&"                 { AND      }
   | "||"                 { OR       }
   | "if"                 { IF       }
@@ -43,10 +43,6 @@ rule token = parse
   | "false"              { FALSE    }
   | "string"             { STRING   }
   | "float"              { FLOAT    }
-  | "print"              { PRINT    }
-  | "Convert"            { CONVERT  }
-  | "Build"              { BUILD    }
-  | "Join"               { JOIN     }
   | "Face"               { FACE     }
   | "Frame"              { FRAME    }
   | ['0'-'9']+ as lxm    { LIT_INT(int_of_string lxm) }
@@ -57,5 +53,6 @@ rule token = parse
   | _ as char { raise (Failure("illegal character " ^ Char.escaped char)) }
 
 and comment = parse
+  | "*/" { token lexbuf   }
   | " */" { token lexbuf   }
   | _     { comment lexbuf }

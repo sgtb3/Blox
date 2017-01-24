@@ -1,1 +1,1 @@
-Fatal error: exception Failure("illegal actual argument found int expected bool in 42")
+Fatal error: exception Failure("main: illegal actual argument '42'. found 'int', expected 'bool'")

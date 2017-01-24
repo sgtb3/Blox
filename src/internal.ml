@@ -8,10 +8,10 @@ exception Opposite_Face of string;;
 exception Invalid_Block of string;;
 exception Block_Out_Of_Bounds of string;;
 
-(* AMF Generator code *)
-let generate frm =
+(* AMF converter - takes a frame type and associated identifier *)
+let convert (frm, fr_id) =
 
-  let name          = frm.fr_id ^ ".amf" in
+  let name          = fr_id ^ ".amf" in
   let oc            = open_out name in
   let x             = ref 0 in
   let y             = ref 0 in
@@ -50,10 +50,13 @@ let generate frm =
   while (!check < !length) do(
 
     if ((Array.length frm.blocks.(!check).faces) = 6) then(
+      let dim1 = let get_dim1 (x,_,_) = x in get_dim1 frm.fr_dim in
+      let dim2 = let get_dim2 (_,y,_) = y in get_dim2 frm.fr_dim in
+      let dim3 = let get_dim3 (_,_,z) = z in get_dim3 frm.fr_dim in
 
-      z_val := (!check mod frm.z);
-      y_val := (((!check - !z_val) / frm.z) mod frm.y);
-      x_val := ((((!check - !z_val) / frm.z) - !y_val) / frm.y);
+      z_val := (!check mod dim1);
+      y_val := (((!check - !z_val) / dim3) mod dim2);
+      x_val := ((((!check - !z_val) / dim3) - !y_val) / dim2);
 
       while (!line > 0) do(
         if   (!line > 4) then x := !x_val
@@ -155,18 +158,19 @@ let generate frm =
   fprintf oc "%s\n" bottom;
   close_out oc;;
 
-(* Executor code *)
-
 (* Return a frame with the given dimensions *)
-let faceCons x y z w n =
-  let fc = {dim = (x, y, z); face = w; fc_id = n} in
+let faceCons x y z w =
+  let fc = {fc_dim = (x, y, z); face = w;} in
   fc;;
 
 (* Takes 1D index and corresponding frame and returns 3D coordinates*)
 let getCoord i frm =
-  let z_val = (i mod frm.z) in
-  let y_val = (((i - z_val) / frm.z) mod frm.y) in
-  let x_val = ((((i - z_val) / frm.z) - y_val) / frm.y) in
+  
+  let dim2 = let get_dim2 (_,y,_) = y in get_dim2 frm.fr_dim in
+  let dim3 = let get_dim3 (_,_,z) = z in get_dim3 frm.fr_dim in
+  let z_val = (i mod dim3) in
+  let y_val = (((i - z_val) / dim3) mod dim2) in
+  let x_val = ((((i - z_val) / dim3) - y_val) / dim2) in
   (x_val, y_val, z_val);;
 
 (* Takes face array index returns face string *)
@@ -204,23 +208,29 @@ let faceCheck a x y z=
 
 (* Checks arguments given to join function and returns coordinate shifts *)
 let argCheck frameA fidA frameB fidB =
+  let frameA_dim1 = let get_dim1 (x,_,_) = x in get_dim1 frameA.fr_dim in
+  let frameB_dim1 = let get_dim1 (x,_,_) = x in get_dim1 frameB.fr_dim in
+  let frameA_dim2 = let get_dim2 (_,y,_) = y in get_dim2 frameA.fr_dim in
+  let frameB_dim2 = let get_dim2 (_,y,_) = y in get_dim2 frameB.fr_dim in
+  let frameA_dim3 = let get_dim3 (_,_,z) = z in get_dim3 frameA.fr_dim in
+  let frameB_dim3 = let get_dim3 (_,_,z) = z in get_dim3 frameB.fr_dim in
 
-  let (ax, ay, az) = fidA.dim in
-  let (bx, by, bz) = fidB.dim in
+  let (ax, ay, az) = fidA.fc_dim in
+  let (bx, by, bz) = fidB.fc_dim in
   let af = fidA.face in
   let bf = fidB.face in
   let aArray = Array.init (Array.length frameA.blocks)
                 (fun i -> {faces = Array.copy frameA.blocks.(i).faces}) in
-  let ai = ((((ax * frameA.y) + ay) * frameA.z) + az) in
+  let ai     = ((((ax * frameA_dim2) + ay) * frameA_dim3) + az) in
   let bArray = Array.init (Array.length frameB.blocks)
                 (fun i -> {faces = Array.copy frameB.blocks.(i).faces}) in
-  let bi = ((((bx * frameB.y) + by) * frameB.z) + bz) in
+  let bi     = ((((bx * frameB_dim2) + by) * frameB_dim3) + bz) in
 
   (* Check specified blocks are within array boundaries *)
-  if (ax >= frameA.x) || (ay >= frameA.y) || (az >= frameA.z) then
+  if (ax >= frameA_dim1) || (ay >= frameA_dim2) || (az >= frameA_dim3) then
     raise (Block_Out_Of_Bounds
            "Specified block for first frame is outside array boundaries");
-  if (bx >= frameB.x) || (by >= frameB.y) || (bz >= frameB.z) then
+  if (bx >= frameB_dim1) || (by >= frameB_dim2) || (bz >= frameB_dim3) then
     raise (Block_Out_Of_Bounds
            "Specified block for second frame is outside array boundaries");
 
@@ -310,15 +320,22 @@ let argCheck frameA fidA frameB fidB =
 (* Joins two frames *)
 let join frameA fidA frameB fidB =
 
+  let frameA_dim1 = let get_dim1 (x,_,_) = x in get_dim1 frameA.fr_dim in
+  let frameB_dim1 = let get_dim1 (x,_,_) = x in get_dim1 frameB.fr_dim in
+  let frameA_dim2 = let get_dim2 (_,y,_) = y in get_dim2 frameA.fr_dim in
+  let frameB_dim2 = let get_dim2 (_,y,_) = y in get_dim2 frameB.fr_dim in
+  let frameA_dim3 = let get_dim3 (_,_,z) = z in get_dim3 frameA.fr_dim in
+  let frameB_dim3 = let get_dim3 (_,_,z) = z in get_dim3 frameB.fr_dim in
+
   let (ax_shift, ay_shift, az_shift,
        bx_shift, by_shift, bz_shift,
        aArray, bArray) = argCheck frameA fidA frameB fidB
   in
 
   (* Determine size of new array *)
-  let cx = (max (frameA.x + ax_shift) (frameB.x + bx_shift)) in
-  let cy = (max (frameA.y + ay_shift) (frameB.y + by_shift)) in
-  let cz = (max (frameA.z + az_shift) (frameB.z + bz_shift)) in
+  let cx = (max (frameA_dim1 + ax_shift) (frameB_dim1 + bx_shift)) in
+  let cy = (max (frameA_dim2 + ay_shift) (frameB_dim2 + by_shift)) in
+  let cz = (max (frameA_dim3 + az_shift) (frameB_dim3 + bz_shift)) in
 
   (* Create new array of blocks *)
   let c = Array.init (cx * cy * cz) (fun _ -> let b = {faces = [||]} in b ) in
@@ -352,13 +369,7 @@ let join frameA fidA frameB fidB =
   faceCheck c cx cy cz;
 
   (* Create and return resulting frame C *)
-  let frameC = {
-    x = cx;
-    y = cy;
-    z = cz;
-    blocks = c;
-    fr_id = "Result"; }
-  in
+  let frameC = { fr_dim = (cx,cy,cz); blocks = c; } in
   frameC;;
 
 
@@ -367,42 +378,42 @@ let join frameA fidA frameB fidB =
    faces. If the faceID array is empty for either frame the algorithm assumes
    all open faces as possible join locations *)
 let build frameA faceArrA frameB faceArrB =
-
+  
   (* Create an array large enough to hold the max number of possible results *)
   let returnArr = match (Array.length faceArrA, Array.length faceArrB) with
     | (0, 0) -> Array.init
                   (6*(Array.length frameA.blocks)*(Array.length frameB.blocks))
-                    (fun _ -> {x = 0; y = 0; z = 0; blocks = [||]; fr_id = ""})
+                    (fun _ -> {fr_dim = (0,0,0); blocks = [||];})
     | (a, 0) -> Array.init
                   (a*(Array.length frameA.blocks))
-                    (fun _ -> {x = 0; y = 0; z = 0; blocks = [||]; fr_id = ""})
+                    (fun _ -> {fr_dim = (0,0,0); blocks = [||];})
     | (0, b) -> Array.init
                   (b*(Array.length frameB.blocks))
-                    (fun _ -> {x = 0; y = 0; z = 0; blocks = [||]; fr_id = ""})
+                    (fun _ -> {fr_dim = (0,0,0); blocks = [||];})
     | (a, b) -> Array.init (a*b)
-                  (fun _ -> {x = 0; y = 0; z = 0; blocks = [||]; fr_id = ""})
+                    (fun _ -> {fr_dim = (0,0,0); blocks = [||];})
   in
 
   (* Return all faces in fLB that can be joined to face el *)
   let fndFcsB el fLB = match el.face with
     | "E" -> Array.map (fun x ->
                           if (x.face = "W") then x
-                          else {dim = (0,0,0); face = "Empty"; fc_id = ""}) fLB
+                          else {fc_dim = (0,0,0); face = "Empty";}) fLB
     | "W" -> Array.map (fun x ->
                           if (x.face = "E") then x
-                          else {dim = (0,0,0); face = "Empty"; fc_id = ""}) fLB
+                          else {fc_dim = (0,0,0); face = "Empty";}) fLB
     | "N" -> Array.map (fun x ->
                           if (x.face = "S") then x
-                          else {dim = (0,0,0); face = "Empty"; fc_id = ""}) fLB
+                          else {fc_dim = (0,0,0); face = "Empty";}) fLB
     | "S" -> Array.map (fun x ->
                           if (x.face = "N") then x
-                          else {dim = (0,0,0); face = "Empty"; fc_id = ""}) fLB
+                          else {fc_dim = (0,0,0); face = "Empty";}) fLB
     | "F" -> Array.map (fun x ->
                           if (x.face = "B") then x
-                          else {dim = (0,0,0); face = "Empty"; fc_id = ""}) fLB
+                          else {fc_dim = (0,0,0); face = "Empty";}) fLB
     | "B" -> Array.map (fun x ->
                           if (x.face = "F") then x
-                          else {dim = (0,0,0); face = "Empty"; fc_id = ""}) fLB
+                          else {fc_dim = (0,0,0); face = "Empty";}) fLB
     |  _  -> raise (Invalid_Face
                    "Face format for first frame not one of: E,W,N,S,F,B")
   in
@@ -411,14 +422,14 @@ let build frameA faceArrA frameB faceArrB =
   let allFc frm =
     let allFcArr =
       Array.init ((Array.length frm.blocks) * 6)
-        (fun _ -> {dim = (0,0,0); face = "Empty"; fc_id = ""})
+        (fun _ -> {fc_dim = (0,0,0); face = "Empty";})
     in
     let count = ref 0 in
     let finder1 i el =
       let finder2 j fel =
         if fel then
         (Array.set allFcArr !count
-          {dim = (getCoord i frm); face = (getFcStr j); fc_id = ""}; incr count)
+          {fc_dim = (getCoord i frm); face = (getFcStr j);}; incr count)
       in
       if Array.length el.faces = 6 then (Array.iteri finder2 el.faces)
     in
@@ -436,12 +447,12 @@ let build frameA faceArrA frameB faceArrB =
             Array.set returnArr !count (join frameA (elA) frameB (elB));
             incr count)
           with
-          | Face_Taken x          -> ignore()
-          | Block_Overlap x       -> ignore()
-          | Invalid_Face x        -> ignore()
-          | Opposite_Face x       -> ignore()
-          | Invalid_Block x       -> ignore()
-          | Block_Out_Of_Bounds x -> ignore())
+          | Face_Taken(_)          -> ignore()
+          | Block_Overlap(_)       -> ignore()
+          | Invalid_Face(_)        -> ignore()
+          | Opposite_Face(_)       -> ignore()
+          | Invalid_Block(_)       -> ignore()
+          | Block_Out_Of_Bounds(_) -> ignore())
       in
       if elA.face = "Empty" then ignore()
       else (Array.iter joiner2 (fndFcsB elA fLB))
@@ -452,20 +463,18 @@ let build frameA faceArrA frameB faceArrB =
   (* Call join on specified faces of frameA and frameB *)
   let num fLA fLB = match (Array.length fLA, Array.length fLB) with
     | (0, 0) -> joinAB (allFc frameA) (allFc frameB)
-    | (x, 0) -> joinAB fLA (allFc frameB)
-    | (0, y) -> joinAB (allFc frameA) fLB
-    | (x, y) -> joinAB fLA fLB
+    | (_, 0) -> joinAB fLA (allFc frameB)
+    | (0, _) -> joinAB (allFc frameA) fLB
+    | (_, _) -> joinAB fLA fLB
   in
   num faceArrA faceArrB;
 
   (* Remove duplicate and empty frames from results *)
   let returnList = Array.to_list returnArr in
   let returnList = List.sort_uniq compare returnList in
-  let returnList = if (List.hd returnList).x = 0 then List.tl returnList
-                   else returnList in
-
-  let returnArr = Array.of_list returnList
-  in
+  let dim1 = let get_dim1 (x,_,_) = x in get_dim1 (List.hd returnList).fr_dim in
+  let returnList = if dim1 = 0 then List.tl returnList else returnList in
+  let returnArr = Array.of_list returnList in
   returnArr;;
 
   (* RETURN ONE FRAME VERSION OF BUILD *)
@@ -475,41 +484,36 @@ let build frameA faceArrA frameB faceArrB =
    all open faces as possible join locations *)
 let buildone frameA faceArrA frameB faceArrB returnstring =
 
+  let dim1 (x,_,_) = x in 
+  let dim2 (_,y,_) = y in 
+  let dim3 (_,_,z) = z in 
+
   (* Create an array large enough to hold the maximum num of possible results *)
   let returnArr = match (Array.length faceArrA, Array.length faceArrB) with
     | (0, 0) -> Array.init
                   (6*(Array.length frameA.blocks)*(Array.length frameB.blocks))
-                    (fun _ -> {x = 0; y = 0; z = 0; blocks = [||]; fr_id = ""})
-    | (a, 0) -> Array.init
-                  (a*(Array.length frameA.blocks))
-                    (fun _ -> {x = 0; y = 0; z = 0; blocks = [||]; fr_id = ""})
-    | (0, b) -> Array.init
-                  (b*(Array.length frameB.blocks))
-                    (fun _ -> {x = 0; y = 0; z = 0; blocks = [||]; fr_id = ""})
-    | (a, b) -> Array.init (a*b)
-                  (fun _ -> {x = 0; y = 0; z = 0; blocks = [||]; fr_id = ""})
+                    (fun _ -> {fr_dim = (0,0,0); blocks = [||];})
+    | (a, 0) -> Array.init (a*(Array.length frameA.blocks))
+                    (fun _ -> {fr_dim = (0,0,0); blocks = [||];})
+    | (0, b) -> Array.init (b*(Array.length frameB.blocks))
+                    (fun _ -> {fr_dim = (0,0,0); blocks = [||];})
+    | (a, b) -> Array.init (a*b) (fun _ -> {fr_dim = (0,0,0); blocks = [||];})
   in
 
   (* Return all faces in fLB that can be joined to face el *)
   let fndFcsB el fLB = match el.face with
-    | "E" -> Array.map (fun x ->
-                          if (x.face = "W") then x
-                          else {dim = (0,0,0); face = "Empty"; fc_id = ""}) fLB
-    | "W" -> Array.map (fun x ->
-                          if (x.face = "E") then x
-                          else {dim = (0,0,0); face = "Empty"; fc_id = ""}) fLB
-    | "N" -> Array.map (fun x ->
-                          if (x.face = "S") then x
-                        else {dim = (0,0,0); face = "Empty"; fc_id = ""}) fLB
-    | "S" -> Array.map (fun x ->
-                          if (x.face = "N") then x
-                          else {dim = (0,0,0); face = "Empty"; fc_id = ""}) fLB
-    | "F" -> Array.map (fun x ->
-                          if (x.face = "B") then x
-                        else {dim = (0,0,0); face = "Empty"; fc_id = ""}) fLB
-    | "B" -> Array.map (fun x ->
-                          if (x.face = "F") then x
-                          else {dim = (0,0,0); face = "Empty"; fc_id = ""}) fLB
+    | "E" -> Array.map (fun x -> if (x.face = "W") then x
+                                 else {fc_dim = (0,0,0); face = "Empty";}) fLB
+    | "W" -> Array.map (fun x -> if (x.face = "E") then x
+                                 else {fc_dim = (0,0,0); face = "Empty";}) fLB
+    | "N" -> Array.map (fun x -> if (x.face = "S") then x
+                                 else {fc_dim = (0,0,0); face = "Empty";}) fLB
+    | "S" -> Array.map (fun x -> if (x.face = "N") then x
+                                 else {fc_dim = (0,0,0); face = "Empty";}) fLB
+    | "F" -> Array.map (fun x -> if (x.face = "B") then x
+                                 else {fc_dim = (0,0,0); face = "Empty";}) fLB
+    | "B" -> Array.map (fun x -> if (x.face = "F") then x
+                                 else {fc_dim = (0,0,0); face = "Empty";}) fLB
     |  _  -> raise (Invalid_Face
                     "Face format for first frame not one of: E,W,N,S,F,B")
   in
@@ -517,13 +521,15 @@ let buildone frameA faceArrA frameB faceArrB returnstring =
   (* Return all available faces in frm *)
   let allFc frm =
     let allFcArr = Array.init ((Array.length frm.blocks) * 6)
-                    (fun _ -> {dim = (0,0,0); face = "Empty"; fc_id = ""}) in
+                    (fun _ -> {fc_dim = (0,0,0); face = "Empty";}) in
     let count = ref 0 in
     let finder1 i el =
       let finder2 j fel =
         if fel then(
           Array.set allFcArr !count
-          {dim = (getCoord i frm); face = (getFcStr j); fc_id = ""}; incr count)
+            {fc_dim = (getCoord i frm); face = (getFcStr j);}; 
+          incr count
+        )
       in
       if Array.length el.faces = 6 then(Array.iteri finder2 el.faces)
     in
@@ -541,12 +547,12 @@ let buildone frameA faceArrA frameB faceArrB returnstring =
             Array.set returnArr !count (join frameA (elA) frameB (elB));
             incr count)
           with
-          | Face_Taken x          -> ignore()
-          | Block_Overlap x       -> ignore()
-          | Invalid_Face x        -> ignore()
-          | Opposite_Face x       -> ignore()
-          | Invalid_Block x       -> ignore()
-          | Block_Out_Of_Bounds x -> ignore())
+          | Face_Taken(_)          -> ignore()
+          | Block_Overlap(_)       -> ignore()
+          | Invalid_Face(_)        -> ignore()
+          | Opposite_Face(_)       -> ignore()
+          | Invalid_Block(_)       -> ignore()
+          | Block_Out_Of_Bounds(_) -> ignore())
       in
       if elA.face = "Empty" then ignore()
       else (Array.iter joiner2 (fndFcsB elA fLB))
@@ -557,9 +563,9 @@ let buildone frameA faceArrA frameB faceArrB returnstring =
   (* Call join on specified faces of frameA and frameB *)
   let num fLA fLB = match (Array.length fLA, Array.length fLB) with
     | (0, 0) -> joinAB (allFc frameA) (allFc frameB)
-    | (x, 0) -> joinAB fLA (allFc frameB)
-    | (0, y) -> joinAB (allFc frameA) fLB
-    | (x, y) -> joinAB fLA fLB
+    | (_, 0) -> joinAB fLA (allFc frameB)
+    | (0, _) -> joinAB (allFc frameA) fLB
+    | (_, _) -> joinAB fLA fLB
   in
 
   (* Returns the smallest overall frame from the build *)
@@ -567,8 +573,8 @@ let buildone frameA faceArrA frameB faceArrB returnstring =
     let index = ref 0 in
     let xyz = ref 1000000 in
     let finder i el =
-      if (el.x + el.y + el.z) < !xyz then(
-        xyz := (el.x + el.y + el.z);
+      if (dim1 el  + dim2 el + dim3 el) < !xyz then(
+        xyz := (dim1 el  + dim2 el + dim3 el);
         index := i) in
     Array.iteri finder iA;
     iA.(!index)
@@ -579,8 +585,8 @@ let buildone frameA faceArrA frameB faceArrB returnstring =
     let index = ref 0 in
     let xyz = ref 0 in
     let finder i el =
-      if (el.x + el.y + el.z) > !xyz then(
-        xyz := (el.x + el.y + el.z);
+      if (dim1 el  + dim2 el + dim3 el) > !xyz then(
+        xyz := (dim1 el  + dim2 el + dim3 el);
         index := i)
     in
     Array.iteri finder iA;
@@ -591,7 +597,7 @@ let buildone frameA faceArrA frameB faceArrB returnstring =
   let smallestx iA =
     let index = ref 0 in
     let x = ref 1000000 in
-    let finder i el = if el.x < !x then (x := el.x; index := i) in
+    let finder i el = if dim1 el < !x then (x := dim1 el; index := i) in
     Array.iteri finder iA;
     iA.(!index)
   in
@@ -600,7 +606,7 @@ let buildone frameA faceArrA frameB faceArrB returnstring =
   let largestx iA =
     let index = ref 0 in
     let x = ref 0 in
-    let finder i el = if el.x > !x then (x := el.x; index := i) in
+    let finder i el = if dim1 el > !x then (x := dim1 el; index := i) in
     Array.iteri finder iA;
     iA.(!index)
   in
@@ -609,7 +615,7 @@ let buildone frameA faceArrA frameB faceArrB returnstring =
   let smallesty iA =
     let index = ref 0 in
     let y = ref 1000000 in
-    let finder i el = if el.y < !y then (y := el.y; index := i) in
+    let finder i el = if dim2 el < !y then (y := dim2 el; index := i) in
     Array.iteri finder iA;
     iA.(!index)
   in
@@ -618,7 +624,7 @@ let buildone frameA faceArrA frameB faceArrB returnstring =
   let largesty iA =
     let index = ref 0 in
     let y = ref 0 in
-    let finder i el = if el.y > !y then (y := el.y; index := i) in
+    let finder i el = if dim2 el > !y then (y := dim2 el; index := i) in
     Array.iteri finder iA;
     iA.(!index)
   in
@@ -627,7 +633,7 @@ let buildone frameA faceArrA frameB faceArrB returnstring =
   let smallestz iA =
     let index = ref 0 in
     let z = ref 1000000 in
-    let finder i el = if el.z < !z then (z := el.z; index := i) in
+    let finder i el = if dim3 el < !z then (z := dim3 el; index := i) in
     Array.iteri finder iA;
     iA.(!index)
   in
@@ -637,7 +643,7 @@ let buildone frameA faceArrA frameB faceArrB returnstring =
     let index = ref 0 in
     let z = ref 0 in
     let finder i el =
-      if el.z > !z then (z := el.z; index := i) in
+      if dim3 el > !z then (z := dim3 el; index := i) in
     Array.iteri finder iA;
     iA.(!index)
   in
@@ -650,15 +656,15 @@ let buildone frameA faceArrA frameB faceArrB returnstring =
 
   (* Matches build return specifier, calls function to return *)
   let returner rs rA = match rs with
-    | "smallest"  -> smallest rA
-    | "largest"   -> largest rA
+    | "smallest"  -> smallest  rA
+    | "largest"   -> largest   rA
     | "smallestx" -> smallestx rA
-    | "largestx"  -> largestx rA
+    | "largestx"  -> largestx  rA
     | "smallesty" -> smallesty rA
-    | "largesty"  -> largesty rA
+    | "largesty"  -> largesty  rA
     | "smallestz" -> smallestz rA
-    | "largestz"  -> largestz rA
-    | _           -> random rA
+    | "largestz"  -> largestz  rA
+    | _           -> random    rA
   in
 
   num faceArrA faceArrB;
@@ -666,23 +672,19 @@ let buildone frameA faceArrA frameB faceArrB returnstring =
   (* Remove duplicate and empty frames from results *)
   let returnList = Array.to_list returnArr in
   let returnList = List.sort_uniq compare returnList in
-  let returnList = if (List.hd returnList).x = 0 then List.tl returnList
-                   else returnList in
+  let dimx = let get_dim1 (x,_,_) = x in get_dim1 (List.hd returnList).fr_dim in
+  let returnList = if dimx = 0 then List.tl returnList else returnList in                   
   let returnArr = Array.of_list returnList in
-
-  if (Array.length returnArr) > 0 then returner returnstring returnArr
-  else {x = 0; y = 0; z = 0; blocks = [||]; fr_id = ""};;
-
+  
+  if (Array.length returnArr) > 0 then 
+    returner (returnstring returnArr)
+  else (fun _ -> (0,0,0)) (* {fr_dim = (0,0,0); blocks = [||];} *)
+;; 
 
 (* Return a frame with the given dimensions *)
-let frameCons x y z n =
-  let arr = Array.init (x*y*z)
+let frameCons x y z =
+  let arr = Array.init (x * y * z)
               (fun _ -> {faces = [|true;true;true;true;true;true|]}) in
-  let frm = {x = x; y = y; z = z; blocks = arr; fr_id = n} in
+  let frm = {fr_dim = (x,y,z); blocks = arr;} in
   faceCheck frm.blocks x y z;
   frm;;
-
-(* Execute a blox prog *)
-let execute prog =
-  print_endline "executor.execute called\n";
-  

@@ -1,1 +1,5 @@
-Frame<1,2,e> one;
+Frame<1,2,e> one; /* illegal dimension type */
+
+int main() {
+	return 0;
+}

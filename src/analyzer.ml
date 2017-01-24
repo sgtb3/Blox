@@ -49,31 +49,35 @@ let analyze (globals, functions) =
   (* Create an empty map *)
   let m = StringMap.empty in
 
+  (* TODO: Adding built-in functions cannot be done in the analyzer. 
+           It needs to happen somewhere else. *)
+
   (* Define built-in funcs *)
   let add_join m = StringMap.add "Join"
     { typ     = Void;
       fname   = "Join";    
-      formals = [(Frame ({x = 0; y = 0; z = 0; blocks = [||]; fr_id = ""}),"A"); 
-                 (FaceId({dim = (0,0,0); face = ""; fc_id = ""}), "B");     
-                 (Frame ({x = 0; y = 0; z = 0; blocks = [||]; fr_id = ""}),"C"); 
-                 (FaceId({dim = (0,0,0); face = ""; fc_id = ""}), "D");];
+      formals = [(Frame({fr_dim = (0,0,0); blocks = [||];}),"A"); 
+                 (FaceId({fc_dim = (0,0,0); face = "";}), "B");     
+                 (Frame({fr_dim = (0,0,0); blocks = [||];}),"C"); 
+                 (FaceId({fc_dim = (0,0,0); face = "";}), "D");];
       body    = [] } m
   in 
   let add_build m = StringMap.add "Build"
     { typ     = Void; 
       fname   = "Build";
-      formals = [(Frame ({x = 0; y = 0; z = 0; blocks = [||]; fr_id = ""}),"A"); 
-                 (FaceId({dim = (0,0,0); face = ""; fc_id = ""}), "B"); 
-                 (Frame ({x = 0; y = 0; z = 0; blocks = [||]; fr_id = ""}),"C"); 
-                 (FaceId({dim = (0,0,0); face = ""; fc_id = ""}), "D");];
+      formals = [(Frame ({fr_dim = (0,0,0); blocks = [||];}),"A"); 
+                 (FaceId({fc_dim = (0,0,0); face = "";}), "B"); 
+                 (Frame ({fr_dim = (0,0,0); blocks = [||];}),"C"); 
+                 (FaceId({fc_dim = (0,0,0); face = "";}), "D");];
       body    = [] } m
   in
   let add_convert m = StringMap.add "Convert"
     { typ     = Void; 
       fname   = "Convert"; 
-      formals = [(Frame({x = 0; y = 0; z = 0; blocks = [||]; fr_id = ""}),"A")]; 
+      formals = [(Frame({fr_dim = (0,0,0); blocks = [||];}),"A")]; 
       body    = [] } m
   in
+
   let add_print m = StringMap.add "print"
     { typ = Void; fname = "print"; formals = [(String, "s")]; body = [] } m
   in 
@@ -105,7 +109,7 @@ let analyze (globals, functions) =
   (* Check for unrecognized functions *)
   let function_decl fname = 
     try StringMap.find fname function_decls 
-    with Not_found -> raise (Failure ("unrecognized function '" ^ fname ^ "' "))
+    with Not_found -> raise (Failure ("unrecognized function '" ^ fname ^ "'"))
   in
 
   (* Check for main function *)
@@ -122,41 +126,43 @@ let analyze (globals, functions) =
                 | FcAssign(id,_)    -> id) globs)
   in
 
+  (* Create a list of globals (type, id) from globals list *)
+  let global_bindings = 
+    let rec make_type_id_mapping = function
+      | []       -> []
+      | hd :: tl -> (match hd with 
+                      | VarDecl(dt,id)     -> [(dt,id)]
+                      | VarAssign(dt,id,_) -> [(dt,id)]
+                      | _                  -> []) 
+                     @ make_type_id_mapping (List.filter ((<>) hd) tl)
+    in 
+    make_type_id_mapping globals;
+  in
+
   (* Check for duplicate global declarations *)
   let check_globals glob =
     report_duplicate (fun n -> "duplicate global declaration '" ^ n ^ "'") 
       (List.rev (get_glob_id glob)) 
   in
-  check_globals globals; (* could have used List.iter since globals is a list *)
+  check_globals globals;
 
-  let check_frame_stmt = function
-    | { x; y; z; blocks; fr_id} -> true
-  in
+  (* Check void global bindings *)
+  List.iter 
+      (check_not_void 
+        (fun n -> "illegal void global '" ^ n ^ "'")) 
+          global_bindings;
 
   (* Check functions *)
   let check_functions func =
-
-    (* Create a list of globals (type, id) from globals list *)
-    let global_bindings = 
-      let rec make_type_id_mapping = function
-        | []       -> []
-        | hd :: tl -> (match hd with 
-                        | VarDecl(dt,id)       -> [(dt,id)]
-                        | VarAssign(dt,id,exp) -> [(dt,id)]
-                        | _                    -> []) 
-                       @ make_type_id_mapping (List.filter ((<>) hd) tl)
-      in 
-      make_type_id_mapping globals;
-    in
 
     (* Create a list of locals (type, id) from func body *)
     let local_bindings = 
       let rec make_type_id_mapping = function
         | []       -> []
         | hd :: tl -> (match hd with 
-                        | Var_Decl(dt,id)    -> [(dt,id)]
-                        | Var_Assign(va,exp) -> [(fst va,snd va)]
-                        | _                  -> []) 
+                        | VDecl(dt,id)  -> [(dt,id)]
+                        | VAssign(va,_) -> [(fst va,snd va)]
+                        | _             -> []) 
                        @ make_type_id_mapping (List.filter ((<>) hd) tl)
       in 
       make_type_id_mapping func.body;
@@ -165,32 +171,32 @@ let analyze (globals, functions) =
     (* Check for void args in func definitions *)
     List.iter 
       (check_not_void 
-        (fun n -> func.fname ^ ": illegal void formal argument '" ^ n ^ "' ")) 
+        (fun n -> func.fname ^ ": illegal void formal argument '" ^ n ^ "'")) 
           func.formals;
 
     (* Check for duplicate formal args in func definitions *)
     report_duplicate 
-      (fun n -> func.fname ^ ": duplicate formal argument: '" ^ n ^ "' ") 
+      (fun n -> func.fname ^ ": duplicate formal argument: '" ^ n ^ "'") 
         (List.map snd func.formals);
 
     (* Check for illegal void type declarations and declaration assignments *)
     List.iter 
       (check_not_void
-        (fun n -> func.fname ^ ": illegal void local var decl '" ^ n ^ "' ")) 
+        (fun n -> func.fname ^ ": illegal void local var decl '" ^ n ^ "'")) 
           local_bindings;
 
     (* List of local identifiers only *)
     let local_ids_list =
       let rec get_ids = function
         | [] -> []
-        | (dt,id) :: tl -> id :: get_ids tl
+        | (_,id) :: tl -> id :: get_ids tl
       in
       get_ids local_bindings;
     in 
 
     (* Check for duplicate locals *)
     report_duplicate 
-      (fun n -> func.fname ^ ": duplicate local '" ^ n ^ "' ") 
+      (fun n -> func.fname ^ ": duplicate local '" ^ n ^ "'") 
         local_ids_list;
 
     (* Symbol table of globals, formals, and locals. Mapping: (type -> id) *)
@@ -203,7 +209,7 @@ let analyze (globals, functions) =
     let type_of_identifier s =
       try StringMap.find s symbols
       with Not_found -> raise (Failure (func.fname ^ 
-                                        ":undeclared identifier '" ^ s ^ "' "))
+                                        ": undeclared identifier '" ^ s ^ "'"))
     in
 
     (* Return expression type *)
@@ -223,7 +229,7 @@ let analyze (globals, functions) =
             | And   | Or                  when t1 = Bool && t2 = Bool -> Bool
             | _ -> raise (Failure (func.fname ^ ": illegal binary operator '" ^
                   string_of_dtype t1 ^ " "    ^ string_of_op op  ^ " " ^
-                  string_of_dtype t2 ^ "': '" ^ string_of_expr e ^ "' ")))
+                  string_of_dtype t2 ^ "': '" ^ string_of_expr e ^ "'")))
       | Unop(op,e) as ex -> 
           let t = check_expr e in
           (match op with
@@ -232,7 +238,7 @@ let analyze (globals, functions) =
             | _ -> raise (Failure (func.fname ^ ": illegal unary operator '" ^ 
                                     string_of_uop op  ^
                                     string_of_dtype t ^ "' in '" ^ 
-                                    string_of_expr ex ^ "' ")))
+                                    string_of_expr ex ^ "'")))
       | Noexpr -> Void
       | Assign(var,e) as ex -> 
           let lt = type_of_identifier var and rt = check_expr e in
@@ -245,7 +251,7 @@ let analyze (globals, functions) =
           if  List.length actuals != List.length fd.formals then
               raise (Failure (func.fname ^ ": expecting '" ^ 
                               string_of_int (List.length fd.formals) ^ 
-                              "'' arguments in '" ^ string_of_expr call ^ "'"))
+                              "' arguments in '" ^ string_of_expr call ^ "'"))
           else  List.iter2 
                 (fun (ft, _) e -> 
                   let et = check_expr e in
@@ -254,10 +260,8 @@ let analyze (globals, functions) =
                       (Failure (func.fname ^ ": illegal actual argument '"^ 
                                 string_of_expr e   ^ "'. found '" ^ 
                                 string_of_dtype et ^ "', expected '" ^ 
-                                string_of_dtype ft )))) fd.formals actuals; 
+                                string_of_dtype ft ^ "'")))) fd.formals actuals; 
                 fd.typ
-      | Fr_Assign(id,e) -> check_expr e (* TODO *)
-      | Fc_Assign(id,e) -> check_expr e (* TODO *)
     in
 
     let check_bool_expr e = 
@@ -268,17 +272,8 @@ let analyze (globals, functions) =
 
     (* Check statements *)
     let rec check_stmt = function
-      | Print(e)              ->  ignore (check_expr e)
-      | Convert(fr)           ->  (* TODO: make sure it's a valid frame also *)
-          let is_frame = check_frame_stmt fr in
-          if is_frame then () 
-          else raise (Failure (func.fname ^ 
-                               ": Convert called with non-frame type"))
-      | Join(f1,id1,f2,id2)   -> () (* TODO *) 
-      | Build(f1,fc1,f2,fc2)  -> () (* TODO *) 
-      | Var_Decl(vd)          -> () (* TODO *) 
-      | Var_Assign(va,exp)    -> () (* TODO *) 
-      | Array(dt,sz,id)       -> () (* TODO *) 
+      | VDecl(vd)             -> () (* TODO *) 
+      | VAssign(va,exp)       -> () (* TODO *) 
       | If(p,b1,b2)           -> check_bool_expr p; check_stmt b1; check_stmt b2
       | Block sl              -> 
           let rec check_block = function
@@ -299,7 +294,7 @@ let analyze (globals, functions) =
           else raise (Failure (func.fname ^ ": illegal return type. found '" ^ 
                                string_of_dtype t ^ "', expected '" ^ 
                                string_of_dtype func.typ ^ "' in expr: '" ^ 
-                               string_of_expr e ^ "' "))
+                               string_of_expr e ^ "'"))
       | For(e1,e2,e3,st)      -> ignore (check_expr e1); check_bool_expr e2;
                                  ignore (check_expr e3); check_stmt st
       | While(p,s)            -> check_bool_expr p; check_stmt s

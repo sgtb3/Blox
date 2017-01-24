@@ -1,1 +1,1 @@
-Fatal error: exception Failure("return gives int expected void in 42")
+Fatal error: exception Failure("foo: illegal return type. found 'int', expected 'void' in expr: '42'")

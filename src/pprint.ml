@@ -3,6 +3,9 @@ open Ast
 (* print binary operators *)
 let string_of_op = function
   | Add     -> "+"
+  | Or      -> "||"
+  | Mod     -> "%"
+  | And     -> "&&"
   | Sub     -> "-"
   | Mult    -> "*"
   | Div     -> "/"
@@ -12,10 +15,6 @@ let string_of_op = function
   | Leq     -> "<="
   | Greater -> ">"
   | Geq     -> ">="
-  | And     -> "&&"
-  | Or      -> "||"
-  | FrameEq -> ".="
-  | Mod     -> "%"
 
 (* print unary operators *)
 let string_of_uop = function
@@ -30,95 +29,85 @@ let string_of_dim (x,y,z) =
 
 (* print datatypes *)
 let rec string_of_dtype = function
-  | Int          -> "int"
-  | Bool         -> "bool"
-  | String       -> "string"
-  | Float        -> "float"
-  | Frame(fr)    -> "Frame" ^ "<" ^ string_of_dim (fr.x, fr.y, fr.z) ^ ">"
-  | FaceId(fc)   -> "Face"  ^ "<" ^ string_of_dim fc.dim ^ "," ^ fc.face ^ ">"
-  | Void         -> "void"
-  | Array(x,y,z) -> string_of_dtype x ^ "[" ^ string_of_int y ^ "] " ^ z
+  | Int        -> "int"
+  | Bool       -> "bool"
+  | String     -> "string"
+  | Float      -> "float"
+  | Frame(fr)  -> "Frame" ^ "<" ^ string_of_dim fr.fr_dim ^ ">"
+  | FaceId(fc) -> "Face"  ^ "<" ^ string_of_dim fc.fc_dim ^ "," ^ fc.face ^ ">"
+  | Void       -> "void"
+  | Array(x,y) -> string_of_dtype x ^ "[" ^ string_of_int y ^ "]"
 
 (* print expressions *)
 let rec string_of_expr = function
-  | Lit_Int(x)        -> string_of_int   x
-  | Lit_Flt(x)        -> string_of_float x
-  | Lit_Str(x)        -> x
-  | Id(x)             -> x
-  | Lit_Bool(true)    -> "true"
-  | Lit_Bool(false)   -> "false"
-  | Null              -> "null"
-  | Noexpr            -> ""
-  | Assign(x,y)       -> x ^ " = " ^ string_of_expr y ^ ";"
-  | Fr_Assign(x,y)    -> "Frame "  ^ x ^ " = " ^ string_of_expr y ^ ";"
-  | Fc_Assign(x,y)    -> "Face "   ^ x ^ " = " ^ string_of_expr y ^ ";"
-  | Binop(e1,o,e2)    -> string_of_expr e1 ^ " " ^
-                         string_of_op   o  ^ " " ^
-                         string_of_expr e2
-  | Unop(o,e)         -> string_of_uop o   ^ string_of_expr e
-  | Call(f,el)        -> f ^ "(" ^ String.concat ", "
-                         (List.map string_of_expr el) ^ ");"
+  | Lit_Int(x)      -> string_of_int   x
+  | Lit_Flt(x)      -> string_of_float x
+  | Lit_Str(x)      -> x
+  | Id(x)           -> x
+  | Lit_Bool(true)  -> "true"
+  | Lit_Bool(false) -> "false"
+  | Null            -> "null"
+  | Noexpr          -> ""
+  | Assign(x,y)     -> x ^ " = " ^ string_of_expr y
+  | Binop(e1,o,e2)  -> string_of_expr e1 ^ " " ^ string_of_op  o  ^ " " ^
+                       string_of_expr e2
+  | Unop(o,e)       -> string_of_uop o   ^ string_of_expr e
+  | Call(f,el)      -> f ^ "(" ^ String.concat ", "
+                       (List.map string_of_expr el) ^ ")"
 
 (* print variable declarations *)
 let string_of_var_decl (x,y) =
   string_of_dtype x ^ " " ^ y
 
-(* print block face identifiers *)
-let string_of_face_id (w,x,y,z) =
-  "(" ^ string_of_int w ^ ", " ^
-        string_of_int x ^ ", " ^
-        string_of_int y ^ ", " ^ z ^ ")"
-
-(* print Join function arguments *)
-let string_of_join_args (w,x,y,z) =
-  w.fr_id ^ "," ^ x.fc_id ^ "," ^ y.fr_id ^ "," ^ z.fc_id
-
-(* print Build function arguments *)
-let string_of_build_args (w,x,y,z) =
-  w.fr_id ^ "," ^ (String.concat "," (List.map (fun f -> f.fc_id) x)) ^ "," ^
-  y.fr_id ^ "," ^ (String.concat "," (List.map (fun f -> f.fc_id) z))
-
-let tab str = "\t" ^ str
+let rec string_of_vd_list = function
+  | []       -> ""
+  | hd :: tl -> string_of_var_decl hd ^ ";" ^ string_of_vd_list tl
 
 (* print variable assignments *)
 let string_of_vassign (t,id,exp) =
-  string_of_dtype t ^ " " ^ id ^ " = " ^ string_of_expr exp ^ ";"
+  string_of_dtype t ^ " " ^ id ^ " = " ^ string_of_expr exp 
+
+let rec string_of_va_list = function
+  | []       -> ""
+  | hd :: tl -> string_of_vassign hd ^ ";" ^ string_of_va_list tl
 
 (* print statements *)
 let rec string_of_stmt = function
   | Block(stmts)      -> " {\n\t" ^ String.concat ""
                          (List.map string_of_stmt stmts) ^ "\t}\n\n"
-  | Expr(expr)        -> "\t" ^ string_of_expr expr      ^ "\n"
-  | Join(w,x,y,z)     -> "\tJoin("  ^ string_of_join_args  (w,x,y,z) ^ ");\n"
-  | Build(w,x,y,z)    -> "\tBuild(" ^ string_of_build_args (w,x,y,z) ^ ");\n"
-  | Print(e)          -> "\tprint(" ^ string_of_expr e ^ ");\n"
-  | Array(x,y,z)      -> "\t" ^ string_of_dtype x ^ "[" ^
-                         string_of_int y   ^ "] " ^ z ^";\n"
-  | Convert(fr)       -> "\tConvert(" ^ fr.fr_id ^ ");\n"
-  | Var_Decl(x,y)     -> "\t" ^ string_of_var_decl (x,y) ^ ";\n"
-  | Var_Assign(va,ex) -> "\t" ^ string_of_vassign (fst va,snd va,ex) ^ "\n"
+  | Expr(expr)        -> "\t" ^ string_of_expr expr      ^ ";\n"
+  | VDecl(x,y)        -> "\t" ^ string_of_var_decl (x,y) ^ ";\n"
+  | VAssign(va,ex)    -> "\t" ^ string_of_vassign (fst va,snd va,ex) ^ ";\n"
   | Return(expr)      -> "\treturn " ^ string_of_expr expr ^ ";\n";
-  | If(e,s,Block([])) -> "\n\tif ("    ^ string_of_expr e  ^
-                         ")"     ^ string_of_stmt s
-  | If(e,s1,s2)       -> "\n\tif ("    ^ string_of_expr e  ^
-                         ")"     ^ string_of_stmt s1 ^
-                         "\telse"  ^ string_of_stmt s2
-  | For(e1,e2,e3,s)   -> "\n\tfor (" ^ string_of_expr e1 ^ "; "
-                     ^ string_of_expr e2 ^ "; "
-                     ^ string_of_expr e3 ^ ") "
-                     ^ string_of_stmt s
+  | If(e,s,Block([])) -> "\n\tif ("  ^ string_of_expr e  ^
+                         ")"         ^ string_of_stmt s
+  | If(e,s1,s2)       -> "\n\tif ("  ^ string_of_expr e  ^
+                         ")"         ^ string_of_stmt s1 ^
+                         "\telse"    ^ string_of_stmt s2
+  | For(e1,e2,e3,s)   -> "\n\tfor (" ^ string_of_expr e1 ^ "; " ^ 
+                          string_of_expr e2 ^ "; " ^
+                          string_of_expr e3 ^ ") " ^
+                          string_of_stmt s
   | While(e,s)        -> "\n\twhile (" ^ string_of_expr e  ^
-                         ")"          ^ string_of_stmt s
+                         ")"           ^ string_of_stmt s
   | Break             -> "\tbreak;\n"
   | Continue          -> "\tcontinue;\n"
 
 (* print frame assignments *)
 let string_of_frassign (fn1,fn2) =
-  "Frame " ^ fn1 ^ " = " ^ fn2 ^ ";"
+  "Frame " ^ fn1 ^ " = " ^ fn2
+
+let rec string_of_fra_list = function
+  | []       -> ""
+  | hd :: tl -> string_of_frassign hd ^ ";" ^ string_of_fra_list tl
 
 (* print face assignments *)
 let string_of_fcassign (fn1,fn2) =
-  "Face " ^ fn1 ^ " = " ^ fn2 ^ ";"
+  "Face " ^ fn1 ^ " = " ^ fn2 
+
+let rec string_of_fca_list = function
+  | []       -> ""
+  | hd :: tl -> string_of_fcassign hd ^ ";" ^ string_of_fca_list tl
 
 (* print function declarations *)
 let string_of_func_decl fd =
@@ -126,33 +115,13 @@ let string_of_func_decl fd =
   String.concat ", " (List.map string_of_var_decl fd.formals) ^ ") {\n" ^
   String.concat ""   (List.map string_of_stmt fd.body)        ^ "}\n"
 
-let rec string_of_vd = fun list -> match list with
-  | [(dt,id)]     -> string_of_var_decl (dt,id) ^ ";"
-  | []            -> ""
-  | hd :: tl      -> string_of_var_decl hd ^ "" ^ string_of_vd tl
-
-let rec string_of_va = fun list -> match list with
-  | [(dt,id,exp)] -> string_of_vassign (dt,id,exp)
-  | []            -> ""
-  | hd :: tl      -> string_of_vassign hd ^ "" ^ string_of_va tl
-
-let rec string_of_fra = fun list -> match list with
-  | [(id1,id2)]   -> string_of_frassign (id1,id2)
-  | []            -> ""
-  | hd :: tl      -> string_of_frassign hd ^ "\n" ^ string_of_fra tl
-
-let rec string_of_fca = fun list -> match list with
-  | [(id1,id2)]   -> string_of_fcassign (id1,id2)
-  | []            -> ""
-  | hd :: tl      -> string_of_fcassign hd ^ "\n" ^ string_of_fca tl
-
 (* print blox program *)
 let string_of_program (globals,funcs) =
   String.concat "\n"
    (List.rev (List.map (fun f -> match f with
-                         | VarDecl(vd)   -> string_of_vd  [vd]
-                         | VarAssign(va) -> string_of_va  [va]
-                         | FrAssign(fra) -> string_of_fra [fra]
-                         | FcAssign(fca) -> string_of_fca [fca]
+                         | VarDecl(vd)   -> string_of_vd_list  [vd]
+                         | VarAssign(va) -> string_of_va_list  [va]
+                         | FrAssign(fra) -> string_of_fra_list [fra]
+                         | FcAssign(fca) -> string_of_fca_list [fca]
                        ) globals)) ^ "\n" ^
   String.concat "" (List.rev (List.map string_of_func_decl funcs))

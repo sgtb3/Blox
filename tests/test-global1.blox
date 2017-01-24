@@ -1,29 +1,29 @@
-int a;
-int b;
+int a = 0;
+int c = 0;
 
-void printa()
+void print()
 {
   print(a);
 }
 
-void printb()
+void printc()
 {
-  print(b);
+  print(c);
 }
 
-void incab()
+void incac()
 {
   a = a + 1;
-  b = b + 1;
+  c = c + 1;
 }
 
 int main()
 {
   a = 42;
-  b = 21;
+  c = 21;
   printa();
-  printb();
-  incab();
+  printc();
+  incac();
   printa();
   printb();
   return 0;
