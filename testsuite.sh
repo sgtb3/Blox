@@ -62,11 +62,8 @@ Compare()
     diff -b "$1" "$2" > "$3" 2>&1 || 
     {
 	   SignalError "$1 and $2 have different output:"
-       cat $1
-       
+       #cat $1
 	   echo "==> $1 and $2 have different output" 1>&2
-       
-       
     }
 }
 

@@ -6,7 +6,6 @@ module StringMap = Map.Make(String)
 exception Error of string
 exception UndefStruct of string
 
-
 let context  = L.global_context ()              (* global data container *)
 let blox_mod = L.create_module context "blox"   (* container *)
 and i32_t    = L.i32_type   context             (* 32-bit int *)
@@ -43,8 +42,8 @@ let rec ltype_of_dtype = function                   (* AST type -> LLVM type *)
   | A.Float         -> flt32_t
   | A.String        -> str_t
   | A.Void          -> void_t
-  | A.Frame(_)      -> L.pointer_type (lookup_struct "Frame")
-  | A.FaceId(_)     -> L.pointer_type (lookup_struct "Face")
+  | A.Frame(_)      -> L.pointer_type (lookup_struct "Frame_Lit")
+  | A.FaceId(_)     -> L.pointer_type (lookup_struct "Face_Lit")
   | A.Array(dt,_)   -> ltype_of_dtype dt
 
 and lookup_array (dt : A.dtype) = 

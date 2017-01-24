@@ -73,12 +73,8 @@ let analyze (globals, functions) =
       body    = [] } m
   in
   let add_convert m = StringMap.add "Convert"
-    { typ     = Void; 
-      fname   = "Convert"; 
-      formals = [(Frame({fr_dim = (0,0,0); blocks = [||];}), "A")]; 
-      body    = [] } m
+    { typ = Void; fname = "Convert"; formals = [(String, "FrameId")]; body = [] } m
   in
-
   let add_print m = StringMap.add "print"
     { typ = Void; fname = "print"; formals = [(String, "s")]; body = [] } m
   in 
@@ -150,6 +146,12 @@ let analyze (globals, functions) =
   (* Check void global bindings *)
   List.iter (check_not_void (fun n -> "illegal void global '" ^ n ^ "'")) 
     global_bindings;
+
+  let non_built_in_fnames = 
+    List.filter (fun fname -> not (List.mem fname built_ins_list))
+      (List.map (fun fd -> fd.fname) functions) 
+  in
+
 
   (* Check functions *)
   let check_functions func =
@@ -246,24 +248,33 @@ let analyze (globals, functions) =
       | Call(fname,actuals) as call -> 
           
           (* let check_built_ins = function
-            | 
+            | ("Convert", id) -> ()
+            | ("",_)          -> 
+                raise (Failure (func.fname ^ ": Not a function call"))
           in
-          check_built_ins fname; *)
+          check_built_ins fname actuals; *)
 
           let fd = function_decl fname in
           if  List.length actuals != List.length fd.formals then
               raise (Failure (func.fname ^ ": expecting '" ^ 
                               string_of_int (List.length fd.formals) ^ 
                               "' arguments in '" ^ str_of_expr call ^ "'"))
-          else  List.iter2 
-                (fun (ft, _) e -> 
-                  let et = check_expr e in
-                  ignore 
-                    (check_assign ft et
-                      (Failure (func.fname ^ ": illegal actual argument '"^ 
-                                str_of_expr e   ^ "'. found '" ^ 
-                                str_of_dtype et ^ "', expected '" ^ 
-                                str_of_dtype ft ^ "'")))) fd.formals actuals; 
+          
+          else if List.mem fname non_built_in_fnames then 
+            (* filter out all functions except built-in's, then execute below
+               with this new list. manually check built-ins above. this should
+               get around the built-in arguments of frame and faceid's *) 
+
+
+            List.iter2 
+              (fun (ft, _) e -> 
+                let et = check_expr e in
+                ignore 
+                  (check_assign ft et
+                    (Failure (func.fname ^ ": illegal actual argument '"^ 
+                              str_of_expr e   ^ "'. found '" ^ 
+                              str_of_dtype et ^ "', expected '" ^ 
+                              str_of_dtype ft ^ "'")))) fd.formals actuals; 
                 fd.typ
     in
 

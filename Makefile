@@ -1,5 +1,5 @@
-.PHONY:	Clean Build Demo AST-Test Compile-Test Run-Menhir-Test Blox.tar.gz test\
-	Compiler Test-AST 
+.PHONY:	Clean Build Demo AST-Test Compile-Test Run-Menhir-Test Blox.tar.gz \
+	Test-Suite Compiler Test-AST Remove-Logs
 
 TESTSH   = testsuite
 FILEIN   = HelloWorld
@@ -28,7 +28,13 @@ Build:
 	
 Clean:
 	@rm -rf $(SRC)/*.o $(SRC)/*.cm* $(EXEC) demo *.amf _build build_results \
-	*.bc *.diff *.out *.ll *.err testsuite.log *.c.out fail* $(GEN)/parser.output
+	*.bc *.diff *-*.out *.ll *.err testsuite.log *.c.out fail* *blox \
+	$(GEN)/parser.output
+	@$(PRT_OK)
+
+Remove-Logs:
+	@rm -rf tests/logs/*
+	@ls -al tests/logs/
 	@$(PRT_OK)
 
 AST-Test:
